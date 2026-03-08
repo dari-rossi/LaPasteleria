@@ -121,7 +121,7 @@ En la entrega se debe enviar:
 * Credenciales para utilizar la aplicación deployada
 * Contacto para coordinar la defensa
 
-El envío se debe realizar por el form https://kutt.it/DSWEntregaSistemaFinal o https://bit.ly/DSWEntregaSistemaFinal y coordinar con el docente una defensa grupal con los profesores.
+El envío se debe realizar por el form https://kutt.to/DSWEntregaSistemaFinal o https://bit.ly/DSWEntregaSistemaFinal y coordinar con el docente una defensa grupal con los profesores.
 
 Para la Aprobación Directa la defensa debe pactarse con los docentes dentro de los plazos indicados a continuación.
 Para la Aprobación en Examen la defensa debe pactarse con los docentes y realizarse antes de la fecha de la mesa de examen.
