@@ -2,16 +2,20 @@
 
 ## Grupo
 ### Integrantes
-* legajo - Apellido(s), Nombre(s)
+* 54175 - Bucher, Guadalupe Aylen
+* 54547 - Crispo, Ignacio Martín
+* 52256 - Miranda, Santiago José 
+* 53953 - Rossi Avonto, Dariana
+* 55061 - Sacchetti, Camila Maylén
 
 ### Repositorios
 * [frontend app](http://hyperlinkToGihubOrGitlab)
 * [backend app](http://hyperlinkToGihubOrGitlab)
 *Nota*: si utiliza un monorepo indicar un solo link con fullstack app.
 
-## Tema
+## Tema - La Pastelería
 ### Descripción
-*2 a 6 líneas describiendo el negocio (menos es más)*
+* La Pastelería es una cafetería ubicada en la ciudad de Rosario que ofrece servicios de cafetería durante el día y bar por la noche en una de sus sucursales. Su funcionamiento se basa en la atención al cliente mediante reservas, asignación de mesas y toma de pedidos online, con control de stock en tiempo real. El negocio busca mejorar la gestión de productos, ventas y finanzas a través de un sistema integrado.
 
 ### Modelo
 ![imagen del modelo]()
