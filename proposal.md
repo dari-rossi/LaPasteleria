@@ -26,31 +26,38 @@
 
 ### Alcance Mínimo
 
-*Nota*: el siguiente es un ejemplo para un grupo de 3 integrantes para un sistema de hotel. El 
 
 Regularidad:
 |Req|Detalle|
 |:-|:-|
-|CRUD simple|1. CRUD Tipo Habitacion<br>2. CRUD Servicio<br>3. CRUD Localidad|
-|CRUD dependiente|1. CRUD Habitación {depende de} CRUD Tipo Habitacion<br>2. CRUD Cliente {depende de} CRUD Localidad|
-|Listado<br>+<br>detalle| 1. Listado de habitaciones filtrado por tipo de habitación, muestra nro y tipo de habitación => detalle CRUD Habitacion<br> 2. Listado de reservas filtrado por rango de fecha, muestra nro de habitación, fecha inicio y fin estadía, estado y nombre del cliente => detalle muestra datos completos de la reserva y del cliente|
-|CUU/Epic|1. Reservar una habitación para la estadía<br>2. Realizar el check-in de una reserva|
+|CRUD simple|1. CRUD Alta de Empleados<br>2. CRUD Alta de Productos<br>3. CRUD Alta de Sucursales<br>4. CRUD Control Stock<br> 5.CRUD Planilla de finanzas|
+|CRUD dependiente|1. CRUD Organización de Mesas {depende de} CRUD Sucursal<br>2. CRUD Tipo de Producto {depende de} CRUD Producto<br>3. Tipo de Sucursal {depende de} CRUD Sucursal|
+|Listado<br>+<br>detalle| 1. Listado de sucursal filtrado por tipo de sucursal, muestra dirección y horarios => detalle CRUD Sucursal<br> 2. Listado de empleados filtrado por tipo de empleado, muestra cantidad de empleados por tipo  => detalle CRUD Empleado<br> 3. Listado de producto filtrado por tipo de producto, cantidad de stock y popularidad, muestra nombre, descripción del producto y stock  => detalle CRUD Producto|
+|CUU/Epic|1. Gestionar sucursal<br>2. Gestionar producto<br>3. Gestionar usuario|
 
 
 Adicionales para Aprobación
 |Req|Detalle|
 |:-|:-|
-|CRUD |1. CRUD Tipo Habitacion<br>2. CRUD Servicio<br>3. CRUD Localidad<br>4. CRUD Provincia<br>5. CRUD Habitación<br>6. CRUD Empleado<br>7. CRUD Cliente|
-|CUU/Epic|1. Reservar una habitación para la estadía<br>2. Realizar el check-in de una reserva<br>3. Realizar el check-out y facturación de estadía y servicios|
+| **CRUD** | 
+1. Categoría de Producto <br>
+<br> 2. Tipo de Empleado <br>
+<br> 3. Proveedores <br>
+<br> 4. Reservas <br>
+<br> 5. Promociones/Descuentos |
+| **CUU/Epic** | 1. **Gestionar Reserva:** Registro, asignación de mesa y cancelación automática por incomparecencia (30 min). <br>
+<br> 2. **Registrar Pago y Facturación:** Aplicación de descuentos (Jubilado/Estudiante) previa validación de certificado y cierre de ticket. <br>
+<br> 3. **Consultar Planilla de Ventas Diaria:** Reporte de ticket promedio, producto estrella y total recaudado. |
 
 
 ### Alcance Adicional Voluntario
+
+Cancelación de reserva
 
 *Nota*: El Alcance Adicional Voluntario es opcional, pero ayuda a que la funcionalidad del sistema esté completa y será considerado en la nota en función de su complejidad y esfuerzo.
 
 |Req|Detalle|
 |:-|:-|
-|Listados |1. Estadía del día filtrado por fecha muestra, cliente, habitaciones y estado <br>2. Reservas filtradas por cliente muestra datos del cliente y de cada reserve fechas, estado cantidad de habitaciones y huespedes|
-|CUU/Epic|1. Consumir servicios<br>2. Cancelación de reserva|
-|Otros|1. Envío de recordatorio de reserva por email|
-
+|Listados |1. Listado de advertencia de stock bajo filtrado por sucursal. Muestra el nombre del producto, la cantidad restante y la sucursal. <br>2. Listado de reservas filtrado por sucursal, fecha y cantidad de personas. Muestra fecha y horario, cantidad de comensales y la sucursal de la reserva. |
+|CUU/Epic|1. Gestionar gasto <br>2. Cancelación de reserva <br>3. Registrar pago <br>4. Gestionar stock  <br>5. Consultar planilla de ventas diaria <br>6. Consultar planilla de finanzas <br>7. Consultar informe gerencial general <br>8. Registrar cancelación de reserva |
+|Otros| |
