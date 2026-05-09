@@ -39,15 +39,8 @@ Regularidad:
 Adicionales para Aprobación
 |Req|Detalle|
 |:-|:-|
-| **CRUD** | 
-1. Categoría de Producto <br>
-<br> 2. Tipo de Empleado <br>
-<br> 3. Proveedores <br>
-<br> 4. Reservas <br>
-<br> 5. Promociones/Descuentos |
-| **CUU/Epic** | 1. **Gestionar Reserva:** Registro, asignación de mesa y cancelación automática por incomparecencia (30 min). <br>
-<br> 2. **Registrar Pago y Facturación:** Aplicación de descuentos (Jubilado/Estudiante) previa validación de certificado y cierre de ticket. <br>
-<br> 3. **Consultar Planilla de Ventas Diaria:** Reporte de ticket promedio, producto estrella y total recaudado. |
+| **CRUD** | 1. Categoría de Producto<br>2. Tipo de Empleado<br>3. Proveedores<br>4. Reservas<br>5. Promociones/Descuentos |
+| **CUU/Epic** | 1. **Gestionar Reserva:** Registro, asignación de mesa y cancelación automática por incomparecencia (30 min).<br>2. **Registrar Pago y Facturación:** Aplicación de descuentos (Jubilado/Estudiante) previa validación de certificado y cierre de ticket. <br>3. **Consultar Planilla de Ventas Diaria:** Reporte de ticket promedio, producto estrella y total recaudado. |
 
 
 ### Alcance Adicional Voluntario
