@@ -18,9 +18,7 @@
 * La Pastelería es una cafetería ubicada en la ciudad de Rosario que ofrece servicios de cafetería durante el día y bar por la noche en una de sus sucursales. Su funcionamiento se basa en la atención al cliente mediante reservas, asignación de mesas y toma de pedidos online, con control de stock en tiempo real. El negocio busca mejorar la gestión de productos, ventas y finanzas a través de un sistema integrado.
 
 ### Modelo
-![imagen del modelo]()
-
-*Nota*: incluir un link con la imagen de un modelo, puede ser modelo de dominio, diagrama de clases, DER. Si lo prefieren pueden utilizar diagramas con [Mermaid](https://mermaid.js.org) en lugar de imágenes.
+![imagen del modelo](https://github.com/dari-rossi/LaPasteleria/blob/6f93e68c5748d1f53e0fc25bdcf4af8bb3e75363/DC%20-%20LaPasteleria.png)
 
 ## Alcance Funcional 
 
@@ -48,5 +46,5 @@ Adicionales para Aprobación
 |Req|Detalle|
 |:-|:-|
 |Listados |1. Listado de advertencia de stock bajo filtrado por sucursal. Muestra el nombre del producto, la cantidad restante y la sucursal. <br>2. Listado de reservas filtrado por sucursal, fecha y cantidad de personas. Muestra fecha y horario, cantidad de comensales y la sucursal de la reserva. |
-|CUU/Epic|1. Gestionar gasto <br>2. Cancelación de reserva <br>3. Registrar pago <br>4. Gestionar stock  <br>5. Consultar planilla de ventas diaria <br>6. Consultar planilla de finanzas <br>7. Consultar informe gerencial general <br>8. Registrar cancelación de reserva |
+|CUU/Epic|1. Consultar planilla general <br>2. Consultar planilla de finanzas. |
 |Otros| |
