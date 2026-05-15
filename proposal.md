@@ -30,17 +30,17 @@
 Regularidad:
 |Req|Detalle|
 |:-|:-|
-|CRUD simple|1. CRUD Alta de Empleados<br>2. CRUD Alta de Productos<br>3. CRUD Alta de Sucursales<br>4. CRUD Control Stock<br> 5.CRUD Planilla de finanzas|
-|CRUD dependiente|1. CRUD Organización de Mesas {depende de} CRUD Sucursal<br>2. CRUD Tipo de Producto {depende de} CRUD Producto<br>3. Tipo de Sucursal {depende de} CRUD Sucursal|
+|CRUD simple|1. CRUD Empleados<br>2. CRUD Productos<br>3. CRUD Sucursales<br>4. CRUD Reserva<br> 5.CRUD Pedido|
+|CRUD dependiente|1. CRUD Mesa {depende de} CRUD Sucursal<br>2. CRUD Cliente {depende de} CRUD Tipo Descuento<br>3. CRUD Gasto {depende de} CRUD Sucursal|
 |Listado<br>+<br>detalle| 1. Listado de sucursal filtrado por tipo de sucursal, muestra dirección y horarios => detalle CRUD Sucursal<br> 2. Listado de empleados filtrado por tipo de empleado, muestra cantidad de empleados por tipo  => detalle CRUD Empleado<br> 3. Listado de producto filtrado por tipo de producto, cantidad de stock y popularidad, muestra nombre, descripción del producto y stock  => detalle CRUD Producto|
-|CUU/Epic|1. Gestionar sucursal<br>2. Gestionar producto<br>3. Gestionar usuario|
+|CUU/Epic|1. Dar de alta mesa para cliente<br>2. Cargar pedido<br>3. Registrar reserva para cliente|
 
 
 Adicionales para Aprobación
 |Req|Detalle|
 |:-|:-|
-| **CRUD** | 1. Categoría de Producto<br>2. Tipo de Empleado<br>3. Proveedores<br>4. Reservas<br>5. Promociones/Descuentos |
-| **CUU/Epic** | 1. **Gestionar Reserva:** Registro, asignación de mesa y cancelación automática por incomparecencia (30 min).<br>2. **Registrar Pago y Facturación:** Aplicación de descuentos (Jubilado/Estudiante) previa validación de certificado y cierre de ticket. <br>3. **Consultar Planilla de Ventas Diaria:** Reporte de ticket promedio, producto estrella y total recaudado. |
+| **CRUD** | 1. CRUD Pago<br>2. CRUD Item Producto |
+| **CUU/Epic** | 1. Cargar pedido de stock<br>2. Registrar Pago<br>3. Consultar Planilla de Ventas Diarias |
 
 
 ### Alcance Adicional Voluntario
