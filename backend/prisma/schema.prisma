@@ -7,10 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Sucursal{
-  id            Int   @id @default(autoincrement())
-  telefono      String
-  direccion     String
-  codigoPostal  String
-  horarios      String
+model sucursal {
+  id           Int    @id @default(autoincrement())
+  telefono     String
+  direccion    String
+  codigoPostal String
+  horarios     String
 }
