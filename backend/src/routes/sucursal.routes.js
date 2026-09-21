@@ -10,7 +10,6 @@ const {
 
 const validate = require("../middlewares/validate");
 const { sucursalSchema } = require("../schemas/sucursal.schema");
-
 const router = express.Router();
 
 /**
@@ -117,7 +116,7 @@ router.post("/", validate(sucursalSchema), crearSucursal);
  *       404:
  *         description: Sucursal no encontrada
  */
-router.put("/:id", modificarSucursal);
+router.put("/:id", validate(sucursalSchema), modificarSucursal);
 
 /**
  * @swagger

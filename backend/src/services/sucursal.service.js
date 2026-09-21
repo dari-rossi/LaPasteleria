@@ -1,26 +1,70 @@
 const sucursalRepository = require("../repositories/sucursal.repository");
 
-// Obtener todas las sucursales
 const obtenerSucursales = async () => {
     return await sucursalRepository.obtenerTodas();
 };
 
-// Obtener una sucursal por ID
 const obtenerSucursalPorId = async (id) => {
     return await sucursalRepository.obtenerPorId(id);
 };
 
-// Crear una sucursal
 const crearSucursal = async (datos) => {
+    const sucursales = await sucursalRepository.obtenerTodas();
+
+    const telefonoExiste = sucursales.some(
+        (sucursal) => sucursal.telefono === datos.telefono
+    );
+
+    if (telefonoExiste) {
+        const error = new Error("Ya existe una sucursal con ese teléfono.");
+        error.status = 400;
+        throw error;
+    }
+
+    const direccionExiste = sucursales.some(
+        (sucursal) => sucursal.direccion.toLowerCase() === datos.direccion.toLowerCase()
+    );
+
+    if (direccionExiste) {
+        const error = new Error("Ya existe una sucursal con esa dirección.");
+        error.status = 400;
+        throw error;
+    }
+
     return await sucursalRepository.crear(datos);
 };
 
-// Modificar una sucursal
 const modificarSucursal = async (id, datos) => {
+    const sucursales = await sucursalRepository.obtenerTodas();
+
+    const telefonoExiste = sucursales.some(
+        (sucursal) =>
+            sucursal.id !== id &&
+            sucursal.telefono === datos.telefono
+    );
+
+    if (telefonoExiste) {
+        const error = new Error("Ya existe otra sucursal con ese teléfono.");
+        error.status = 400;
+        throw error;
+    }
+
+    const direccionExiste = sucursales.some(
+        (sucursal) =>
+            sucursal.id !== id &&
+            sucursal.direccion.toLowerCase() === datos.direccion.toLowerCase()
+    );
+
+    if (direccionExiste) {
+        const error = new Error("Ya existe otra sucursal con esa dirección.");
+        error.status = 400;
+        throw error;
+    }
+
     return await sucursalRepository.modificar(id, datos);
 };
 
-// Eliminar una sucursal
+
 const eliminarSucursal = async (id) => {
     return await sucursalRepository.eliminar(id);
 };

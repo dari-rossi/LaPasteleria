@@ -38,6 +38,11 @@ const crearSucursal = async (req, res) => {
         res.status(201).json(sucursal);
     } catch (error) {
         console.error(error);
+
+        if (error.status) {
+            return res.status(error.status).json({error: error.message});
+        }
+
         res.status(500).json({error: "Error al crear la sucursal"});
     }
 };
@@ -60,6 +65,11 @@ const modificarSucursal = async (req, res) => {
         res.json(sucursal);
     } catch (error) {
         console.error(error);
+
+        if (error.status) {
+            return res.status(error.status).json({error: error.message});
+        }
+
         res.status(500).json({error: "Error al modificar la sucursal"});
     }
 };
