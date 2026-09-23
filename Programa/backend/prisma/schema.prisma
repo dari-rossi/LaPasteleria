@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Sucursal {
+  id           Int          @id @default(autoincrement())
+  telefono     String
+  direccion    String
+  codigoPostal String
+  horarios     String
+  
+  // Para relacionar Sucursal y Producto
+  inventarios  Inventario[]
+}
+
+model Producto {
+  idProducto   Int          @id @default(autoincrement())
+  nombre       String
+  tipoProducto String
+  descripcion  String?
+  precio       Float
+  precioFinal  Float?
+  proveedor    String
+
+  // Para relacionar Sucursal y Producto
+  inventarios  Inventario[]
+}
+
+// La relation entre Sucursal y Producto
+model Inventario {
+  id           Int      @id @default(autoincrement())
+  stock        Int      
+  stockMin     Int      
+  
+  sucursalId   Int
+  sucursal     Sucursal @relation(fields: [sucursalId], references: [id])
+  
+  productoId   Int
+  producto     Producto @relation(fields: [productoId], references: [idProducto])
+
+  // Esto es para que no se cargue el mismo producto en una misma sucursal
+  @@unique([sucursalId, productoId]) 
+}
