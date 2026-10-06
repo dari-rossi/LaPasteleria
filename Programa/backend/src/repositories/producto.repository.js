@@ -6,7 +6,7 @@ const obtenerTodos = async () => {
 
 const obtenerPorId = async (id) => {
     return await prisma.producto.findUnique({
-        where: { id: id }
+        where: { idProducto: id }
     });
 };
 
@@ -16,19 +16,19 @@ const crear = async (datos) => {
 
 const modificar = async (id, datos) => {
     return await prisma.producto.update({
-        where: { id: id },
+        where: { idProducto: id },
         data: datos
     });
 };
 
 const eliminar = async (id) => {
     return await prisma.producto.delete({
-        where: { id: id }
+        where: { idProducto: id }
     });
 };
 
 module.exports = {
-    obtenerTodos, 
+    obtenerTodos,
     obtenerPorId,
     crear,
     modificar,
