@@ -1,6 +1,8 @@
 import SucursalList from "./components/SucursalList";
 import ProductoList from "./components/ProductoList";
 import InventarioList from "./components/InventarioList";
+import ClienteList from "./components/ClienteList";
+import PagoList from "./components/PagoList";
 
 function App() {
     return (
@@ -11,6 +13,10 @@ function App() {
             <ProductoList />
             <hr className="my-5" />
             <InventarioList />
+            <ClienteList />
+            <hr className="my-5" />
+            <PagoList />
+            <hr className="my-5" />
         </div>
     );
 }

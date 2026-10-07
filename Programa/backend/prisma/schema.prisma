@@ -46,3 +46,26 @@ model Inventario {
   // Esto es para que no se cargue el mismo producto en una misma sucursal
   @@unique([sucursalId, productoId]) 
 }
+
+model Cliente {
+  id           Int        @id @default(autoincrement())
+  tipo         String
+  descuento    Int
+}
+
+enum MetodoPago {
+  Efectivo
+  Tarjeta
+  Transferencia
+}
+
+model Pago {
+  idPedido      Int      @id
+  fechaHora     DateTime
+  precio        Float
+  tipoDescuento String
+  metodoPago    MetodoPago
+  precioFinal   Float
+
+  // luego agregar la relacion con Pedido cuando lo tengamos hecho
+}
