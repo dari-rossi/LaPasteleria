@@ -46,3 +46,15 @@ model Inventario {
   // Esto es para que no se cargue el mismo producto en una misma sucursal
   @@unique([sucursalId, productoId]) 
 }
+
+enum EstadoMesa {
+  Libre
+  Ocupada
+  Reservada
+}
+
+model Mesa {
+  idMesa        Int        @id @default(autoincrement())
+  estado        EstadoMesa
+  maxComensales Int
+}
