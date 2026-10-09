@@ -59,3 +59,15 @@ model Reserva {
   // La clave primaria es la clave foránea de Mesa + la fecha y hora
   @@id([idMesa, fechaHoraReservada])
 }
+
+enum EstadoMesa {
+  Libre
+  Ocupada
+  Reservada
+}
+
+model Mesa {
+  idMesa        Int        @id @default(autoincrement())
+  estado        EstadoMesa
+  maxComensales Int
+}
