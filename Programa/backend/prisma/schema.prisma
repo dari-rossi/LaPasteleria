@@ -46,3 +46,16 @@ model Inventario {
   // Esto es para que no se cargue el mismo producto en una misma sucursal
   @@unique([sucursalId, productoId]) 
 }
+
+model Reserva {
+  idMesa             Int
+  fechaHoraReservada DateTime
+  cantComensales     Int
+  estadoReserva      String
+  dni                String
+
+  mesa               Mesa     @relation(fields: [idMesa], references: [idMesa])
+
+  // La clave primaria es la clave foránea de Mesa + la fecha y hora
+  @@id([idMesa, fechaHoraReservada])
+}

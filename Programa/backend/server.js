@@ -5,6 +5,7 @@ const swaggerSpec = require("./src/config/swagger");
 const sucursalRoutes = require("./src/routes/sucursal.routes");
 const productoRoutes = require("./src/routes/producto.routes");
 const inventarioRoutes = require('./src/routes/inventario.routes');
+const reservaRoutes = require("./src/routes/reserva.routes");
 const app = express();
 const PORT = 3000;
 
@@ -22,6 +23,7 @@ app.get("/", (req, res) => {
 app.use("/sucursales", sucursalRoutes);
 app.use("/productos", productoRoutes);
 app.use('/inventario', inventarioRoutes);
+app.use('/reservas', reservaRoutes);
 
 app.listen(PORT, () => {
     console.log(`Servidor funcionando en http://localhost:${PORT}`);

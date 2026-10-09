@@ -1,6 +1,7 @@
 import SucursalList from "./components/SucursalList";
 import ProductoList from "./components/ProductoList";
 import InventarioList from "./components/InventarioList";
+import ReservaList from "./components/ReservaList";
 
 function App() {
     return (
@@ -11,6 +12,8 @@ function App() {
             <ProductoList />
             <hr className="my-5" />
             <InventarioList />
+            <ReservaList/>
+            <hr className= "my-5" />
         </div>
     );
 }
