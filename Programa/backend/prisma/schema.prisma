@@ -16,6 +16,12 @@ model Sucursal {
   
   // Para relacionar Sucursal y Producto
   inventarios  Inventario[]
+
+  // Para relacionar Sucursal y TipoEmpleado
+  tiposEmpleado SucursalTipoEmpleado[]
+
+  // Para relacionar Sucursal y Gasto
+  gastos        Gasto[]
 }
 
 model Producto {
@@ -45,4 +51,41 @@ model Inventario {
 
   // Esto es para que no se cargue el mismo producto en una misma sucursal
   @@unique([sucursalId, productoId]) 
+
+}
+
+model TipoEmpleado {
+  id           Int     @id @default(autoincrement())
+  usuario        String? @unique
+  contrasenia  String?
+  tipoEmpleado String  @unique
+  sueldo       Float
+
+  // Para relacionar Sucursal y TipoEmpleado
+  sucursales   SucursalTipoEmpleado[]
+}
+
+// La relación entre Sucursal y TipoEmpleado: cuántos empleados de ese tipo hay en esa sucursal
+model SucursalTipoEmpleado {
+  cantidad       Int
+
+  sucursalId     Int
+  sucursal       Sucursal     @relation(fields: [sucursalId], references: [id], onDelete: Cascade)
+
+  tipoEmpleadoId Int
+  tipoEmpleado   TipoEmpleado @relation(fields: [tipoEmpleadoId], references: [id], onDelete: Cascade)
+
+  // Un mismo tipo de empleado aparece una sola vez por sucursal
+  @@id([sucursalId, tipoEmpleadoId])
+}
+
+// Un gasto pertenece siempre a una sucursal (CRUD dependiente de Sucursal)
+model Gasto {
+  id         Int      @id @default(autoincrement())
+  fechaGasto DateTime @db.Date
+  nombre     String
+  costo      Float
+
+  sucursalId Int
+  sucursal   Sucursal @relation(fields: [sucursalId], references: [id])
 }
