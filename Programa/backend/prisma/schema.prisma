@@ -70,4 +70,6 @@ model Mesa {
   idMesa        Int        @id @default(autoincrement())
   estado        EstadoMesa
   maxComensales Int
+
+  reservas Reserva[]
 }

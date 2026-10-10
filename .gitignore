@@ -34,3 +34,4 @@ dist-ssr
 *.7z
 *.tar.gz
 *.tar
+.env

@@ -82,6 +82,7 @@ router.get("/:idMesa/:fechaHora", obtenerReservaPorId);
  *                 type: integer
  *               estadoReserva:
  *                 type: string
+ *                 enum: [Activa, En curso, Finalizada, Cancelada]
  *               dni:
  *                 type: string
  *     responses:
@@ -128,6 +129,7 @@ router.post("/", validate(reservaSchema), crearReserva);
  *                 type: integer
  *               estadoReserva:
  *                 type: string
+ *                 enum: [Activa, En curso, Finalizada, Cancelada]
  *               dni:
  *                 type: string
  *     responses:

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { crearReserva, modificarReserva } from "../services/reservaService";
 
+const ESTADOS_RESERVA = ["Activa", "En curso", "Finalizada", "Cancelada"];
+
 const FORMULARIO_VACIO = {
     idMesa: "",
     fechaHoraReservada: "",
@@ -153,13 +155,19 @@ function ReservaForm({ reservaEditar, onReservaCreada, onReservaModificada, onCa
 
                     <div className="mb-3">
                         <label className="form-label">Estado de la reserva</label>
-                        <input
-                            type="text"
+                        <select
                             name="estadoReserva"
-                            className="form-control"
+                            className="form-select"
                             value={formulario.estadoReserva}
                             onChange={manejarCambio}
-                        />
+                        >
+                            <option value="">Seleccione un estado</option>
+                            {ESTADOS_RESERVA.map((estado) => (
+                                <option key={estado} value={estado}>
+                                    {estado}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="mb-3">
