@@ -71,7 +71,9 @@ router.get("/:idPedido", obtenerPagoPorId);
  *       201:
  *         description: Pago creado
  *       400:
- *         description: Datos inválidos
+ *         description: Datos inválidos, pedido inexistente o pedido sin productos
+ *       409:
+ *         description: El pedido ya tiene un pago registrado
  */
 router.post("/", validate(pagoSchema), crearPago);
 

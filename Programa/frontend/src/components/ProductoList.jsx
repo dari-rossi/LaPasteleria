@@ -5,7 +5,7 @@ import {
 } from "../services/productoService";
 import ProductoForm from "./ProductoForm";
 
-// precioFinal puede venir en null (el backend todavía no lo calcula)
+// El precio puede venir en null
 const formatearPrecio = (valor) => {
     if (valor === null || valor === undefined) {
         return "—";
@@ -104,7 +104,6 @@ function ProductoList() {
                                 <th>Tipo</th>
                                 <th>Descripción</th>
                                 <th>Precio</th>
-                                <th>Precio final</th>
                                 <th>Proveedor</th>
                                 <th>Acciones</th>
                             </tr>
@@ -118,7 +117,6 @@ function ProductoList() {
                                     <td>{producto.tipoProducto}</td>
                                     <td>{producto.descripcion}</td>
                                     <td>{formatearPrecio(producto.precio)}</td>
-                                    <td>{formatearPrecio(producto.precioFinal)}</td>
                                     <td>{producto.proveedor}</td>
                                     <td>
                                         <button

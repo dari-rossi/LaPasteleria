@@ -1,4 +1,11 @@
 const pagoRepository = require("../repositories/pago.repository");
+const pedidoRepository = require("../repositories/pedido.repository");
+
+const lanzarError = (mensaje, status) => {
+    const error = new Error(mensaje);
+    error.status = status;
+    throw error;
+};
 
 const obtenerPagos = async () => {
     return await pagoRepository.obtenerTodos();
@@ -9,13 +16,25 @@ const obtenerPagoPorId = async (idPedido) => {
 };
 
 const crearPago = async (datos) => {
-    /* Cuando exista pedido:
-    buscar el pedido
-    buscar sus productos
+    /* Todavía falta:
     calcular el precio total
     buscar el tipo de cliente
-    calcular el descuento
-    crear el pago */
+    calcular el descuento */
+
+    const pedido = await pedidoRepository.obtenerPorId(datos.idPedido);
+
+    if (!pedido) {
+        lanzarError("El pedido indicado no existe.", 400);
+    }
+
+    // Un pedido sin productos es un pedido incompleto: no se puede pagar
+    if (pedido.items.length === 0) {
+        lanzarError("No se puede registrar el pago de un pedido sin productos.", 400);
+    }
+
+    if (pedido.pago) {
+        lanzarError("El pedido ya tiene un pago registrado.", 409);
+    }
 
     const nuevoPagoData = {
         idPedido: datos.idPedido,
