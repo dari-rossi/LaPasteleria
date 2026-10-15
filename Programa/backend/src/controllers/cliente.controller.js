@@ -92,6 +92,11 @@ const eliminarCliente = async (req, res) => {
         res.json({mensaje: "Cliente eliminado"});
     } catch (error) {
         console.error(error);
+
+        if (error.status) {
+            return res.status(error.status).json({error: error.message});
+        }
+
         res.status(500).json({error: "Error al eliminar el cliente"});
     }
 };

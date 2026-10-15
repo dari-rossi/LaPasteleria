@@ -9,6 +9,21 @@ const lanzarError = (mensaje, status) => {
     throw error;
 };
 
+const verificarPermisoSucursal = (sucursalId, usuario) => {
+    if (!usuario) {
+        lanzarError("Debés iniciar sesión", 401);
+    }
+
+    if (usuario.rol !== "DUENIO" && usuario.rol !== "GERENTE") {
+        lanzarError("No tenés permiso para realizar esta operación", 403);
+    }
+
+    if (usuario.rol === "GERENTE" &&
+        Number(usuario.sucursalId) !== Number(sucursalId)) {
+        lanzarError("No tenés permiso para operar sobre otra sucursal", 403);
+    }
+};
+
 const verificarSucursal = async (sucursalId) => {
     const sucursal = await sucursalRepository.obtenerPorId(sucursalId);
 
@@ -17,13 +32,15 @@ const verificarSucursal = async (sucursalId) => {
     }
 };
 
-const obtenerTiposEmpleadoDeSucursal = async (sucursalId) => {
+const obtenerTiposEmpleadoDeSucursal = async (sucursalId, usuario) => {
+    verificarPermisoSucursal(sucursalId, usuario);
     await verificarSucursal(sucursalId);
 
     return await sucursalTipoEmpleadoRepository.obtenerPorSucursal(sucursalId);
 };
 
-const asignarTipoEmpleado = async (sucursalId, datos) => {
+const asignarTipoEmpleado = async (sucursalId, datos, usuario) => {
+    verificarPermisoSucursal(sucursalId, usuario);
     await verificarSucursal(sucursalId);
 
     const tipo = await tipoEmpleadoRepository.obtenerPorId(datos.tipoEmpleadoId);
@@ -45,7 +62,9 @@ const asignarTipoEmpleado = async (sucursalId, datos) => {
     });
 };
 
-const modificarCantidad = async (sucursalId, tipoEmpleadoId, datos) => {
+const modificarCantidad = async (sucursalId, tipoEmpleadoId, datos, usuario) => {
+    verificarPermisoSucursal(sucursalId, usuario);
+
     const asignacion = await sucursalTipoEmpleadoRepository.obtenerPorId(sucursalId, tipoEmpleadoId);
 
     if (!asignacion) {
@@ -55,7 +74,9 @@ const modificarCantidad = async (sucursalId, tipoEmpleadoId, datos) => {
     return await sucursalTipoEmpleadoRepository.modificarCantidad(sucursalId, tipoEmpleadoId, datos.cantidad);
 };
 
-const quitarTipoEmpleado = async (sucursalId, tipoEmpleadoId) => {
+const quitarTipoEmpleado = async (sucursalId, tipoEmpleadoId, usuario) => {
+    verificarPermisoSucursal(sucursalId, usuario);
+
     const asignacion = await sucursalTipoEmpleadoRepository.obtenerPorId(sucursalId, tipoEmpleadoId);
 
     if (!asignacion) {

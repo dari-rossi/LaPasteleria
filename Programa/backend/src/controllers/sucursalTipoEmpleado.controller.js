@@ -7,7 +7,7 @@ const obtenerTiposEmpleadoDeSucursal = async (req, res) => {
             return res.status(400).json({error: "ID de sucursal incorrecto"});
         }
 
-        const asignaciones = await sucursalTipoEmpleadoService.obtenerTiposEmpleadoDeSucursal(sucursalId);
+        const asignaciones = await sucursalTipoEmpleadoService.obtenerTiposEmpleadoDeSucursal(sucursalId, req.usuario);
 
         res.json(asignaciones);
     } catch (error) {
@@ -28,7 +28,7 @@ const asignarTipoEmpleado = async (req, res) => {
             return res.status(400).json({error: "ID de sucursal incorrecto"});
         }
 
-        const asignacion = await sucursalTipoEmpleadoService.asignarTipoEmpleado(sucursalId, req.body);
+        const asignacion = await sucursalTipoEmpleadoService.asignarTipoEmpleado(sucursalId, req.body, req.usuario);
 
         res.status(201).json(asignacion);
     } catch (error) {
@@ -50,7 +50,7 @@ const modificarCantidad = async (req, res) => {
             return res.status(400).json({error: "ID incorrecto"});
         }
 
-        const asignacion = await sucursalTipoEmpleadoService.modificarCantidad(sucursalId, tipoEmpleadoId, req.body);
+        const asignacion = await sucursalTipoEmpleadoService.modificarCantidad(sucursalId, tipoEmpleadoId, req.body, req.usuario);
 
         res.json(asignacion);
     } catch (error) {
@@ -72,7 +72,7 @@ const quitarTipoEmpleado = async (req, res) => {
             return res.status(400).json({error: "ID incorrecto"});
         }
 
-        await sucursalTipoEmpleadoService.quitarTipoEmpleado(sucursalId, tipoEmpleadoId);
+        await sucursalTipoEmpleadoService.quitarTipoEmpleado(sucursalId, tipoEmpleadoId, req.usuario);
 
         res.json({mensaje: "Tipo de empleado quitado de la sucursal"});
     } catch (error) {

@@ -13,12 +13,32 @@ const lanzarError = (mensaje, status) => {
 
 const redondear = (valor) => Math.round(valor * 100) / 100;
 
-const obtenerPedidos = async () => {
-    return await pedidoRepository.obtenerTodos();
+const verificarAccesoPedido = (pedido, usuario) => {
+    if (!pedido) {
+        lanzarError("Pedido no encontrado.", 404);
+    }
+
+    if (Number(pedido.sucursalId) !== Number(usuario.sucursalId)) {
+        lanzarError("No tenés permiso para operar sobre pedidos de otra sucursal.", 403);
+    }
 };
 
-const obtenerPedidoPorId = async (id) => {
-    return await pedidoRepository.obtenerPorId(id);
+const obtenerPedidos = async (usuario) => {
+    const pedidos = await pedidoRepository.obtenerTodos();
+
+    return pedidos.filter(pedido =>
+        Number(pedido.sucursalId) === Number(usuario.sucursalId)
+    );
+};
+
+const obtenerPedidoPorId = async (id, usuario) => {
+    const pedido = await pedidoRepository.obtenerPorId(id);
+
+    if (pedido) {
+        verificarAccesoPedido(pedido, usuario);
+    }
+
+    return pedido;
 };
 
 // Un pedido siempre tiene una mesa, un cliente y una sucursal. Los productos pueden venir ahora o cargarse después
@@ -39,6 +59,10 @@ const crearPedido = async (datos) => {
 
     if (!sucursal) {
         lanzarError("La sucursal indicada no existe.", 400);
+    }
+
+    if (Number(datos.sucursalId) !== Number(usuario.sucursalId)) {
+        lanzarError("No tenés permiso para crear pedidos en otra sucursal.", 403);
     }
 
     // Se arma cada item con su subTotal (cantidad * precio del producto)
@@ -74,14 +98,18 @@ const crearPedido = async (datos) => {
 };
 
 // Solo se modifican el estado y los comensales (los productos se manejan desde itemProducto)
-const modificarPedido = async (id, datos) => {
+const modificarPedido = async (id, datos, usuario) => {
+    const pedido = await pedidoRepository.obtenerPorId(id);
+    verificarAccesoPedido(pedido, usuario);
+
     return await pedidoRepository.modificar(id, datos);
 };
 
-const eliminarPedido = async (id) => {
+const eliminarPedido = async (id, usuario) => {
     const pedido = await pedidoRepository.obtenerPorId(id);
+    verificarAccesoPedido(pedido, usuario);
 
-    if (pedido && pedido.pago) {
+    if (pedido.pago) {
         lanzarError("No se puede eliminar un pedido que ya tiene un pago registrado.", 409);
     }
 

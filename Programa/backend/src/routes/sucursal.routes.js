@@ -1,3 +1,4 @@
+const { autenticar, permitirRoles } = require("../middlewares/auth.middleware");
 const express = require("express");
 
 const {
@@ -22,7 +23,7 @@ const router = express.Router();
  *       200:
  *         description: Lista de sucursales
  */
-router.get("/", obtenerSucursales);
+router.get("/",autenticar, permitirRoles("DUENIO"), obtenerSucursales);
 
 /**
  * @swagger
@@ -42,7 +43,7 @@ router.get("/", obtenerSucursales);
  *       404:
  *         description: Sucursal no encontrada
  */
-router.get("/:id", obtenerSucursalPorId);
+router.get("/:id",autenticar, permitirRoles("DUENIO"), obtenerSucursalPorId);
 
 /**
  * @swagger
@@ -76,7 +77,7 @@ router.get("/:id", obtenerSucursalPorId);
  *       400:
  *         description: Datos inválidos
  */
-router.post("/", validate(sucursalSchema), crearSucursal);
+router.post("/",autenticar, permitirRoles("DUENIO"), validate(sucursalSchema), crearSucursal);
 
 /**
  * @swagger
@@ -116,7 +117,7 @@ router.post("/", validate(sucursalSchema), crearSucursal);
  *       404:
  *         description: Sucursal no encontrada
  */
-router.put("/:id", validate(sucursalSchema), modificarSucursal);
+router.put("/:id",autenticar, permitirRoles("DUENIO"), validate(sucursalSchema), modificarSucursal);
 
 /**
  * @swagger
@@ -136,6 +137,6 @@ router.put("/:id", validate(sucursalSchema), modificarSucursal);
  *       404:
  *         description: Sucursal no encontrada
  */
-router.delete("/:id", eliminarSucursal);
+router.delete("/:id",autenticar, permitirRoles("DUENIO"), eliminarSucursal);
 
 module.exports = router;

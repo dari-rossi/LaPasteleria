@@ -1,3 +1,4 @@
+const { autenticar, permitirRoles } = require("../middlewares/auth.middleware");
 const express = require('express');
 const router = express.Router();
 const inventarioController = require('../controllers/inventario.controller');
@@ -21,7 +22,7 @@ const { inventarioSchema } = require('../schemas/inventario.schema');
  *       200:
  *         description: Lista de inventarios devuelta exitosamente.
  */
-router.get('/', inventarioController.getAll);
+router.get('/', autenticar, permitirRoles("DUENIO", "GERENTE", "AYUDANTE_COCINA"), inventarioController.getAll);
 
 /**
  * @swagger
@@ -54,8 +55,7 @@ router.get('/', inventarioController.getAll);
  *       400:
  *         description: Error de validación o datos incorrectos.
  */
-router.post('/', validate(inventarioSchema), inventarioController.create);
-
+router.post('/', autenticar, permitirRoles("DUENIO"), validate(inventarioSchema), inventarioController.create);
 /**
  * @swagger
  * /inventario/{id}:
@@ -83,8 +83,7 @@ router.post('/', validate(inventarioSchema), inventarioController.create);
  *       200:
  *         description: Inventario actualizado.
  */
-router.put('/:id', validate(inventarioSchema.partial()), inventarioController.update);
-
+router.put('/:id', autenticar, permitirRoles("DUENIO", "AYUDANTE_COCINA"), validate(inventarioSchema.partial()), inventarioController.update);
 /**
  * @swagger
  * /inventario/{id}:
@@ -102,6 +101,6 @@ router.put('/:id', validate(inventarioSchema.partial()), inventarioController.up
  *       204:
  *         description: Inventario eliminado.
  */
-router.delete('/:id', inventarioController.remove);
+router.delete('/:id',autenticar, permitirRoles("DUENIO", "GERENTE"), inventarioController.remove);
 
 module.exports = router;

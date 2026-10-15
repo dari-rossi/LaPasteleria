@@ -1,3 +1,4 @@
+const { autenticar, permitirRoles } = require("../middlewares/auth.middleware");
 const express = require("express");
 
 const {
@@ -22,7 +23,7 @@ const router = express.Router();
  *       200:
  *         description: Lista de clientes
  */
-router.get("/", obtenerClientes);
+router.get("/",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), obtenerClientes);
 
 /**
  * @swagger
@@ -42,10 +43,8 @@ router.get("/", obtenerClientes);
  *       404:
  *         description: Cliente no encontrado
  */
-router.get("/:id", obtenerClientePorId);
+router.get("/:id",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), obtenerClientePorId);
 
-/**
- * @swagger
  /**
  * @swagger
  * /clientes:
@@ -70,7 +69,7 @@ router.get("/:id", obtenerClientePorId);
  *       400:
  *         description: Datos inválidos
  */
-router.post("/", validate(clienteSchema), crearCliente);
+router.post("/",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), validate(clienteSchema), crearCliente);
 
 /**
  * @swagger
@@ -104,7 +103,7 @@ router.post("/", validate(clienteSchema), crearCliente);
  *       404:
  *         description: Cliente no encontrado
  */
-router.put("/:id", validate(clienteSchema), modificarCliente);
+router.put("/:id",autenticar, permitirRoles("DUENIO", "GERENTE"), validate(clienteSchema), modificarCliente);
 
 /**
  * @swagger
@@ -124,6 +123,6 @@ router.put("/:id", validate(clienteSchema), modificarCliente);
  *       404:
  *         description: Cliente no encontrado
  */
-router.delete("/:id", eliminarCliente);
+router.delete("/:id", autenticar, permitirRoles("DUENIO", "GERENTE"), eliminarCliente);
 
 module.exports = router;

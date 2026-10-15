@@ -7,7 +7,7 @@ const filtroPorTipo = (tipoEmpleado) => {
 const obtenerTodos = async (tipoEmpleado) => {
     return await prisma.tipoEmpleado.findMany({
         where: filtroPorTipo(tipoEmpleado),
-        include: { sucursales: { select: { cantidad: true } } },
+        include: { sucursales: { select: { sucursalId: true, cantidad: true } } },
         orderBy: { tipoEmpleado: "asc" }
     });
 };

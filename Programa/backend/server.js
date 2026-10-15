@@ -14,6 +14,7 @@ const sucursalTipoEmpleadoRoutes = require("./src/routes/sucursalTipoEmpleado.ro
 const gastoRoutes = require("./src/routes/gasto.routes");
 const itemProductoRoutes = require("./src/routes/itemProducto.routes");
 const pedidoRoutes = require("./src/routes/pedido.routes");
+const authRoutes = require("./src/routes/auth.routes");
 
 const app = express();
 const PORT = 3000;
@@ -29,6 +30,7 @@ app.get("/", (req, res) => {
     });
 });
 
+app.use("/auth", authRoutes);
 app.use("/sucursales", sucursalRoutes);
 app.use("/productos", productoRoutes);
 app.use('/inventario', inventarioRoutes);

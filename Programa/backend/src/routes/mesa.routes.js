@@ -1,3 +1,4 @@
+const { autenticar, permitirRoles } = require("../middlewares/auth.middleware");
 const express = require("express");
 
 const {
@@ -23,7 +24,7 @@ const router = express.Router();
  *       200:
  *         description: Lista de mesas
  */
-router.get("/", obtenerMesas);
+router.get("/",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), obtenerMesas);
 
 /**
  * @swagger
@@ -43,7 +44,7 @@ router.get("/", obtenerMesas);
  *       404:
  *         description: Mesa no encontrada
  */
-router.get("/:id", obtenerMesaPorId);
+router.get("/:id",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), obtenerMesaPorId);
 
 /**
  * @swagger
@@ -74,7 +75,7 @@ router.get("/:id", obtenerMesaPorId);
  *       400:
  *         description: Datos inválidos
  */
-router.post("/", validate(mesaSchema), crearMesa);
+router.post("/",autenticar, permitirRoles("DUENIO", "GERENTE"), validate(mesaSchema), crearMesa);
 
 /**
  * @swagger
@@ -113,7 +114,7 @@ router.post("/", validate(mesaSchema), crearMesa);
  *       404:
  *         description: Mesa no encontrada
  */
-router.put("/:id", validate(mesaSchema), modificarMesa);
+router.put("/:id",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), validate(mesaSchema), modificarMesa);
 
 /**
  * @swagger
@@ -133,6 +134,6 @@ router.put("/:id", validate(mesaSchema), modificarMesa);
  *       404:
  *         description: Mesa no encontrada
  */
-router.delete("/:id", eliminarMesa);
+router.delete("/:id",autenticar, permitirRoles("DUENIO", "GERENTE"), eliminarMesa);
 
 module.exports = router;

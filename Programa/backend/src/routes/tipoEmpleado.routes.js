@@ -1,3 +1,4 @@
+const { autenticar, permitirRoles } = require("../middlewares/auth.middleware");
 const express = require("express");
 
 const {
@@ -29,7 +30,7 @@ const router = express.Router();
  *       200:
  *         description: Lista de tipos de empleado (sin contraseña)
  */
-router.get("/", obtenerTiposEmpleado);
+router.get("/",autenticar, permitirRoles("DUENIO", "GERENTE"), obtenerTiposEmpleado);
 
 /**
  * @swagger
@@ -51,7 +52,7 @@ router.get("/", obtenerTiposEmpleado);
  *       404:
  *         description: Tipo de empleado no encontrado
  */
-router.get("/:id", obtenerTipoEmpleadoPorId);
+router.get("/:id",autenticar, permitirRoles("DUENIO", "GERENTE"), obtenerTipoEmpleadoPorId);
 
 /**
  * @swagger
@@ -91,7 +92,7 @@ router.get("/:id", obtenerTipoEmpleadoPorId);
  *       409:
  *         description: El tipo ya es parte del sistema o ya existe un tipo de empleado con ese usuario
  */
-router.post("/", validate(tipoEmpleadoSchema), crearTipoEmpleado);
+router.post("/",autenticar, permitirRoles("DUENIO"), validate(tipoEmpleadoSchema), crearTipoEmpleado);
 
 /**
  * @swagger
@@ -136,7 +137,7 @@ router.post("/", validate(tipoEmpleadoSchema), crearTipoEmpleado);
  *       409:
  *         description: El tipo ya es parte del sistema o ya existe otro tipo de empleado con ese usuario
  */
-router.put("/:id", validate(tipoEmpleadoSchema), modificarTipoEmpleado);
+router.put("/:id",autenticar, permitirRoles("DUENIO"), validate(tipoEmpleadoSchema), modificarTipoEmpleado);
 
 /**
  * @swagger
@@ -156,6 +157,6 @@ router.put("/:id", validate(tipoEmpleadoSchema), modificarTipoEmpleado);
  *       404:
  *         description: Tipo de empleado no encontrado
  */
-router.delete("/:id", eliminarTipoEmpleado);
+router.delete("/:id",autenticar, permitirRoles("DUENIO"), eliminarTipoEmpleado);
 
 module.exports = router;

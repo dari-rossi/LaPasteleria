@@ -25,6 +25,9 @@ model Sucursal {
 
   // Para relacionar Sucursal y Pedido
   pedidos       Pedido[]
+
+  // Cuentas para cada rol segun Sucursal
+  cuentasAcceso CuentaAcceso[]
 }
 
 model Producto {
@@ -186,4 +189,22 @@ model ItemProducto {
 
   // Un mismo producto aparece una sola vez por pedido
   @@unique([pedidoId, productoId])
+}
+
+enum RolAcceso {
+  DUENIO
+  GERENTE
+  MOZO
+  AYUDANTE_COCINA
+}
+// La cuenta puede pertenecer a una sucursal o a ninguna (caso del duenio)
+model CuentaAcceso {
+  id Int @id @default(autoincrement())
+  usuario String @unique
+  contraseniaHash String
+  rol RolAcceso
+  sucursalId Int?
+  sucursal Sucursal? @relation(fields: [sucursalId], references: [id], onDelete: Cascade)
+
+  @@unique([rol, sucursalId])
 }

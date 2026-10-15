@@ -1,3 +1,4 @@
+const { autenticar, permitirRoles } = require("../middlewares/auth.middleware");
 const express = require("express");
 
 const {
@@ -22,7 +23,7 @@ const router = express.Router();
  *       200:
  *         description: Lista de pedidos
  */
-router.get("/", obtenerPedidos);
+router.get("/",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), obtenerPedidos);
 
 /**
  * @swagger
@@ -42,7 +43,7 @@ router.get("/", obtenerPedidos);
  *       404:
  *         description: Pedido no encontrado
  */
-router.get("/:id", obtenerPedidoPorId);
+router.get("/:id",autenticar, permitirRoles("MOZO"), obtenerPedidoPorId);
 
 /**
  * @swagger
@@ -88,7 +89,7 @@ router.get("/:id", obtenerPedidoPorId);
  *       400:
  *         description: Datos inválidos o mesa, cliente, sucursal o producto inexistente
  */
-router.post("/", validate(pedidoSchema), crearPedido);
+router.post("/",autenticar, permitirRoles("MOZO"), validate(pedidoSchema), crearPedido);
 
 /**
  * @swagger
@@ -125,7 +126,7 @@ router.post("/", validate(pedidoSchema), crearPedido);
  *       404:
  *         description: Pedido no encontrado
  */
-router.put("/:id", validate(pedidoModificarSchema), modificarPedido);
+router.put("/:id",autenticar, permitirRoles("MOZO"), validate(pedidoModificarSchema), modificarPedido);
 
 /**
  * @swagger
@@ -147,6 +148,6 @@ router.put("/:id", validate(pedidoModificarSchema), modificarPedido);
  *       409:
  *         description: El pedido tiene un pago registrado
  */
-router.delete("/:id", eliminarPedido);
+router.delete("/:id",autenticar, permitirRoles("MOZO"), eliminarPedido);
 
 module.exports = router;

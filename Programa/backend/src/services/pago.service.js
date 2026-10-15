@@ -7,27 +7,52 @@ const lanzarError = (mensaje, status) => {
     throw error;
 };
 
-const obtenerPagos = async () => {
-    return await pagoRepository.obtenerTodos();
+const verificarAccesoPedido = (pedido, usuario) => {
+    if (!pedido) {
+        lanzarError("El pedido indicado no existe.", 404);
+    }
+
+    if (usuario.rol !== "DUENIO" &&
+        Number(pedido.sucursalId) !== Number(usuario.sucursalId)) {
+        lanzarError("No tenés permiso para acceder a pagos de otra sucursal.", 403);
+    }
 };
 
-const obtenerPagoPorId = async (idPedido) => {
-    return await pagoRepository.obtenerPorId(idPedido);
+const obtenerPagos = async (usuario) => {
+    const pagos = await pagoRepository.obtenerTodos();
+
+    if (usuario.rol === "DUENIO") {
+        return pagos;
+    }
+
+    return pagos.filter(pago =>
+        Number(pago.pedido.sucursalId) === Number(usuario.sucursalId)
+    );
 };
 
-const crearPago = async (datos) => {
-    /* Todavía falta:
-    calcular el precio total
-    buscar el tipo de cliente
-    calcular el descuento */
+const obtenerPagoPorId = async (idPedido, usuario) => {
+    const pedido = await pedidoRepository.obtenerPorId(idPedido);
 
+    verificarAccesoPedido(pedido, usuario);
+
+    const pago = await pagoRepository.obtenerPorId(idPedido);
+
+    if (!pago) {
+        lanzarError("Pago no encontrado.", 404);
+    }
+
+    return pago;
+};
+
+const crearPago = async (datos, usuario) => {
     const pedido = await pedidoRepository.obtenerPorId(datos.idPedido);
 
     if (!pedido) {
         lanzarError("El pedido indicado no existe.", 400);
     }
 
-    // Un pedido sin productos es un pedido incompleto: no se puede pagar
+    verificarAccesoPedido(pedido, usuario);
+
     if (pedido.items.length === 0) {
         lanzarError("No se puede registrar el pago de un pedido sin productos.", 400);
     }

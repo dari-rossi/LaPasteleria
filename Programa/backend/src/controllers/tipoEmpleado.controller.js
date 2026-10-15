@@ -3,7 +3,7 @@ const tipoEmpleadoService = require("../services/tipoEmpleado.service");
 const obtenerTiposEmpleado = async (req, res) => {
     try {
         const tipoEmpleado = req.query.tipoEmpleado;
-        const tipos = await tipoEmpleadoService.obtenerTiposEmpleado(tipoEmpleado);
+        const tipos = await tipoEmpleadoService.obtenerTiposEmpleado(tipoEmpleado, req.usuario);
 
         res.json(tipos);
     } catch (error) {
@@ -19,13 +19,13 @@ const obtenerTipoEmpleadoPorId = async (req, res) => {
             return res.status(400).json({error: "ID incorrecto"});
         }
 
-        const tipo = await tipoEmpleadoService.obtenerTipoEmpleadoPorId(id);
+        const tipos = await tipoEmpleadoService.obtenerTiposEmpleado(tipoEmpleado, req.usuario);
 
         if (!tipo) {
             return res.status(404).json({error: "Tipo de empleado no encontrado"});
         }
 
-        res.json(tipo);
+        res.json(tipos);
     } catch (error) {
         console.error(error);
         res.status(500).json({error: "Error al obtener el tipo de empleado"});

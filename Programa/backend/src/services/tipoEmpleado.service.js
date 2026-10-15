@@ -46,16 +46,23 @@ const verificarUsuarioLibre = async (usuario, idActual) => {
     }
 };
 
-const obtenerTiposEmpleado = async (tipoEmpleado) => {
+const obtenerTiposEmpleado = async (tipoEmpleado, usuario) => {
     const tipos = await tipoEmpleadoRepository.obtenerTodos(tipoEmpleado);
 
-    // Cada tipo trae la cantidad total de empleados: suma lo cargado en todas las sucursales
     return tipos
         .filter((tipo) => !esDuenio(tipo.tipoEmpleado))
-        .map(({ sucursales, contrasenia, ...tipo }) => ({
-            ...tipo,
-            cantidadAsignada: sucursales.reduce((total, item) => total + item.cantidad, 0)
-        }));
+        .map(({ sucursales, contrasenia, ...tipo }) => {
+            const cantidadAsignada = usuario.rol === "DUENIO"
+                ? sucursales.reduce((total, item) => total + item.cantidad, 0)
+                : sucursales
+                    .filter((item) => Number(item.sucursalId) === Number(usuario.sucursalId))
+                    .reduce((total, item) => total + item.cantidad, 0);
+
+            return {
+                ...tipo,
+                cantidadAsignada
+            };
+        });
 };
 
 const obtenerTipoEmpleadoPorId = async (id) => {
