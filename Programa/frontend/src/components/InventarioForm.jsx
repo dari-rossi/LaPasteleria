@@ -1,18 +1,16 @@
 import { useEffect, useState } from "react";
 import { crearInventario, modificarInventario } from "../services/inventarioService";
-import { obtenerSucursales } from "../services/sucursalService";
 import { obtenerProductos } from "../services/productoService";
 
 const FORMULARIO_VACIO = {
-    sucursalId: "",
     productoId: "",
     stock: "",
-    stockMin: ""
 };
 
-function InventarioForm({ inventarioEditar, onInventarioGuardado, onCancelarEdicion }) {
+// sucursalId llega desde afuera: el inventario se crea siempre para la sucursal
+// en la que se está trabajando, por eso ya no se elige acá
+function InventarioForm({ sucursalId, inventarioEditar, onInventarioGuardado, onCancelarEdicion }) {
     const [formulario, setFormulario] = useState(FORMULARIO_VACIO);
-    const [sucursales, setSucursales] = useState([]);
     const [productos, setProductos] = useState([]);
 
     const [error, setError] = useState("");
@@ -23,25 +21,19 @@ function InventarioForm({ inventarioEditar, onInventarioGuardado, onCancelarEdic
 
     const cargarOpciones = async () => {
         try {
-            const [sucursalesObtenidas, productosObtenidos] = await Promise.all([
-                obtenerSucursales(),
-                obtenerProductos()
-            ]);
+            const productosObtenidos = await obtenerProductos();
 
-            setSucursales(sucursalesObtenidas);
             setProductos(productosObtenidos);
         } catch (error) {
-            setError("No se pudieron cargar las sucursales y los productos.");
+            setError("No se pudieron cargar los productos.");
         }
     };
 
     useEffect(() => {
         if (inventarioEditar) {
             setFormulario({
-                sucursalId: String(inventarioEditar.sucursalId),
                 productoId: String(inventarioEditar.productoId),
                 stock: String(inventarioEditar.stock),
-                stockMin: String(inventarioEditar.stockMin)
             });
         }
     }, [inventarioEditar]);
@@ -59,18 +51,16 @@ function InventarioForm({ inventarioEditar, onInventarioGuardado, onCancelarEdic
 
         try {
             if (inventarioEditar) {
-                // Al modificar solo se cambian los stocks
+                // Al modificar solo se cambia el stock
                 await modificarInventario(inventarioEditar.id, {
                     stock: Number(formulario.stock),
-                    stockMin: Number(formulario.stockMin)
                 });
             } else {
                 // El backend espera números, pero los inputs devuelven texto
                 await crearInventario({
-                    sucursalId: Number(formulario.sucursalId),
+                    sucursalId: Number(sucursalId),
                     productoId: Number(formulario.productoId),
                     stock: Number(formulario.stock),
-                    stockMin: Number(formulario.stockMin)
                 });
             }
 
@@ -108,25 +98,6 @@ function InventarioForm({ inventarioEditar, onInventarioGuardado, onCancelarEdic
 
                 <form onSubmit={manejarEnvio}>
                     <div className="mb-3">
-                        <label className="form-label">Sucursal</label>
-                        <select
-                            name="sucursalId"
-                            className="form-select"
-                            value={formulario.sucursalId}
-                            onChange={manejarCambio}
-                            disabled={Boolean(inventarioEditar)}
-                            required
-                        >
-                            <option value="">Seleccioná una sucursal</option>
-                            {sucursales.map((sucursal) => (
-                                <option key={sucursal.id} value={sucursal.id}>
-                                    {sucursal.id} - {sucursal.direccion}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="mb-3">
                         <label className="form-label">Producto</label>
                         <select
                             name="productoId"
@@ -154,20 +125,6 @@ function InventarioForm({ inventarioEditar, onInventarioGuardado, onCancelarEdic
                             name="stock"
                             className="form-control"
                             value={formulario.stock}
-                            onChange={manejarCambio}
-                            required
-                        />
-                    </div>
-
-                    <div className="mb-3">
-                        <label className="form-label">Stock mínimo</label>
-                        <input
-                            type="number"
-                            step="1"
-                            min="0"
-                            name="stockMin"
-                            className="form-control"
-                            value={formulario.stockMin}
                             onChange={manejarCambio}
                             required
                         />

@@ -4,6 +4,7 @@ CREATE TABLE `Producto` (
     `nombre` VARCHAR(191) NOT NULL,
     `tipoProducto` VARCHAR(191) NOT NULL,
     `descripcion` VARCHAR(191) NULL,
+    `stockMin` INTEGER NOT NULL,
     `precio` DOUBLE NOT NULL,
     `precioFinal` DOUBLE NULL,
     `proveedor` VARCHAR(191) NOT NULL,
@@ -15,7 +16,6 @@ CREATE TABLE `Producto` (
 CREATE TABLE `Inventario` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `stock` INTEGER NOT NULL,
-    `stockMin` INTEGER NOT NULL,
     `sucursalId` INTEGER NOT NULL,
     `productoId` INTEGER NOT NULL,
 

@@ -5,6 +5,7 @@ const FORMULARIO_VACIO = {
     nombre: "",
     tipoProducto: "",
     descripcion: "",
+    stockMin: "",
     precio: "",
     proveedor: ""
 };
@@ -20,6 +21,7 @@ function ProductoForm({ productoEditar, onProductoCreado, onProductoModificado, 
                 nombre: productoEditar.nombre,
                 tipoProducto: productoEditar.tipoProducto,
                 descripcion: productoEditar.descripcion ?? "",
+                stockMin: String(productoEditar.stockMin),
                 precio: String(productoEditar.precio),
                 proveedor: productoEditar.proveedor
             });
@@ -40,6 +42,7 @@ function ProductoForm({ productoEditar, onProductoCreado, onProductoModificado, 
         // El input devuelve texto, pero el backend espera que precio sea un número
         const datos = {
             ...formulario,
+            stockMin: Number(formulario.stockMin),
             precio: Number(formulario.precio)
         };
 
@@ -118,6 +121,19 @@ function ProductoForm({ productoEditar, onProductoCreado, onProductoModificado, 
                             name="descripcion"
                             className="form-control"
                             value={formulario.descripcion}
+                            onChange={manejarCambio}
+                        />
+                    </div>
+
+                    <div className="mb-3">
+                        <label className="form-label">Stock mínimo</label>
+                        <input
+                            type="number"
+                            step="1"
+                            min="0"
+                            name="stockMin"
+                            className="form-control"
+                            value={formulario.stockMin}
                             onChange={manejarCambio}
                         />
                     </div>

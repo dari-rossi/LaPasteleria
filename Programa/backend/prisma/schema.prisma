@@ -23,6 +23,7 @@ model Producto {
   nombre       String
   tipoProducto String
   descripcion  String?
+  stockMin     Int
   precio       Float
   precioFinal  Float?
   proveedor    String
@@ -34,8 +35,7 @@ model Producto {
 // La relation entre Sucursal y Producto
 model Inventario {
   id           Int      @id @default(autoincrement())
-  stock        Int      
-  stockMin     Int      
+  stock        Int            
   
   sucursalId   Int
   sucursal     Sucursal @relation(fields: [sucursalId], references: [id])

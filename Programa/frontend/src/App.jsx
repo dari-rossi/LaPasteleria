@@ -1,23 +1,21 @@
-import SucursalList from "./components/SucursalList";
-import ProductoList from "./components/ProductoList";
-import InventarioList from "./components/InventarioList";
-import ReservaList from "./components/ReservaList";
-import MesaList from "./components/MesaList";
+import { Routes, Route, Navigate } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import ProductosPage from "./pages/ProductosPage";
+import InventarioPage from "./pages/InventarioPage";
+
 
 function App() {
     return (
-        <div className="container mt-4">
-            <h1>La Pastelería</h1>
-            <SucursalList />
-            <hr className="my-5" />
-            <ProductoList />
-            <hr className="my-5" />
-            <InventarioList />
-            <ReservaList/>
-            <hr className= "my-5" />
-            <MesaList />
-            <hr className="my-5" />
-        </div>
+        <>
+            <Navbar />
+            <div className="container">
+                <Routes>
+                    <Route path="/" element={<Navigate to="/productos" replace />} />
+                    <Route path="/productos" element={<ProductosPage />} />
+                    <Route path="/inventario" element={<InventarioPage />} />
+                </Routes>
+            </div>
+        </>
     );
 }
 

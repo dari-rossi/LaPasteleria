@@ -60,6 +60,7 @@ router.get("/:id", obtenerProductoPorId);
  *             required:
  *               - nombre
  *               - tipoProducto
+ *               - stockMin
  *               - precio
  *               - proveedor
  *             properties:
@@ -67,6 +68,8 @@ router.get("/:id", obtenerProductoPorId);
  *                 type: string
  *               tipoProducto:
  *                 type: string
+ *               stockMin: 
+ *                 type: integer
  *               descripcion:
  *                 type: string
  *               precio:
@@ -102,6 +105,7 @@ router.post("/", validate(productoSchema), crearProducto);
  *             required:
  *               - nombre
  *               - tipoProducto
+ *               - stockMin
  *               - precio
  *               - proveedor
  *             properties:
@@ -109,6 +113,8 @@ router.post("/", validate(productoSchema), crearProducto);
  *                 type: string
  *               tipoProducto:
  *                 type: string
+ *               stockMin:
+ *                 type: integer
  *               descripcion:
  *                 type: string
  *               precio:
