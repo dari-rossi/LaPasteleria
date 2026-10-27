@@ -14,9 +14,21 @@ const sucursalTipoEmpleadoRoutes = require("./src/routes/sucursalTipoEmpleado.ro
 const gastoRoutes = require("./src/routes/gasto.routes");
 const itemProductoRoutes = require("./src/routes/itemProducto.routes");
 const pedidoRoutes = require("./src/routes/pedido.routes");
+const reservaService = require("./src/services/reserva.service");
 
 const app = express();
 const PORT = 3000;
+
+const revisarReservas = async () => {
+    try {
+        await reservaService.cancelarReservasVencidas();
+    } catch (error) {
+        console.error("Error al cancelar las reservas vencidas:", error);
+    }
+};
+
+revisarReservas();
+setInterval(revisarReservas, 60 * 1000);
 
 app.use(express.json());
 app.use(cors());

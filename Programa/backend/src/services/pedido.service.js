@@ -29,6 +29,14 @@ const crearPedido = async (datos) => {
         lanzarError("La mesa indicada no existe.", 400);
     }
 
+    if (mesa.estado === "Ocupada") {
+        lanzarError("La mesa ya está ocupada.", 409);
+    }
+
+    if (datos.comensales > mesa.maxComensales) {
+        lanzarError(`La mesa admite hasta ${mesa.maxComensales} comensales.`, 400);
+    }
+
     const cliente = await clienteRepository.obtenerPorId(datos.clienteId);
 
     if (!cliente) {
@@ -70,7 +78,7 @@ const crearPedido = async (datos) => {
         nuevoPedidoData.items = { create: items };
     }
 
-    return await pedidoRepository.crear(nuevoPedidoData);
+    return await pedidoRepository.crearOcupandoMesa(nuevoPedidoData);
 };
 
 // Solo se modifican el estado y los comensales (los productos se manejan desde itemProducto)

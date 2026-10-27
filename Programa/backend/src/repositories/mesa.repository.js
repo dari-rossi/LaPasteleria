@@ -27,10 +27,25 @@ const eliminar = async (id) => {
     });
 };
 
+const obtenerTodasConReservaVigente = async (desde, hasta) => {
+    return await prisma.mesa.findMany({
+        orderBy: { idMesa: "asc" },
+        include: {
+            reservas: {
+                where: {
+                    fechaHoraReservada: { gte: desde, lte: hasta },
+                    estadoReserva: "Activa"
+                }
+            }
+        }
+    });
+};
+
 module.exports = {
     obtenerTodas,
     obtenerPorId,
     crear,
     modificar,
-    eliminar
+    eliminar,
+    obtenerTodasConReservaVigente
 };
