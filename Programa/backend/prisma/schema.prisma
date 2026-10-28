@@ -104,6 +104,7 @@ enum MetodoPago {
   Efectivo
   Tarjeta
   Transferencia
+  MercadoPago
 }
 
 // Un pago pertenece a un único pedido: su PK es la FK hacia Pedido (relación 0..1)
@@ -167,6 +168,11 @@ model Pedido {
 
   sucursalId    Int
   sucursal      Sucursal       @relation(fields: [sucursalId], references: [id])
+  mercadoPagoOrderId       String? @unique
+  mercadoPagoQrData        String? @db.Text
+  mercadoPagoPrecio        Float?
+  mercadoPagoTipoDescuento String?
+  mercadoPagoPrecioFinal   Float?
 
   // Un pedido tiene como máximo un pago (0..1)
   pago          Pago?

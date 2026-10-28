@@ -13,15 +13,27 @@ const obtenerTodos = async () => {
 };
 
 const obtenerPorId = async (idPedido) => {
-    return await prisma.pago.findUnique({where: {idPedido: idPedido}});
+    return await prisma.pago.findUnique({
+        where: { idPedido: idPedido }
+    });
 };
 
 const crear = async (datos) => {
-    return await prisma.pago.create({data: datos});
+    return await prisma.pago.create({
+        data: datos
+    });
+};
+
+const guardarOrdenMercadoPago = async (idPedido, datos) => {
+    return await prisma.pedido.update({
+        where: { idPedido: idPedido },
+        data: datos
+    });
 };
 
 module.exports = {
     obtenerTodos,
     obtenerPorId,
-    crear
+    crear,
+    guardarOrdenMercadoPago
 };

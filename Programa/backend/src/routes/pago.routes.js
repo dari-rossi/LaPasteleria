@@ -4,7 +4,9 @@ const express = require("express");
 const {
     obtenerPagos,
     obtenerPagoPorId,
-    crearPago
+    crearPago,
+    crearQrMercadoPago,
+    verificarPagoMercadoPago
 } = require("../controllers/pago.controller");
 
 const validate = require("../middlewares/validate");
@@ -77,5 +79,56 @@ router.get("/:idPedido",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), 
  *         description: El pedido ya tiene un pago registrado
  */
 router.post("/",autenticar, permitirRoles("MOZO"), validate(pagoSchema), crearPago);
+
+
+/**
+ * @swagger
+ * /pagos/mercadopago/{idPedido}/qr:
+ *   post:
+ *     summary: Generar QR dinámico para un pedido
+ *     tags: [Pago]
+ *     parameters:
+ *       - in: path
+ *         name: idPedido
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: QR generado
+ *       404:
+ *         description: Pedido no encontrado
+ *       409:
+ *         description: El pedido ya tiene un pago
+ */
+router.post(
+    "/mercadopago/:idPedido/qr",
+    autenticar,
+    permitirRoles("MOZO"),
+    crearQrMercadoPago
+);
+
+/**
+ * @swagger
+ * /pagos/mercadopago/{idPedido}/estado:
+ *   get:
+ *     summary: Consultar y verificar el pago de un pedido
+ *     tags: [Pago]
+ *     parameters:
+ *       - in: path
+ *         name: idPedido
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Estado del pago
+ */
+router.get(
+    "/mercadopago/:idPedido/estado",
+    autenticar,
+    permitirRoles("MOZO"),
+    verificarPagoMercadoPago
+);
 
 module.exports = router;
