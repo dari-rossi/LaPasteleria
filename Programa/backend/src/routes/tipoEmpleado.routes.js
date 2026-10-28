@@ -10,27 +10,29 @@ const {
 } = require("../controllers/tipoEmpleado.controller");
 
 const validate = require("../middlewares/validate");
-const { tipoEmpleadoSchema } = require("../schemas/tipoEmpleado.schema");
+const { crearTipoEmpleadoSchema, modificarTipoEmpleadoSchema } = require("../schemas/tipoEmpleado.schema");
 const router = express.Router();
 
 /**
  * @swagger
  * /tipos-empleado:
  *   get:
- *     summary: Listar tipos de empleado con la cantidad total de empleados de cada tipo, opcionalmente filtrados por tipo
+ *     summary: Listar tipos de empleado con la cantidad asignada, opcionalmente filtrados por rol
  *     tags: [Tipo Empleado]
  *     parameters:
  *       - in: query
- *         name: tipoEmpleado
+ *         name: rol
  *         required: false
- *         description: Filtra por tipo de empleado (coincidencia parcial)
  *         schema:
  *           type: string
+ *           enum: [GERENTE, MOZO, AYUDANTE_COCINA]
  *     responses:
  *       200:
- *         description: Lista de tipos de empleado (sin contraseña)
+ *         description: Lista de tipos de empleado
+ *       400:
+ *         description: Rol inválido
  */
-router.get("/",autenticar, permitirRoles("DUENIO", "GERENTE"), obtenerTiposEmpleado);
+router.get("/", autenticar, permitirRoles("DUENIO", "GERENTE"), obtenerTiposEmpleado);
 
 /**
  * @swagger
@@ -46,13 +48,13 @@ router.get("/",autenticar, permitirRoles("DUENIO", "GERENTE"), obtenerTiposEmple
  *           type: integer
  *     responses:
  *       200:
- *         description: Tipo de empleado encontrado (sin contraseña)
+ *         description: Tipo de empleado encontrado
  *       400:
  *         description: ID incorrecto
  *       404:
  *         description: Tipo de empleado no encontrado
  */
-router.get("/:id",autenticar, permitirRoles("DUENIO", "GERENTE"), obtenerTipoEmpleadoPorId);
+router.get("/:id", autenticar, permitirRoles("DUENIO", "GERENTE"), obtenerTipoEmpleadoPorId);
 
 /**
  * @swagger
@@ -67,38 +69,31 @@ router.get("/:id",autenticar, permitirRoles("DUENIO", "GERENTE"), obtenerTipoEmp
  *           schema:
  *             type: object
  *             required:
- *               - tipoEmpleado
+ *               - rol
  *               - sueldo
  *             properties:
- *               tipoEmpleado:
+ *               rol:
  *                 type: string
- *                 enum: [Gerente, Mozo, Ayudante de cocina]
- *                 example: Mozo
- *                 description: Solo se pueden crear estos tipos. El Dueño es una cuenta predefinida
+ *                 enum: [DUENIO, GERENTE, MOZO, AYUDANTE_COCINA]
+ *                 example: MOZO
  *               sueldo:
  *                 type: number
  *                 example: 500000
- *               usuario:
- *                 type: string
- *                 description: Opcional, pero si se envía hay que enviar también la contraseña
- *               contrasenia:
- *                 type: string
- *                 description: Mínimo 8 caracteres.
  *     responses:
  *       201:
  *         description: Tipo de empleado creado
  *       400:
- *         description: Datos inválidos o tipo de empleado que no es parte del sistema
+ *         description: Datos inválidos
  *       409:
- *         description: El tipo ya es parte del sistema o ya existe un tipo de empleado con ese usuario
+ *         description: El rol ya es parte del sistema
  */
-router.post("/",autenticar, permitirRoles("DUENIO"), validate(tipoEmpleadoSchema), crearTipoEmpleado);
+router.post("/", autenticar, permitirRoles("DUENIO"), validate(crearTipoEmpleadoSchema), crearTipoEmpleado);
 
 /**
  * @swagger
  * /tipos-empleado/{id}:
  *   put:
- *     summary: Modificar un tipo de empleado
+ *     summary: Modificar el sueldo de un tipo de empleado
  *     tags: [Tipo Empleado]
  *     parameters:
  *       - in: path
@@ -113,31 +108,19 @@ router.post("/",autenticar, permitirRoles("DUENIO"), validate(tipoEmpleadoSchema
  *           schema:
  *             type: object
  *             required:
- *               - tipoEmpleado
  *               - sueldo
  *             properties:
- *               tipoEmpleado:
- *                 type: string
- *                 enum: [Gerente, Mozo, Ayudante de cocina]
  *               sueldo:
  *                 type: number
- *               usuario:
- *                 type: string
- *                 description: Opcional. Si no se envía, no se modifica
- *               contrasenia:
- *                 type: string
- *                 description: Opcional (mínimo 8 caracteres). Si no se envía, no se modifica
  *     responses:
  *       200:
  *         description: Tipo de empleado modificado
  *       400:
- *         description: Datos inválidos o tipo de empleado que no es parte del sistema
+ *         description: Datos inválidos
  *       404:
  *         description: Tipo de empleado no encontrado
- *       409:
- *         description: El tipo ya es parte del sistema o ya existe otro tipo de empleado con ese usuario
  */
-router.put("/:id",autenticar, permitirRoles("DUENIO"), validate(tipoEmpleadoSchema), modificarTipoEmpleado);
+router.put("/:id", autenticar, permitirRoles("DUENIO"), validate(modificarTipoEmpleadoSchema), modificarTipoEmpleado);
 
 /**
  * @swagger
@@ -156,7 +139,9 @@ router.put("/:id",autenticar, permitirRoles("DUENIO"), validate(tipoEmpleadoSche
  *         description: Tipo de empleado eliminado
  *       404:
  *         description: Tipo de empleado no encontrado
+ *       409:
+ *         description: Hay usuarios que tienen este rol
  */
-router.delete("/:id",autenticar, permitirRoles("DUENIO"), eliminarTipoEmpleado);
+router.delete("/:id", autenticar, permitirRoles("DUENIO"), eliminarTipoEmpleado);
 
 module.exports = router;

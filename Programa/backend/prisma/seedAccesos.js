@@ -3,43 +3,50 @@ const bcrypt = require("bcryptjs");
 const prisma = require("../src/prisma");
 
 async function main() {
-    const cuentas = [
-        { usuario: "duenio", contrasenia: "duenioDSW", rol: "DUENIO", sucursalId: null },
-        { usuario: "gerente1", contrasenia: "gerenteDSW1", rol: "GERENTE", sucursalId: 1 },
-        { usuario: "mozo1", contrasenia: "mozoDSW1", rol: "MOZO", sucursalId: 1 },
-        { usuario: "cocina1", contrasenia: "cocinaDSW1", rol: "AYUDANTE_COCINA", sucursalId: 1 },
-        { usuario: "gerente2", contrasenia: "gerenteDSW2", rol: "GERENTE", sucursalId: 2 },
-        { usuario: "mozo2", contrasenia: "mozoDSW2", rol: "MOZO", sucursalId: 2 },
-        { usuario: "cocina2", contrasenia: "cocinaDSW2", rol: "AYUDANTE_COCINA", sucursalId: 2 }
+    // Un usuario por rol en cada sucursal. El Dueño no tiene sucursal
+    const usuarios = [
+        { nombreUsuario: "duenio", contrasenia: "duenioDSW", rol: "DUENIO", sucursalId: null },
+        { nombreUsuario: "gerente1", contrasenia: "gerenteDSW1", rol: "GERENTE", sucursalId: 1 },
+        { nombreUsuario: "mozo1", contrasenia: "mozoDSW1", rol: "MOZO", sucursalId: 1 },
+        { nombreUsuario: "cocina1", contrasenia: "cocinaDSW1", rol: "AYUDANTE_COCINA", sucursalId: 1 },
+        { nombreUsuario: "gerente2", contrasenia: "gerenteDSW2", rol: "GERENTE", sucursalId: 2 },
+        { nombreUsuario: "mozo2", contrasenia: "mozoDSW2", rol: "MOZO", sucursalId: 2 },
+        { nombreUsuario: "cocina2", contrasenia: "cocinaDSW2", rol: "AYUDANTE_COCINA", sucursalId: 2 }
     ];
 
-    for (const cuenta of cuentas) {
-        const contraseniaHash = await bcrypt.hash(cuenta.contrasenia, 12);
+    for (const usuario of usuarios) {
+        const tipo = await prisma.tipoEmpleado.findUnique({ where: { rol: usuario.rol } });
 
-        await prisma.cuentaAcceso.upsert({
-            where: { usuario: cuenta.usuario },
+        if (!tipo) {
+            throw new Error(`No existe el tipo de empleado ${usuario.rol}. Corré primero prisma/seed.js`);
+        }
+
+        const contrasenia = await bcrypt.hash(usuario.contrasenia, 12);
+
+        await prisma.usuario.upsert({
+            where: { nombreUsuario: usuario.nombreUsuario },
             update: {
-                contraseniaHash,
-                rol: cuenta.rol,
-                sucursalId: cuenta.sucursalId
+                contrasenia,
+                idTipoEmpleado: tipo.idTipoEmpleado,
+                sucursalId: usuario.sucursalId
             },
             create: {
-                usuario: cuenta.usuario,
-                contraseniaHash,
-                rol: cuenta.rol,
-                sucursalId: cuenta.sucursalId
+                nombreUsuario: usuario.nombreUsuario,
+                contrasenia,
+                idTipoEmpleado: tipo.idTipoEmpleado,
+                sucursalId: usuario.sucursalId
             }
         });
 
-        console.log(`Cuenta preparada: ${cuenta.usuario}`);
+        console.log(`Usuario preparado: ${usuario.nombreUsuario}`);
     }
 
-    console.log("Todas las cuentas de prueba se crearon correctamente.");
+    console.log("Todos los usuarios de prueba se crearon correctamente.");
 }
 
 main()
     .catch(error => {
-        console.error("Error al crear las cuentas:", error.message);
+        console.error("Error al crear los usuarios:", error.message);
         process.exitCode = 1;
     })
     .finally(async () => {

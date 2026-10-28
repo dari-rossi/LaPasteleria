@@ -2,6 +2,7 @@ const { autenticar } = require("../middlewares/auth.middleware");
 const express = require("express");
 const { iniciarSesion } = require("../controllers/auth.controller");
 const { loginSchema } = require("../schemas/auth.schema");
+const validate = require("../middlewares/validate");
 
 const router = express.Router();
 /**
@@ -17,10 +18,10 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             required:
- *               - usuario
+ *               - nombreUsuario
  *               - contrasenia
  *             properties:
- *               usuario:
+ *               nombreUsuario:
  *                 type: string
  *               contrasenia:
  *                 type: string
@@ -32,22 +33,7 @@ const router = express.Router();
  *       401:
  *         description: Usuario o contraseña incorrectos
  */
-router.post("/login", (req, res, next) => {
-    const resultado = loginSchema.safeParse(req.body);
-
-    if (!resultado.success) {
-        return res.status(400).json({
-            mensaje: "Datos inválidos",
-            errores: resultado.error.issues.map(error => ({
-                campo: error.path.join("."),
-                mensaje: error.message
-            }))
-        });
-    }
-
-    req.body = resultado.data;
-    next();
-}, iniciarSesion);
+router.post("/login", validate(loginSchema), iniciarSesion);
 
 /**
  * @swagger

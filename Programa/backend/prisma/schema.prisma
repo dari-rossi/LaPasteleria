@@ -26,8 +26,8 @@ model Sucursal {
   // Para relacionar Sucursal y Pedido
   pedidos       Pedido[]
 
-  // Cuentas para cada rol segun Sucursal
-  cuentasAcceso CuentaAcceso[]
+  // Usuarios (uno por rol) que pertenecen a esta sucursal
+  usuarios      Usuario[]
 }
 
 model Producto {
@@ -37,6 +37,7 @@ model Producto {
   descripcion   String?
   precio        Float
   proveedor     String
+  stockMinimo   Int
 
   // Para relacionar Sucursal y Producto
   inventarios   Inventario[]
@@ -49,7 +50,6 @@ model Producto {
 model Inventario {
   id           Int      @id @default(autoincrement())
   stock        Int
-  stockMin     Int
 
   sucursalId   Int
   sucursal     Sucursal @relation(fields: [sucursalId], references: [id])
@@ -118,15 +118,25 @@ model Pago {
   pedido        Pedido     @relation(fields: [idPedido], references: [idPedido])
 }
 
+// Los roles posibles del sistema. Cada TipoEmpleado tiene exactamente uno
+enum Rol {
+  DUENIO
+  GERENTE
+  MOZO
+  AYUDANTE_COCINA
+}
+
+// Tabla precargada por el seed: una fila por rol
 model TipoEmpleado {
-  id           Int     @id @default(autoincrement())
-  usuario      String? @unique
-  contrasenia  String?
-  tipoEmpleado String  @unique
-  sueldo       Float
+  idTipoEmpleado Int     @id @default(autoincrement())
+  rol            Rol     @unique
+  sueldo         Float
+
+  // Un TipoEmpleado puede tener varios Usuarios (uno por sucursal)
+  usuarios       Usuario[]
 
   // Para relacionar Sucursal y TipoEmpleado
-  sucursales   SucursalTipoEmpleado[]
+  sucursales     SucursalTipoEmpleado[]
 }
 
 // La relación entre Sucursal y TipoEmpleado: cuántos empleados de ese tipo hay en esa sucursal
@@ -137,7 +147,7 @@ model SucursalTipoEmpleado {
   sucursal       Sucursal     @relation(fields: [sucursalId], references: [id], onDelete: Cascade)
 
   tipoEmpleadoId Int
-  tipoEmpleado   TipoEmpleado @relation(fields: [tipoEmpleadoId], references: [id], onDelete: Cascade)
+  tipoEmpleado   TipoEmpleado @relation(fields: [tipoEmpleadoId], references: [idTipoEmpleado], onDelete: Cascade)
 
   // Un mismo tipo de empleado aparece una sola vez por sucursal
   @@id([sucursalId, tipoEmpleadoId])
@@ -191,20 +201,20 @@ model ItemProducto {
   @@unique([pedidoId, productoId])
 }
 
-enum RolAcceso {
-  DUENIO
-  GERENTE
-  MOZO
-  AYUDANTE_COCINA
-}
-// La cuenta puede pertenecer a una sucursal o a ninguna (caso del duenio)
-model CuentaAcceso {
-  id Int @id @default(autoincrement())
-  usuario String @unique
-  contraseniaHash String
-  rol RolAcceso
-  sucursalId Int?
-  sucursal Sucursal? @relation(fields: [sucursalId], references: [id], onDelete: Cascade)
+// Cada sucursal tiene una cuenta por rol (compartida por todos los empleados de ese rol).
+// sucursalId null = Dueño, que tiene acceso a todas las sucursales.
+// Esa regla (solo el Dueño sin sucursal, un solo Dueño) la valida el service
+model Usuario {
+  idUsuario      Int          @id @default(autoincrement())
+  nombreUsuario  String       @unique
+  contrasenia    String       // se guarda el hash de bcrypt, nunca el texto plano
 
-  @@unique([rol, sucursalId])
+  idTipoEmpleado Int
+  tipoEmpleado   TipoEmpleado @relation(fields: [idTipoEmpleado], references: [idTipoEmpleado])
+
+  sucursalId     Int?
+  sucursal       Sucursal?    @relation(fields: [sucursalId], references: [id], onDelete: Cascade)
+
+  // Una sola cuenta por rol en cada sucursal
+  @@unique([idTipoEmpleado, sucursalId])
 }

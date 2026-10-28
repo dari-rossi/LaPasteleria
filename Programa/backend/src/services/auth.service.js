@@ -2,43 +2,39 @@ require("dotenv").config();
 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const prisma = require("../prisma");
+const usuarioRepository = require("../repositories/usuario.repository");
+const { esDuenio } = require("../config/tiposEmpleado");
+const { lanzarError } = require("../config/errores");
 
-const login = async ({ usuario, contrasenia }) => {
-    const cuenta = await prisma.cuentaAcceso.findUnique({
-        where: { usuario: usuario.trim() }
-    });
+const login = async ({ nombreUsuario, contrasenia }) => {
+    const usuario = await usuarioRepository.obtenerPorNombre(nombreUsuario);
 
-    if (!cuenta) {
-        throw new Error("Credenciales inválidas");
+    if (!usuario) {
+        lanzarError("CREDENCIALES_INVALIDAS");
     }
 
-    const contraseniaValida = await bcrypt.compare(
-        contrasenia,
-        cuenta.contraseniaHash
-    );
+    const contraseniaValida = await bcrypt.compare(contrasenia, usuario.contrasenia);
 
     if (!contraseniaValida) {
-        throw new Error("Credenciales inválidas");
+        lanzarError("CREDENCIALES_INVALIDAS");
     }
 
-    if (cuenta.rol === "DUENIO" && cuenta.sucursalId !== null) {
-        throw new Error("Configuración de cuenta inválida");
-    }
+    const rol = usuario.tipoEmpleado.rol;
 
-    if (cuenta.rol !== "DUENIO" && cuenta.sucursalId === null) {
-        throw new Error("Configuración de cuenta inválida");
+    // El Dueño no tiene sucursal; todos los demás sí
+    if (esDuenio(rol) !== (usuario.sucursalId === null)) {
+        lanzarError("CUENTA_CONFIGURACION_INVALIDA");
     }
 
     if (!process.env.JWT_SECRET) {
-        throw new Error("Falta configurar JWT_SECRET");
+        lanzarError("JWT_SECRET_FALTANTE");
     }
 
     const token = jwt.sign(
         {
-            sub: cuenta.id,
-            rol: cuenta.rol,
-            sucursalId: cuenta.sucursalId
+            sub: usuario.idUsuario,
+            rol: rol,
+            sucursalId: usuario.sucursalId
         },
         process.env.JWT_SECRET,
         { expiresIn: "2h" }
@@ -46,9 +42,9 @@ const login = async ({ usuario, contrasenia }) => {
 
     return {
         token,
-        usuario: cuenta.usuario,
-        rol: cuenta.rol,
-        sucursalId: cuenta.sucursalId
+        nombreUsuario: usuario.nombreUsuario,
+        rol: rol,
+        sucursalId: usuario.sucursalId
     };
 };
 

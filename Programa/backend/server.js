@@ -15,6 +15,8 @@ const gastoRoutes = require("./src/routes/gasto.routes");
 const itemProductoRoutes = require("./src/routes/itemProducto.routes");
 const pedidoRoutes = require("./src/routes/pedido.routes");
 const authRoutes = require("./src/routes/auth.routes");
+const usuarioRoutes = require("./src/routes/usuario.routes");
+const { rutaNoEncontrada, manejarErrores } = require("./src/config/errores");
 
 const app = express();
 const PORT = 3000;
@@ -43,6 +45,9 @@ app.use("/sucursales", sucursalTipoEmpleadoRoutes);
 app.use("/gastos", gastoRoutes);
 app.use("/itemProducto", itemProductoRoutes);
 app.use("/pedidos", pedidoRoutes);
+app.use("/usuarios", usuarioRoutes);
+app.use(rutaNoEncontrada);
+app.use(manejarErrores);
 
 app.listen(PORT, () => {
     console.log(`Servidor funcionando en http://localhost:${PORT}`);

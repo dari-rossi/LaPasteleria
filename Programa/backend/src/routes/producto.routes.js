@@ -63,6 +63,7 @@ router.get("/:id", autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO", "AYUDA
  *               - tipoProducto
  *               - precio
  *               - proveedor
+ *               - stockMinimo
  *             properties:
  *               nombre:
  *                 type: string
@@ -74,6 +75,9 @@ router.get("/:id", autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO", "AYUDA
  *                 type: number
  *               proveedor:
  *                 type: string
+ *               stockMinimo:
+ *                 type: integer
+ *                 example: 10
  *     responses:
  *       201:
  *         description: Producto creado
@@ -105,6 +109,7 @@ router.post("/", autenticar, permitirRoles("DUENIO"), validate(productoSchema), 
  *               - tipoProducto
  *               - precio
  *               - proveedor
+ *               - stockMinimo
  *             properties:
  *               nombre:
  *                 type: string
@@ -116,6 +121,9 @@ router.post("/", autenticar, permitirRoles("DUENIO"), validate(productoSchema), 
  *                 type: number
  *               proveedor:
  *                 type: string
+ *               stockMinimo:
+ *                 type: integer
+ *                 example: 10
  *     responses:
  *       200:
  *         description: Producto modificado

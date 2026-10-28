@@ -1,12 +1,11 @@
+const { AppError } = require("../config/errores");
+
 const validate = (schema) => {
     return (req, res, next) => {
         const result = schema.safeParse(req.body);
 
         if (!result.success) {
-            return res.status(400).json({
-                error: "Datos inválidos",
-                detalles: result.error.issues
-            });
+            throw new AppError("DATOS_INVALIDOS", undefined, result.error.issues);
         }
 
         req.body = result.data;

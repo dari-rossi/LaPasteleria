@@ -1,89 +1,30 @@
 const sucursalTipoEmpleadoService = require("../services/sucursalTipoEmpleado.service");
+const { leerId } = require("../config/errores");
 
 const obtenerTiposEmpleadoDeSucursal = async (req, res) => {
-    try {
-        const sucursalId = Number(req.params.sucursalId);
-        if(!Number.isInteger(sucursalId) || sucursalId <= 0){
-            return res.status(400).json({error: "ID de sucursal incorrecto"});
-        }
-
-        const asignaciones = await sucursalTipoEmpleadoService.obtenerTiposEmpleadoDeSucursal(sucursalId, req.usuario);
-
-        res.json(asignaciones);
-    } catch (error) {
-        console.error(error);
-
-        if (error.status) {
-            return res.status(error.status).json({error: error.message});
-        }
-
-        res.status(500).json({error: "Error al obtener los tipos de empleado de la sucursal"});
-    }
+    const sucursalId = leerId(req.params.sucursalId);
+    const asignaciones = await sucursalTipoEmpleadoService.obtenerTiposEmpleadoDeSucursal(sucursalId, req.usuario);
+    res.json(asignaciones);
 };
 
 const asignarTipoEmpleado = async (req, res) => {
-    try {
-        const sucursalId = Number(req.params.sucursalId);
-        if(!Number.isInteger(sucursalId) || sucursalId <= 0){
-            return res.status(400).json({error: "ID de sucursal incorrecto"});
-        }
-
-        const asignacion = await sucursalTipoEmpleadoService.asignarTipoEmpleado(sucursalId, req.body, req.usuario);
-
-        res.status(201).json(asignacion);
-    } catch (error) {
-        console.error(error);
-
-        if (error.status) {
-            return res.status(error.status).json({error: error.message});
-        }
-
-        res.status(500).json({error: "Error al asignar el tipo de empleado a la sucursal"});
-    }
+    const sucursalId = leerId(req.params.sucursalId);
+    const asignacion = await sucursalTipoEmpleadoService.asignarTipoEmpleado(sucursalId, req.body, req.usuario);
+    res.status(201).json(asignacion);
 };
 
 const modificarCantidad = async (req, res) => {
-    try {
-        const sucursalId = Number(req.params.sucursalId);
-        const tipoEmpleadoId = Number(req.params.tipoEmpleadoId);
-        if(!Number.isInteger(sucursalId) || sucursalId <= 0 || !Number.isInteger(tipoEmpleadoId) || tipoEmpleadoId <= 0){
-            return res.status(400).json({error: "ID incorrecto"});
-        }
-
-        const asignacion = await sucursalTipoEmpleadoService.modificarCantidad(sucursalId, tipoEmpleadoId, req.body, req.usuario);
-
-        res.json(asignacion);
-    } catch (error) {
-        console.error(error);
-
-        if (error.status) {
-            return res.status(error.status).json({error: error.message});
-        }
-
-        res.status(500).json({error: "Error al modificar la cantidad de empleados"});
-    }
+    const sucursalId = leerId(req.params.sucursalId);
+    const tipoEmpleadoId = leerId(req.params.tipoEmpleadoId);
+    const asignacion = await sucursalTipoEmpleadoService.modificarCantidad(sucursalId, tipoEmpleadoId, req.body, req.usuario);
+    res.json(asignacion);
 };
 
 const quitarTipoEmpleado = async (req, res) => {
-    try {
-        const sucursalId = Number(req.params.sucursalId);
-        const tipoEmpleadoId = Number(req.params.tipoEmpleadoId);
-        if(!Number.isInteger(sucursalId) || sucursalId <= 0 || !Number.isInteger(tipoEmpleadoId) || tipoEmpleadoId <= 0){
-            return res.status(400).json({error: "ID incorrecto"});
-        }
-
-        await sucursalTipoEmpleadoService.quitarTipoEmpleado(sucursalId, tipoEmpleadoId, req.usuario);
-
-        res.json({mensaje: "Tipo de empleado quitado de la sucursal"});
-    } catch (error) {
-        console.error(error);
-
-        if (error.status) {
-            return res.status(error.status).json({error: error.message});
-        }
-
-        res.status(500).json({error: "Error al quitar el tipo de empleado de la sucursal"});
-    }
+    const sucursalId = leerId(req.params.sucursalId);
+    const tipoEmpleadoId = leerId(req.params.tipoEmpleadoId);
+    await sucursalTipoEmpleadoService.quitarTipoEmpleado(sucursalId, tipoEmpleadoId, req.usuario);
+    res.json({ mensaje: "Tipo de empleado quitado de la sucursal" });
 };
 
 module.exports = {

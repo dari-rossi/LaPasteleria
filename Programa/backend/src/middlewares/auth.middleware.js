@@ -1,40 +1,40 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
+const { lanzarError } = require("../config/errores");
 
 const autenticar = (req, res, next) => {
     const autorizacion = req.headers.authorization;
 
     if (!autorizacion || !autorizacion.startsWith("Bearer ")) {
-        return res.status(401).json({mensaje: "Debés iniciar sesión para acceder"});
+        lanzarError("SESION_REQUERIDA");
     }
 
     const token = autorizacion.split(" ")[1];
+    let contenido;
 
     try {
-        const contenido = jwt.verify(token, process.env.JWT_SECRET);
-
-        if (!contenido.sub || !contenido.rol) {
-            return res.status(401).json({mensaje: "Token inválido"});
-        }
-
-        req.usuario = {
-            id: contenido.sub,
-            rol: contenido.rol,
-            sucursalId: contenido.sucursalId ?? null
-        };
-
-        next();
+        contenido = jwt.verify(token, process.env.JWT_SECRET);
     } catch {
-        return res.status(401).json({
-            mensaje: "Token inválido o vencido"
-        });
+        lanzarError("TOKEN_INVALIDO");
     }
+
+    if (!contenido.sub || !contenido.rol) {
+        lanzarError("TOKEN_INVALIDO");
+    }
+
+    req.usuario = {
+        id: contenido.sub,
+        rol: contenido.rol,
+        sucursalId: contenido.sucursalId ?? null
+    };
+
+    next();
 };
 
 const permitirRoles = (...rolesPermitidos) => {
     return (req, res, next) => {
         if (!req.usuario || !rolesPermitidos.includes(req.usuario.rol)) {
-            return res.status(403).json({mensaje: "No tenés permisos para realizar esta operación"});
+            lanzarError("SIN_PERMISOS");
         }
 
         next();
@@ -52,7 +52,7 @@ const verificarSucursal = (req, res, next) => {
 
     if (!Number.isInteger(sucursalSolicitada) ||
         sucursalSolicitada !== req.usuario.sucursalId) {
-        return res.status(403).json({mensaje: "No tenés acceso a esta sucursal"});
+        lanzarError("SUCURSAL_NO_PERMITIDA");
     }
 
     next();
