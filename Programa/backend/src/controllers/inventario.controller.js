@@ -2,7 +2,7 @@ const inventarioService = require('../services/inventario.service');
 
 const getAll = async (req, res) => {
   try {
-    const inventarios = await inventarioService.obtenerInventarios();
+    const inventarios = await inventarioService.obtenerInventarios(req.usuario);
     res.json(inventarios);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -11,7 +11,7 @@ const getAll = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    const nuevoInventario = await inventarioService.crearInventario(req.body);
+    const nuevoInventario = await inventarioService.crearInventario(req.body, req.usuario);
     res.status(201).json(nuevoInventario);
   } catch (error) {
     res.status(400).json({ error: "Error al crear inventario. Verificá los datos o si el producto ya existe en la sucursal." });
@@ -20,7 +20,7 @@ const create = async (req, res) => {
 
 const update = async (req, res) => {
   try {
-    const inventarioActualizado = await inventarioService.actualizarInventario(req.params.id, req.body);
+    const inventarioActualizado = await inventarioService.actualizarInventario(req.params.id, req.body, req.usuario);
     res.json(inventarioActualizado);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -29,7 +29,7 @@ const update = async (req, res) => {
 
 const remove = async (req, res) => {
   try {
-    await inventarioService.eliminarInventario(req.params.id);
+    await inventarioService.eliminarInventario(req.params.id, req.usuario);
     res.status(204).send();
   } catch (error) {
     res.status(400).json({ error: error.message });

@@ -6,7 +6,6 @@ export class Producto {
         this.descripcion = descripcion;
         this.stockMin = stockMin;
         this.precio = precio;
-        this.precioFinal = precioFinal;
         this.proveedor = proveedor;
     }
 }

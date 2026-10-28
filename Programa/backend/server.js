@@ -7,6 +7,15 @@ const productoRoutes = require("./src/routes/producto.routes");
 const inventarioRoutes = require('./src/routes/inventario.routes');
 const reservaRoutes = require("./src/routes/reserva.routes");
 const mesaRoutes = require("./src/routes/mesa.routes");
+const clienteRoutes = require('./src/routes/cliente.routes');
+const pagoRoutes = require('./src/routes/pago.routes');
+const tipoEmpleadoRoutes = require("./src/routes/tipoEmpleado.routes");
+const sucursalTipoEmpleadoRoutes = require("./src/routes/sucursalTipoEmpleado.routes");
+const gastoRoutes = require("./src/routes/gasto.routes");
+const itemProductoRoutes = require("./src/routes/itemProducto.routes");
+const pedidoRoutes = require("./src/routes/pedido.routes");
+const authRoutes = require("./src/routes/auth.routes");
+
 const app = express();
 const PORT = 3000;
 
@@ -21,11 +30,19 @@ app.get("/", (req, res) => {
     });
 });
 
+app.use("/auth", authRoutes);
 app.use("/sucursales", sucursalRoutes);
 app.use("/productos", productoRoutes);
 app.use('/inventario', inventarioRoutes);
 app.use('/reservas', reservaRoutes);
 app.use("/mesas", mesaRoutes);
+app.use("/clientes", clienteRoutes);
+app.use("/pagos", pagoRoutes);
+app.use("/tipos-empleado", tipoEmpleadoRoutes);
+app.use("/sucursales", sucursalTipoEmpleadoRoutes);
+app.use("/gastos", gastoRoutes);
+app.use("/itemProducto", itemProductoRoutes);
+app.use("/pedidos", pedidoRoutes);
 
 app.listen(PORT, () => {
     console.log(`Servidor funcionando en http://localhost:${PORT}`);
