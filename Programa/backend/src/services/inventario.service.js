@@ -17,12 +17,24 @@ const verificarAcceso = (inventario, usuario) => {
   }
 };
 
-const obtenerInventarios = async (usuario) => {
+const obtenerStockBajo = async (usuario, sucursalId) => {
+    if (usuario.rol === "DUENIO") {
+        if (!sucursalId) {
+            lanzarError("Debés indicar una sucursal", 400);
+        }
+
+        return await inventarioRepository.getStockBajo(sucursalId);
+    }
+
+    return await inventarioRepository.getStockBajo(usuario.sucursalId);
+};
+
+const obtenerInventarios = async (usuario, productoId) => {
   if (usuario.rol === "DUENIO") {
-    return await inventarioRepository.getAll();
+    return await inventarioRepository.getAll(null, productoId);
   }
 
-  return await inventarioRepository.getAll(usuario.sucursalId);
+  return await inventarioRepository.getAll(usuario.sucursalId, productoId);
 };
 
 const crearInventario = async (data, usuario) => {
@@ -71,6 +83,7 @@ const eliminarInventario = async (id, usuario) => {
 module.exports = {
   obtenerInventarios,
   crearInventario,
+  obtenerStockBajo,
   actualizarInventario,
   eliminarInventario
 };

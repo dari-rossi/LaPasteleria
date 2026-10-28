@@ -1,15 +1,31 @@
 const prisma = require('../prisma');
 
-const getAll = async (sucursalId = null) => {
-  return await prisma.inventario.findMany({
-    where: sucursalId === null ? {} : { sucursalId },
-    include: {
-      sucursal: true,
-      producto: true
-    }
-  });
+const filtroPorProducto = (productoId) => {
+  return productoId? {productoId: Number(productoId)}: {}
+}
+
+const getStockBajo = async (sucursalId) => {
+    const inventarios = await getAll(sucursalId);
+
+    return inventarios.filter(
+        inventario => inventario.stock <= inventario.stockMin
+    );
 };
 
+const getAll = async (sucursalId = null, productoId = null) => {
+    return await prisma.inventario.findMany({
+        where: {
+            ...filtroPorProducto(productoId),
+            ...(sucursalId !== null
+                ? { sucursalId: Number(sucursalId) }
+                : {})
+        },
+        include: {
+            sucursal: true,
+            producto: true
+        }
+    });
+};
 const getById = async (id) => {
   return await prisma.inventario.findUnique({
     where: { id: parseInt(id) }
@@ -36,9 +52,10 @@ const remove = async (id) => {
 };
 
 module.exports = {
-  getAll,
-  getById,
-  create,
-  update,
-  remove
+    getAll,
+    getById,
+    getStockBajo,
+    create,
+    update,
+    remove
 };

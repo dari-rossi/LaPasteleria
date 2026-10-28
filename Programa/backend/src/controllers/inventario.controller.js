@@ -1,18 +1,59 @@
 const inventarioService = require('../services/inventario.service');
 
+const obtenerStockBajo = async (req, res) => {
+    try {
+        const sucursalId = req.query.sucursalId
+            ? Number(req.query.sucursalId)
+            : null;
+
+        if (req.usuario.rol === "DUENIO" &&
+            (!Number.isInteger(sucursalId) || sucursalId <= 0)) {
+            return res.status(400).json({
+                error: "Debés indicar un ID de sucursal válido"
+            });
+        }
+
+        const inventarios = await inventarioService.obtenerStockBajo(
+            req.usuario,
+            sucursalId
+        );
+
+        res.json(inventarios);
+    } catch (error) {
+        res.status(error.status || 500).json({
+            error: error.message
+        });
+    }
+};
+
 const getAll = async (req, res) => {
-  try {
-    const inventarios = await inventarioService.obtenerInventarios(req.usuario);
-    res.json(inventarios);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+    try {
+        const productoId = req.query.productoId
+            ? Number(req.query.productoId)
+            : null;
+
+        if (productoId !== null &&
+            (!Number.isInteger(productoId) || productoId <= 0)) {
+            return res.status(400).json({
+                error: "El ID del producto debe ser un entero positivo"
+            });
+        }
+
+        const inventarios = await inventarioService.obtenerInventarios(
+            req.usuario,
+            productoId
+        );
+
+        res.json(inventarios);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 };
 
 const create = async (req, res) => {
   try {
     const nuevoInventario = await inventarioService.crearInventario(req.body, req.usuario);
-    res.status(201).json(nuevoInventario);
+    res.status(201).json(nuevoIventario);
   } catch (error) {
     res.status(400).json({ error: "Error al crear inventario. Verificá los datos o si el producto ya existe en la sucursal." });
   }
@@ -37,7 +78,8 @@ const remove = async (req, res) => {
 };
 
 module.exports = { 
-    getAll, 
+    getAll,
+    obtenerStockBajo, 
     create, 
     update, 
     remove };

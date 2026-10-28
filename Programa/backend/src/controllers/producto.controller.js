@@ -2,11 +2,43 @@ const productoService = require("../services/producto.service");
 
 const obtenerProductos = async (req, res) => {
     try {
-        const productos = await productoService.obtenerProductos();
+        const { tipoProducto, nombre, popularidad } = req.query;
+        const sucursalId = req.query.sucursalId
+            ? Number(req.query.sucursalId)
+            : null;
+
+        if (sucursalId !== null &&
+            (!Number.isInteger(sucursalId) || sucursalId <= 0)) {
+            return res.status(400).json({
+                error: "El ID de sucursal debe ser un entero positivo"
+            });
+        }
+
+        if (popularidad && popularidad !== "desc") {
+            return res.status(400).json({
+                error: "La popularidad permitida es desc"
+            });
+        }
+
+        if (popularidad === "desc" && sucursalId === null) {
+            return res.status(400).json({
+                error: "Debés indicar una sucursal para ordenar por popularidad"
+            });
+        }
+
+        const productos = await productoService.obtenerProductos({
+            tipoProducto,
+            nombre,
+            sucursalId,
+            popularidad
+        });
+
         res.json(productos);
     } catch (error) {
         console.error(error);
-        res.status(500).json({error: "Error al obtener los productos"});
+        res.status(500).json({
+            error: "Error al obtener los productos"
+        });
     }
 };
 

@@ -1,8 +1,8 @@
 const productoRepository = require("../repositories/producto.repository");
 
 // Obtener todos los productos
-const obtenerProductos = async () => {
-    return await productoRepository.obtenerTodos();
+const obtenerProductos = async (filtros) => {
+    return await productoRepository.obtenerTodos(filtros);
 };
 
 // Obtener un producto por ID
