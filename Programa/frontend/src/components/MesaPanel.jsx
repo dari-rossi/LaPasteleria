@@ -47,7 +47,6 @@ function MesaPanel({ mesa, clientes, onEmpezarPedido, onReservaCreada, onEditar,
     const ocupada = mesa.estado === "Ocupada";
     const sinClientes = clientes.length === 0;
 
-    // Vista de reserva: reemplaza las opciones mientras se completa el formulario
     if (vista === "reservar") {
         return (
             <div className="card">

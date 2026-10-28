@@ -1,6 +1,5 @@
 const ESTADOS_PEDIDO = ["Pendiente", "En preparación", "Entregado", "Pagado", "Cancelado"];
-
-// Estado con el que se crea todo pedido nuevo
+const ESTADOS_FINALES = ["Pagado", "Cancelado"];
 const ESTADO_INICIAL = "Pendiente";
 
-module.exports = { ESTADOS_PEDIDO, ESTADO_INICIAL };
+module.exports = { ESTADOS_PEDIDO, ESTADO_INICIAL, ESTADOS_FINALES };

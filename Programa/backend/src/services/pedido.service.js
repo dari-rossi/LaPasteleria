@@ -4,6 +4,7 @@ const clienteRepository = require("../repositories/cliente.repository");
 const sucursalRepository = require("../repositories/sucursal.repository");
 const productoRepository = require("../repositories/producto.repository");
 const { ESTADO_INICIAL } = require("../config/estadosPedido");
+const { ESTADOS_FINALES } = require("../config/estadosPedido");
 
 const lanzarError = (mensaje, status) => {
     const error = new Error(mensaje);
@@ -81,8 +82,25 @@ const crearPedido = async (datos) => {
     return await pedidoRepository.crearOcupandoMesa(nuevoPedidoData);
 };
 
-// Solo se modifican el estado y los comensales (los productos se manejan desde itemProducto)
 const modificarPedido = async (id, datos) => {
+    const pedido = await pedidoRepository.obtenerPorId(id);
+
+    if (ESTADOS_FINALES.includes(pedido.estadoPedido)) {
+        lanzarError(`Un pedido ${pedido.estadoPedido.toLowerCase()} no se puede modificar.`, 409);
+    }
+
+    if (datos.estadoPedido === "Pagado") {
+        lanzarError("Para pagar el pedido hay que registrar el pago.", 400);
+    }
+
+    if (datos.comensales > pedido.mesa.maxComensales) {
+        lanzarError(`La mesa admite hasta ${pedido.mesa.maxComensales} comensales.`, 400);
+    }
+
+    if (datos.estadoPedido === "Cancelado") {
+        return await pedidoRepository.cancelarDevolviendoStock(id);
+    }
+
     return await pedidoRepository.modificar(id, datos);
 };
 
@@ -91,6 +109,10 @@ const eliminarPedido = async (id) => {
 
     if (pedido && pedido.pago) {
         lanzarError("No se puede eliminar un pedido que ya tiene un pago registrado.", 409);
+    }
+
+    if (pedido && !ESTADOS_FINALES.includes(pedido.estadoPedido)) {
+        await pedidoRepository.cancelarDevolviendoStock(id);
     }
 
     return await pedidoRepository.eliminar(id);

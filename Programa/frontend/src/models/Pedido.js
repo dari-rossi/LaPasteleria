@@ -1,4 +1,8 @@
 export const ESTADOS_PEDIDO = ["Pendiente", "En preparación", "Entregado", "Pagado", "Cancelado"];
+export const ESTADOS_FINALES = ["Pagado", "Cancelado"];
+export const ESTADOS_EDITABLES = ["Pendiente", "En preparación", "Entregado", "Cancelado"];
+export const METODOS_PAGO = ["Efectivo", "Tarjeta", "Transferencia"];
+
 
 export const COLORES_ESTADO_PEDIDO = {
     "Pendiente": "bg-secondary",
@@ -16,3 +20,13 @@ export const calcularTotalConDescuento = (pedido) =>
 
 export const formatearPrecio = (valor) =>
     valor.toLocaleString("es-AR", {style: "currency", currency: "ARS"});
+
+export const pedidoEditable = (pedido) => !ESTADOS_FINALES.includes(pedido.estadoPedido);
+
+export const productoDisponibleAhora = (producto) => {
+    const hora = new Date().getHours();
+
+    if (producto.tipoProducto === "Día") return hora >= 7 && hora < 20;
+    if (producto.tipoProducto === "Noche") return hora >= 20 || hora < 3;
+    return true;
+};

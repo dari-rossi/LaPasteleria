@@ -1,7 +1,8 @@
 const prisma = require("../prisma");
 const { MARGEN_RESERVA_MS } = require("../config/reservas");
+const { ESTADOS_FINALES } = require("../config/estadosPedido");
+const { lanzarError } = require("../config/errores");
 
-// Todo lo que se devuelve junto con el pedido
 const incluir = {
     mesa: true,
     cliente: true,
@@ -70,11 +71,47 @@ const eliminar = async (id) => {
     });
 };
 
+const cancelarDevolviendoStock = async (id) => {
+    return await prisma.$transaction(async (tx) => {
+        const pedido = await tx.pedido.findUnique({
+            where: { idPedido: id },
+            include: { items: true }
+        });
+
+        if (!pedido) {
+            lanzarError("Pedido no encontrado.", 404);
+        }
+
+        if (ESTADOS_FINALES.includes(pedido.estadoPedido)) {
+            lanzarError(`El pedido ya está ${pedido.estadoPedido.toLowerCase()}.`, 409);
+        }
+
+        for (const item of pedido.items) {
+            await tx.inventario.updateMany({
+                where: { sucursalId: pedido.sucursalId, productoId: item.productoId },
+                data: { stock: { increment: item.cantidad } }
+            });
+        }
+
+        await tx.mesa.update({
+            where: { idMesa: pedido.mesaId },
+            data: { estado: "Libre" }
+        });
+
+        return await tx.pedido.update({
+            where: { idPedido: id },
+            data: { estadoPedido: "Cancelado" },
+            include: incluir
+        });
+    });
+};
+
 module.exports = {
     obtenerTodos,
     obtenerPorId,
     crear,
     crearOcupandoMesa,
     modificar,
-    eliminar
+    eliminar,
+    cancelarDevolviendoStock
 };

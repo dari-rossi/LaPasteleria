@@ -1,14 +1,7 @@
 const itemProductoRepository = require("../repositories/itemProducto.repository");
-const pedidoRepository = require("../repositories/pedido.repository");
 const productoRepository = require("../repositories/producto.repository");
-
-const lanzarError = (mensaje, status) => {
-    const error = new Error(mensaje);
-    error.status = status;
-    throw error;
-};
-
-const redondear = (valor) => Math.round(valor * 100) / 100;
+const { lanzarError } = require("../config/errores");
+const { productoDisponibleAhora, mensajeHorario } = require("../config/horarios");
 
 const obtenerItemProductos = async () => {
     return await itemProductoRepository.obtenerTodos();
@@ -23,35 +16,33 @@ const obtenerItemProductoPorId = async (id) => {
 };
 
 const crearItemProducto = async (datos) => {
-    const pedido = await pedidoRepository.obtenerPorId(datos.pedidoId);
-
-    if (!pedido) {
-        lanzarError("El pedido indicado no existe.", 400);
-    }
-
     const producto = await productoRepository.obtenerPorId(datos.productoId);
 
     if (!producto) {
         lanzarError("El producto indicado no existe.", 400);
     }
 
-    const subTotal = redondear(datos.cantidad * producto.precio);
+    if (!productoDisponibleAhora(producto.tipoProducto)) {
+        lanzarError(mensajeHorario(producto.tipoProducto), 409);
+    }
 
-    return await itemProductoRepository.crear({ ...datos, subTotal });
+    // El pedido (existencia y estado) y el stock se validan dentro de la transacción
+    return await itemProductoRepository.agregar(datos.pedidoId, producto, datos.cantidad);
 };
 
-// Solo se puede cambiar la cantidad: el subTotal se recalcula con el precio del producto
 const modificarItemProducto = async (id, datos) => {
-    const itemExistente = await itemProductoRepository.obtenerPorId(id);
-    const producto = await productoRepository.obtenerPorId(itemExistente.productoId);
+    const item = await itemProductoRepository.obtenerPorId(id);
 
-    const subTotal = redondear(datos.cantidad * producto.precio);
+    // El horario solo importa si se están sumando unidades
+    if (datos.cantidad > item.cantidad && !productoDisponibleAhora(item.producto.tipoProducto)) {
+        lanzarError(mensajeHorario(item.producto.tipoProducto), 409);
+    }
 
-    return await itemProductoRepository.modificar(id, { cantidad: datos.cantidad, subTotal });
+    return await itemProductoRepository.cambiarCantidad(id, datos.cantidad);
 };
 
 const eliminarItemProducto = async (id) => {
-    return await itemProductoRepository.eliminar(id);
+    return await itemProductoRepository.quitar(id);
 };
 
 module.exports = {
