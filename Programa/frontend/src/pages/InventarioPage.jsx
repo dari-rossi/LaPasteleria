@@ -1,7 +1,7 @@
-import InventarioList from "../components/ProductoList";
+import InventarioList from "../components/InventarioList";
 
 function InventarioPage() {
-    return <InventarioList/>
+    return <InventarioList sucursalId={1}/> // Para probar el inventario después modificar
 }
 
 export default InventarioPage

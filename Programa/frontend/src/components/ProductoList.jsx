@@ -7,6 +7,7 @@ import ProductoForm from "./ProductoForm";
 
 const PRODUCTOS_POR_PAGINA = 10;
 
+// precioFinal puede venir en null (el backend todavía no lo calcula)
 const formatearPrecio = (valor) => {
     if (valor === null || valor === undefined) {
         return "—";
@@ -23,10 +24,22 @@ const normalizar = (texto) =>
         .toLowerCase()
         .trim();
 
+// Fila seleccionada: borde azul, sin cambiar el fondo ni las letras
+const ESTILO_FILA_SELECCIONADA = {
+    outline: "2px solid #0d6efd",
+    outlineOffset: "-2px"
+};
+
 function ProductoList() {
     const [productos, setProductos] = useState([]);
     const [error, setError] = useState("");
     const [productoEditar, setProductoEditar] = useState(null);
+
+    // El panel para crear o editar un producto está oculto hasta que se lo pide
+    const [mostrarFormulario, setMostrarFormulario] = useState(false);
+
+    // Fila seleccionada (idProducto): al elegirla aparecen Editar y Eliminar
+    const [productoSeleccionado, setProductoSeleccionado] = useState(null);
 
     // Filtro y paginación
     const [tipoProducto, setTipoProducto] = useState("todos");
@@ -47,10 +60,12 @@ function ProductoList() {
 
     const agregarProducto = (nuevoProducto) => {
         setProductos([...productos, nuevoProducto]);
+        setMostrarFormulario(false);
     };
 
     const editarProducto = (producto) => {
         setProductoEditar(producto);
+        setMostrarFormulario(true);
     };
 
     const actualizarProducto = (productoModificado) => {
@@ -63,6 +78,7 @@ function ProductoList() {
         );
 
         setProductoEditar(null);
+        setMostrarFormulario(false);
     };
 
     const borrarProducto = async (id) => {
@@ -80,6 +96,7 @@ function ProductoList() {
             setProductos(
                 productos.filter((producto) => producto.idProducto !== id)
             );
+            setProductoSeleccionado(null);
         } catch (error) {
             setError("No se pudo eliminar el producto.");
         }
@@ -87,6 +104,18 @@ function ProductoList() {
 
     const cancelarEdicion = () => {
         setProductoEditar(null);
+        setMostrarFormulario(false);
+    };
+
+    // El botón abre el panel para crear un producto, o lo cierra si ya está abierto
+    const alternarFormulario = () => {
+        setProductoEditar(null);
+        setMostrarFormulario(!mostrarFormulario);
+    };
+
+    // Un clic selecciona la fila y otro clic sobre la misma la deselecciona
+    const seleccionarProducto = (id) => {
+        setProductoSeleccionado(productoSeleccionado === id ? null : id);
     };
 
     const cambiarTipoProducto = (e) => {
@@ -98,6 +127,11 @@ function ProductoList() {
         (producto) =>
             tipoProducto === "todos" ||
             normalizar(producto.tipoProducto) === tipoProducto
+    );
+
+    // El producto elegido solo cuenta si sigue visible con el filtro actual
+    const productoElegido = productosFiltrados.find(
+        (producto) => producto.idProducto === productoSeleccionado
     );
 
     const totalPaginas = Math.max(
@@ -116,14 +150,25 @@ function ProductoList() {
 
     return (
         <div>
-            <h2 className="mb-3">Productos</h2>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                <h2 className="mb-0">Productos</h2>
 
-            <ProductoForm
-                productoEditar={productoEditar}
-                onProductoCreado={agregarProducto}
-                onProductoModificado={actualizarProducto}
-                onCancelarEdicion={cancelarEdicion}
-            />
+                <button
+                    className="btn btn-primary"
+                    onClick={alternarFormulario}
+                >
+                    {mostrarFormulario ? "Cerrar" : "+ Crear producto"}
+                </button>
+            </div>
+
+            {mostrarFormulario && (
+                <ProductoForm
+                    productoEditar={productoEditar}
+                    onProductoCreado={agregarProducto}
+                    onProductoModificado={actualizarProducto}
+                    onCancelarEdicion={cancelarEdicion}
+                />
+            )}
 
             {error && (
                 <div className="alert alert-danger">
@@ -158,8 +203,35 @@ function ProductoList() {
                         <p>No hay productos que coincidan con el filtro.</p>
                     ) : (
                         <>
+                            {/* Siempre ocupa el mismo lugar, así la tabla no se mueve al seleccionar */}
+                            <div className="d-flex align-items-center mb-3">
+                                <span className="flex-grow-1 text-truncate me-3">
+                                    {productoElegido
+                                        ? `Seleccionado: ${productoElegido.nombre}`
+                                        : "Seleccioná una fila para editar o eliminar"}
+                                </span>
+
+                                <div className={`flex-shrink-0 ${productoElegido ? "" : "invisible"}`}>
+                                    <button
+                                        className="btn btn-warning btn-sm me-2"
+                                        onClick={() => editarProducto(productoElegido)}
+                                    >
+                                        Editar
+                                    </button>
+
+                                    <button
+                                        className="btn btn-danger btn-sm"
+                                        onClick={() =>
+                                            borrarProducto(productoElegido.idProducto)
+                                        }
+                                    >
+                                        Eliminar
+                                    </button>
+                                </div>
+                            </div>
+
                             <div className="table-responsive">
-                                <table className="table table-striped table-bordered">
+                                <table className="table table-bordered">
                                     <thead>
                                         <tr>
                                             <th>ID</th>
@@ -169,13 +241,23 @@ function ProductoList() {
                                             <th>Stock mínimo</th>
                                             <th>Precio</th>
                                             <th>Proveedor</th>
-                                            <th>Acciones</th>
                                         </tr>
                                     </thead>
 
                                     <tbody>
                                         {productosDePagina.map((producto) => (
-                                            <tr key={producto.idProducto}>
+                                            <tr
+                                                key={producto.idProducto}
+                                                style={{
+                                                    cursor: "pointer",
+                                                    ...(productoSeleccionado === producto.idProducto
+                                                        ? ESTILO_FILA_SELECCIONADA
+                                                        : {})
+                                                }}
+                                                onClick={() =>
+                                                    seleccionarProducto(producto.idProducto)
+                                                }
+                                            >
                                                 <td>{producto.idProducto}</td>
                                                 <td>{producto.nombre}</td>
                                                 <td>{producto.tipoProducto}</td>
@@ -183,25 +265,6 @@ function ProductoList() {
                                                 <td>{producto.stockMin}</td>
                                                 <td>{formatearPrecio(producto.precio)}</td>
                                                 <td>{producto.proveedor}</td>
-                                                <td>
-                                                    <button
-                                                        className="btn btn-warning btn-sm me-2"
-                                                        onClick={() =>
-                                                            editarProducto(producto)
-                                                        }
-                                                    >
-                                                        Editar
-                                                    </button>
-
-                                                    <button
-                                                        className="btn btn-danger btn-sm"
-                                                        onClick={() =>
-                                                            borrarProducto(producto.idProducto)
-                                                        }
-                                                    >
-                                                        Eliminar
-                                                    </button>
-                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>

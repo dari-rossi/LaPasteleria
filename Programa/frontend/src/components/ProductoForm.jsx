@@ -10,6 +10,20 @@ const FORMULARIO_VACIO = {
     proveedor: ""
 };
 
+// Los tipos de producto son solo estos dos
+const TIPOS_PRODUCTO = [
+    { valor: "dia", nombre: "Día" },
+    { valor: "noche", nombre: "Noche" }
+];
+
+// Para reconocer tipos ya guardados aunque tengan tilde o mayúsculas ("Día", "dia")
+const normalizar = (texto) =>
+    texto
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+
 function ProductoForm({ productoEditar, onProductoCreado, onProductoModificado, onCancelarEdicion }) {
     const [formulario, setFormulario] = useState(FORMULARIO_VACIO);
 
@@ -17,9 +31,14 @@ function ProductoForm({ productoEditar, onProductoCreado, onProductoModificado, 
 
     useEffect(() => {
         if (productoEditar) {
+            const tipoNormalizado = normalizar(productoEditar.tipoProducto);
+
             setFormulario({
                 nombre: productoEditar.nombre,
-                tipoProducto: productoEditar.tipoProducto,
+                // Si el tipo guardado no es ninguno de los dos, queda vacío para elegirlo de nuevo
+                tipoProducto: TIPOS_PRODUCTO.some((tipo) => tipo.valor === tipoNormalizado)
+                    ? tipoNormalizado
+                    : "",
                 descripcion: productoEditar.descripcion ?? "",
                 stockMin: String(productoEditar.stockMin),
                 precio: String(productoEditar.precio),
@@ -105,13 +124,19 @@ function ProductoForm({ productoEditar, onProductoCreado, onProductoModificado, 
 
                     <div className="mb-3">
                         <label className="form-label">Tipo de producto</label>
-                        <input
-                            type="text"
+                        <select
                             name="tipoProducto"
-                            className="form-control"
+                            className="form-select"
                             value={formulario.tipoProducto}
                             onChange={manejarCambio}
-                        />
+                        >
+                            <option value="">Seleccioná un tipo</option>
+                            {TIPOS_PRODUCTO.map((tipo) => (
+                                <option key={tipo.valor} value={tipo.valor}>
+                                    {tipo.nombre}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="mb-3">
