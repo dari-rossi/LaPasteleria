@@ -6,12 +6,6 @@ const { lanzarError } = require("../config/errores");
 // El pedido tiene que existir y el usuario tiene que poder acceder a su sucursal
 const redondear = (valor) => Math.round((valor + Number.EPSILON) * 100) / 100;
 
-const lanzarError = (mensaje, status) => {
-    const error = new Error(mensaje);
-    error.status = status;
-    throw error;
-};
-
 const verificarAccesoPedido = (pedido, usuario) => {
     if (!pedido) {
         lanzarError("PEDIDO_NO_ENCONTRADO");
