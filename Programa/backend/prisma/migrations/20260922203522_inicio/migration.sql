@@ -4,10 +4,10 @@ CREATE TABLE `Producto` (
     `nombre` VARCHAR(191) NOT NULL,
     `tipoProducto` VARCHAR(191) NOT NULL,
     `descripcion` VARCHAR(191) NULL,
-    `stockMin` INTEGER NOT NULL,
     `precio` DOUBLE NOT NULL,
     `precioFinal` DOUBLE NULL,
     `proveedor` VARCHAR(191) NOT NULL,
+    `stockMinimo` INTEGER NOT NULL,
 
     PRIMARY KEY (`idProducto`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

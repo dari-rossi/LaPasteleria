@@ -1,7 +1,6 @@
 /*
   Warnings:
 
-  - You are about to drop the column `stockMin` on the `inventario` table. All the data in the column will be lost.
   - The primary key for the `tipoempleado` table will be changed. If it partially fails, the table could be left without primary key constraint.
   - You are about to drop the column `contrasenia` on the `tipoempleado` table. All the data in the column will be lost.
   - You are about to drop the column `id` on the `tipoempleado` table. All the data in the column will be lost.
@@ -28,9 +27,6 @@ DROP INDEX `TipoEmpleado_tipoEmpleado_key` ON `tipoempleado`;
 
 -- DropIndex
 DROP INDEX `TipoEmpleado_usuario_key` ON `tipoempleado`;
-
--- AlterTable
-ALTER TABLE `inventario` DROP COLUMN `stockMin`;
 
 -- AlterTable
 ALTER TABLE `producto` ADD COLUMN `stockMinimo` INTEGER NOT NULL;
