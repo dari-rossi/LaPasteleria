@@ -162,7 +162,11 @@ function MesaGrid({ onReservaCreada }) {
                             mesa={seleccionada}
                             clientes={clientes}
                             onEmpezarPedido={empezarPedido}
-                            onReservaCreada={onReservaCreada}
+                            onReservaCreada={() => {
+                                refrescarMesas();
+                                if (onReservaCreada) onReservaCreada();
+                            }}
+                            onReservaCancelada={refrescarMesas}
                             onEditar={() => setModoFormulario("editar")}
                             onEliminar={borrarMesa}
                             onCerrar={() => setSeleccionada(null)}

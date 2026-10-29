@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import MesasPage from "./pages/MesasPage";
 import PedidosPage from "./pages/PedidosPage";
 import PedidoDetallePage from "./pages/PedidoDetallePage";
+import ReservasPage from "./pages/ReservasPage";
 
 function App() {
     return (
@@ -14,6 +15,7 @@ function App() {
                     <Route path="/mesas" element={<MesasPage />} />
                     <Route path="/pedidos" element={<PedidosPage />} />
                     <Route path="/pedidos/:id" element={<PedidoDetallePage />} />
+                    <Route path="/reservas" element={<ReservasPage />} />
                 </Routes>
             </div>
         </>
