@@ -109,22 +109,50 @@ const crearQrMercadoPago = async (idPedido, usuario) => {
         lanzarError("No se puede generar un QR para un pedido cancelado.", 409);
     }
 
-    if (pedido.mercadoPagoOrderId && pedido.mercadoPagoQrData) {
-        return {
-            idPedido,
-            orderId: pedido.mercadoPagoOrderId,
-            qrData: pedido.mercadoPagoQrData,
-            precio: pedido.mercadoPagoPrecio,
-            tipoDescuento: pedido.mercadoPagoTipoDescuento,
-            precioFinal: pedido.mercadoPagoPrecioFinal
-        };
-    }
-
     const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
     const externalPosId = process.env.MERCADOPAGO_POS_EXTERNAL_ID;
 
     if (!accessToken || !externalPosId) {
         lanzarError("Falta configurar Mercado Pago en el .env.", 500);
+    }
+
+    if (pedido.mercadoPagoOrderId && pedido.mercadoPagoQrData) {
+        const respuestaEstado = await fetch(
+            `https://api.mercadopago.com/v1/orders/${encodeURIComponent(pedido.mercadoPagoOrderId)}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            }
+        );
+
+        const ordenExistente = await respuestaEstado.json();
+
+        if (!respuestaEstado.ok) {
+            console.error("Error consultando la orden:", ordenExistente);
+            lanzarError("No se pudo consultar la orden anterior de Mercado Pago.", 502);
+        }
+
+        if (ordenExistente.status === "processed") {
+            lanzarError(
+                "La orden anterior figura como pagada. Consultá el estado del pago antes de generar otro QR.",
+                409
+            );
+        }
+
+        if (
+            ordenExistente.status !== "expired" &&
+            ordenExistente.status !== "cancelled"
+        ) {
+            return {
+                idPedido,
+                orderId: pedido.mercadoPagoOrderId,
+                qrData: pedido.mercadoPagoQrData,
+                precio: pedido.mercadoPagoPrecio,
+                tipoDescuento: pedido.mercadoPagoTipoDescuento,
+                precioFinal: pedido.mercadoPagoPrecioFinal
+            };
+        }
     }
 
     const importe = calcularImporte(pedido);
@@ -166,7 +194,10 @@ const crearQrMercadoPago = async (idPedido, usuario) => {
     const qrData = datos.type_response?.qr_data;
 
     if (!datos.id || !qrData) {
-        lanzarError("Mercado Pago no devolvió el identificador de la orden o los datos del QR.", 502);
+        lanzarError(
+            "Mercado Pago no devolvió el identificador de la orden o los datos del QR.",
+            502
+        );
     }
 
     await pagoRepository.guardarOrdenMercadoPago(idPedido, {

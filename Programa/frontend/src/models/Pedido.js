@@ -1,7 +1,7 @@
 export const ESTADOS_PEDIDO = ["Pendiente", "En preparación", "Entregado", "Pagado", "Cancelado"];
 export const ESTADOS_FINALES = ["Pagado", "Cancelado"];
 export const ESTADOS_EDITABLES = ["Pendiente", "En preparación", "Entregado", "Cancelado"];
-export const METODOS_PAGO = ["Efectivo", "Tarjeta", "Transferencia"];
+export const METODOS_PAGO = ["Efectivo", "Tarjeta", "Transferencia", "MercadoPago"];
 
 
 export const COLORES_ESTADO_PEDIDO = {

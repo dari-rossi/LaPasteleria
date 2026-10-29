@@ -4,6 +4,7 @@ import { obtenerPedidoPorId, modificarPedido } from "../services/pedidoService";
 import { obtenerProductos } from "../services/productoService";
 import { agregarItem, modificarCantidad, quitarItem } from "../services/itemProductoService";
 import { crearPago } from "../services/pagoService";
+import MercadoPago from "./mercadoPago/mercadoPago";
 import {
     ESTADOS_EDITABLES,
     METODOS_PAGO,
@@ -17,6 +18,7 @@ import {
 
 function PedidoDetalle() {
     const { id } = useParams();
+    const token = localStorage.getItem("token");
     const [pedido, setPedido] = useState(null);
     const [productos, setProductos] = useState([]);
     const [estado, setEstado] = useState("");
@@ -24,6 +26,7 @@ function PedidoDetalle() {
     const [productoId, setProductoId] = useState("");
     const [cantidad, setCantidad] = useState(1);
     const [metodoPago, setMetodoPago] = useState("");
+    const [mostrarQR, setMostrarQR] = useState(false);
     const [error, setError] = useState("");
     const [mensaje, setMensaje] = useState("");
 
@@ -47,7 +50,6 @@ function PedidoDetalle() {
         cargar();
     }, [id]);
 
-    // Ejecuta una acción, recarga el pedido y muestra el resultado
     const ejecutar = async (accion, textoOk) => {
         setError("");
         setMensaje("");
@@ -81,23 +83,41 @@ function PedidoDetalle() {
     };
 
     const guardar = () => {
-        if (estado === "Cancelado" && !window.confirm("¿Cancelar el pedido? Se libera la mesa y se devuelve el stock.")) {
+        if (estado === "Cancelado" &&
+            !window.confirm("¿Cancelar el pedido? Se libera la mesa y se devuelve el stock.")) {
             return;
         }
 
         ejecutar(
-            () => modificarPedido(id, { estadoPedido: estado, comensales: Number(comensales) }),
+            () => modificarPedido(id, {
+                estadoPedido: estado,
+                comensales: Number(comensales)
+            }),
             "Pedido actualizado."
         );
     };
 
-    const pagar = () => {
+    const pagar = async () => {
+        setError("");
+        setMensaje("");
+
         if (!metodoPago) {
             setError("Elegí un método de pago.");
             return;
         }
 
-        ejecutar(() => crearPago({ idPedido: Number(id), metodoPago }), "Pedido pagado.");
+        if (metodoPago === "MercadoPago") {
+            setMostrarQR(true);
+            return;
+        }
+
+        await ejecutar(
+            () => crearPago({
+                idPedido: Number(id),
+                metodoPago
+            }),
+            "Pedido pagado."
+        );
     };
 
     if (error && !pedido) {
@@ -122,7 +142,9 @@ function PedidoDetalle() {
                         {pedido.estadoPedido}
                     </span>
                 </h2>
-                <Link to="/pedidos" className="btn btn-outline-secondary">Volver al listado</Link>
+                <Link to="/pedidos" className="btn btn-outline-secondary">
+                    Volver al listado
+                </Link>
             </div>
 
             {error && <div className="alert alert-danger">{error}</div>}
@@ -162,7 +184,10 @@ function PedidoDetalle() {
                                                             className="btn btn-outline-secondary btn-sm me-2"
                                                             disabled={item.cantidad <= 1}
                                                             onClick={() => ejecutar(
-                                                                () => modificarCantidad(item.idItemProducto, item.cantidad - 1),
+                                                                () => modificarCantidad(
+                                                                    item.idItemProducto,
+                                                                    item.cantidad - 1
+                                                                ),
                                                                 "Cantidad actualizada."
                                                             )}
                                                         >
@@ -174,7 +199,10 @@ function PedidoDetalle() {
                                                         <button
                                                             className="btn btn-outline-secondary btn-sm ms-2"
                                                             onClick={() => ejecutar(
-                                                                () => modificarCantidad(item.idItemProducto, item.cantidad + 1),
+                                                                () => modificarCantidad(
+                                                                    item.idItemProducto,
+                                                                    item.cantidad + 1
+                                                                ),
                                                                 "Cantidad actualizada."
                                                             )}
                                                         >
@@ -233,7 +261,10 @@ function PedidoDetalle() {
                                         />
                                     </div>
                                     <div className="col-3">
-                                        <button className="btn btn-primary w-100" onClick={agregarProducto}>
+                                        <button
+                                            className="btn btn-primary w-100"
+                                            onClick={agregarProducto}
+                                        >
                                             Agregar
                                         </button>
                                     </div>
@@ -241,16 +272,20 @@ function PedidoDetalle() {
                             )}
 
                             <hr />
-                            <p className="mb-1">Subtotal (sin descuento): {formatearPrecio(subtotal)}</p>
+                            <p className="mb-1">
+                                Subtotal (sin descuento): {formatearPrecio(subtotal)}
+                            </p>
                             <p className="mb-1">
                                 Descuento del cliente ({pedido.pago?.tipoDescuento ?? pedido.cliente?.tipo} · {descuento}%):{" "}
                                 -{formatearPrecio(subtotal - total)}
                             </p>
-                            <p className="fw-bold fs-5 mb-0">Total (con descuento): {formatearPrecio(total)}</p>
+                            <p className="fw-bold fs-5 mb-0">
+                                Total (con descuento): {formatearPrecio(total)}
+                            </p>
                         </div>
                     </div>
 
-                    {editable ? (
+                    {editable && !pedido.pago && (
                         <div className="card">
                             <div className="card-body">
                                 <h5 className="card-title">Pagar pedido</h5>
@@ -260,11 +295,18 @@ function PedidoDetalle() {
                                         <select
                                             className="form-select"
                                             value={metodoPago}
-                                            onChange={(e) => setMetodoPago(e.target.value)}
+                                            onChange={(e) => {
+                                                setMetodoPago(e.target.value);
+                                                setMostrarQR(false);
+                                                setError("");
+                                                setMensaje("");
+                                            }}
                                         >
                                             <option value="">Método de pago</option>
                                             {METODOS_PAGO.map((metodo) => (
-                                                <option key={metodo} value={metodo}>{metodo}</option>
+                                                <option key={metodo} value={metodo}>
+                                                    {metodo}
+                                                </option>
                                             ))}
                                         </select>
                                     </div>
@@ -274,35 +316,58 @@ function PedidoDetalle() {
                                             disabled={pedido.items.length === 0}
                                             onClick={pagar}
                                         >
-                                            Pagar {formatearPrecio(total)}
+                                            {metodoPago === "MercadoPago"
+                                                ? "Continuar al QR"
+                                                : `Pagar ${formatearPrecio(total)}`}
                                         </button>
                                     </div>
                                 </div>
+
+                                {mostrarQR && metodoPago === "MercadoPago" && (
+                                    <div className="mt-4">
+                                        <hr />
+                                        <MercadoPago
+                                            pedidoId={Number(id)}
+                                            token={token}
+                                            onPagoConfirmado={async () => {
+                                                await recargar();
+                                                setMostrarQR(false);
+                                                setMensaje("¡Pago confirmado correctamente!");
+                                            }}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
-                    ) : (
-                        pedido.pago && (
-                            <div className="card">
-                                <div className="card-body">
-                                    <h5 className="card-title">Pago</h5>
-                                    <p className="mb-1">Método: {pedido.pago.metodoPago}</p>
-                                    <p className="mb-0">
-                                        Fecha: {new Date(pedido.pago.fechaHora).toLocaleString("es-AR")}
-                                    </p>
-                                </div>
+                    )}
+
+                    {pedido.pago && (
+                        <div className="card">
+                            <div className="card-body">
+                                <h5 className="card-title">Pago</h5>
+                                <p className="mb-1">
+                                    Método: {pedido.pago.metodoPago}
+                                </p>
+                                <p className="mb-0">
+                                    Fecha: {new Date(pedido.pago.fechaHora).toLocaleString("es-AR")}
+                                </p>
                             </div>
-                        )
+                        </div>
                     )}
                 </div>
 
                 <div className="col-md-4">
                     <div className="card">
                         <div className="card-body">
-                            <p className="mb-1"><strong>Mesa:</strong> {pedido.mesa?.idMesa}</p>
+                            <p className="mb-1">
+                                <strong>Mesa:</strong> {pedido.mesa?.idMesa}
+                            </p>
                             <p className="mb-1">
                                 <strong>Cliente:</strong> #{pedido.cliente?.id} · {pedido.cliente?.tipo}
                             </p>
-                            <p className="mb-3"><strong>Sucursal:</strong> {pedido.sucursal?.direccion}</p>
+                            <p className="mb-3">
+                                <strong>Sucursal:</strong> {pedido.sucursal?.direccion}
+                            </p>
 
                             {editable ? (
                                 <>
@@ -313,7 +378,9 @@ function PedidoDetalle() {
                                         onChange={(e) => setEstado(e.target.value)}
                                     >
                                         {ESTADOS_EDITABLES.map((e) => (
-                                            <option key={e} value={e}>{e}</option>
+                                            <option key={e} value={e}>
+                                                {e}
+                                            </option>
                                         ))}
                                     </select>
 
@@ -327,12 +394,17 @@ function PedidoDetalle() {
                                         onChange={(e) => setComensales(e.target.value)}
                                     />
 
-                                    <button className="btn btn-success w-100" onClick={guardar}>
+                                    <button
+                                        className="btn btn-success w-100"
+                                        onClick={guardar}
+                                    >
                                         Guardar cambios
                                     </button>
                                 </>
                             ) : (
-                                <p className="mb-0"><strong>Comensales:</strong> {pedido.comensales}</p>
+                                <p className="mb-0">
+                                    <strong>Comensales:</strong> {pedido.comensales}
+                                </p>
                             )}
                         </div>
                     </div>

@@ -4,7 +4,7 @@ import "./MercadoPago.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-const MercadoPago = ({ pedidoId, token }) => {
+const MercadoPago = ({ pedidoId, token, onPagoConfirmado }) => {
     const [orden, setOrden] = useState(null);
     const [estado, setEstado] = useState("");
     const [cargando, setCargando] = useState(false);
@@ -69,6 +69,10 @@ const MercadoPago = ({ pedidoId, token }) => {
                     ...anterior,
                     pago: datos.pago
                 }));
+
+                if (onPagoConfirmado) {
+                    await onPagoConfirmado();
+                }
             }
         } catch (error) {
             setError(error.message);
