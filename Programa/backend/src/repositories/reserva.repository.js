@@ -42,10 +42,21 @@ const eliminar = async (idMesa, fechaHora) => {
     });
 };
 
+const cancelarVencidas = async (limite) => {
+    return await prisma.reserva.updateMany({
+        where: {
+            estadoReserva: "Activa",
+            fechaHoraReservada: { lt: limite }
+        },
+        data: { estadoReserva: "Cancelada" }
+    });
+};
+
 module.exports = {
     obtenerTodos,
     obtenerPorId,
     crear,
     modificar,
-    eliminar
+    eliminar,
+    cancelarVencidas
 };

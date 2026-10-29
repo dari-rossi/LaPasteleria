@@ -1,14 +1,8 @@
 const itemProductoRepository = require("../repositories/itemProducto.repository");
 const pedidoRepository = require("../repositories/pedido.repository");
 const productoRepository = require("../repositories/producto.repository");
-
-const lanzarError = (mensaje, status) => {
-    const error = new Error(mensaje);
-    error.status = status;
-    throw error;
-};
-
-const redondear = (valor) => Math.round(valor * 100) / 100;
+const { lanzarError } = require("../config/errores");
+const { productoDisponibleAhora, mensajeHorario } = require("../config/horarios");
 
 const verificarAccesoPedido = (pedido, usuario) => {
     if (!pedido) {
@@ -58,28 +52,29 @@ const crearItemProducto = async (datos, usuario) => {
         lanzarError("El producto indicado no existe.", 400);
     }
 
-    const subTotal = redondear(datos.cantidad * producto.precio);
+    if (!productoDisponibleAhora(producto.tipoProducto)) {
+        lanzarError(mensajeHorario(producto.tipoProducto), 409);
+    }
 
-    return await itemProductoRepository.crear({ ...datos, subTotal });
+    return await itemProductoRepository.agregar(datos.pedidoId, producto, datos.cantidad);
 };
 
 const modificarItemProducto = async (id, datos, usuario) => {
-    const itemExistente = await itemProductoRepository.obtenerPorId(id);
+    const item = await itemProductoRepository.obtenerPorId(id);
 
-    if (!itemExistente) {
+    if (!item) {
         lanzarError("Item no encontrado.", 404);
     }
 
-    const pedido = await pedidoRepository.obtenerPorId(itemExistente.pedidoId);
+    const pedido = await pedidoRepository.obtenerPorId(item.pedidoId);
     verificarAccesoPedido(pedido, usuario);
 
-    const producto = await productoRepository.obtenerPorId(itemExistente.productoId);
-    const subTotal = redondear(datos.cantidad * producto.precio);
+    if (datos.cantidad > item.cantidad &&
+        !productoDisponibleAhora(item.producto.tipoProducto)) {
+        lanzarError(mensajeHorario(item.producto.tipoProducto), 409);
+    }
 
-    return await itemProductoRepository.modificar(id, {
-        cantidad: datos.cantidad,
-        subTotal
-    });
+    return await itemProductoRepository.cambiarCantidad(id, datos.cantidad);
 };
 
 const eliminarItemProducto = async (id, usuario) => {
@@ -92,7 +87,7 @@ const eliminarItemProducto = async (id, usuario) => {
     const pedido = await pedidoRepository.obtenerPorId(item.pedidoId);
     verificarAccesoPedido(pedido, usuario);
 
-    return await itemProductoRepository.eliminar(id);
+    return await itemProductoRepository.quitar(id);
 };
 
 module.exports = {

@@ -2,13 +2,13 @@ const { randomUUID } = require("crypto");
 const pagoRepository = require("../repositories/pago.repository");
 const pedidoRepository = require("../repositories/pedido.repository");
 
+const redondear = (valor) => Math.round((valor + Number.EPSILON) * 100) / 100;
+
 const lanzarError = (mensaje, status) => {
     const error = new Error(mensaje);
     error.status = status;
     throw error;
 };
-
-const redondear = (valor) => Math.round((valor + Number.EPSILON) * 100) / 100;
 
 const verificarAccesoPedido = (pedido, usuario) => {
     if (!pedido) {
@@ -31,15 +31,13 @@ const calcularImporte = (pedido) => {
     );
 
     const tipo = String(pedido.cliente.tipo).trim().toLowerCase();
-    let descuento = 0;
+    let descuento = pedido.cliente.descuento;
 
-    if (tipo === "jubilado") {
-        descuento = 20;
-    } else if (tipo === "estudiante") {
-        descuento = 15;
+    if (descuento === null || descuento === undefined) {
+        descuento = tipo === "jubilado" ? 20 : tipo === "estudiante" ? 15 : 0;
     }
 
-    const precioFinal = redondear(precio * (1 - descuento / 100));
+    const precioFinal = redondear(precio * (1 - Number(descuento) / 100));
 
     return {
         precio,
@@ -81,18 +79,22 @@ const crearPago = async (datos, usuario) => {
         lanzarError("El pedido ya tiene un pago registrado.", 409);
     }
 
+    if (pedido.estadoPedido === "Cancelado") {
+        lanzarError("No se puede pagar un pedido cancelado.", 409);
+    }
+
     if (datos.metodoPago === "MercadoPago") {
         lanzarError("Los pagos de Mercado Pago deben confirmarse mediante la verificación de la orden.", 400);
     }
 
     const importe = calcularImporte(pedido);
 
-    return await pagoRepository.crear({
+    return await pagoRepository.crearPagando({
         idPedido: datos.idPedido,
         fechaHora: new Date(),
         ...importe,
         metodoPago: datos.metodoPago
-    });
+    }, pedido.mesaId);
 };
 
 const crearQrMercadoPago = async (idPedido, usuario) => {
@@ -101,6 +103,10 @@ const crearQrMercadoPago = async (idPedido, usuario) => {
 
     if (pedido.pago) {
         lanzarError("El pedido ya tiene un pago registrado.", 409);
+    }
+
+    if (pedido.estadoPedido === "Cancelado") {
+        lanzarError("No se puede generar un QR para un pedido cancelado.", 409);
     }
 
     if (pedido.mercadoPagoOrderId && pedido.mercadoPagoQrData) {
@@ -190,11 +196,19 @@ const verificarPagoMercadoPago = async (idPedido, usuario) => {
         };
     }
 
+    if (pedido.estadoPedido === "Cancelado") {
+        lanzarError("No se puede confirmar el pago de un pedido cancelado.", 409);
+    }
+
     if (!pedido.mercadoPagoOrderId) {
         lanzarError("El pedido todavía no tiene una orden de Mercado Pago.", 400);
     }
 
     const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
+
+    if (!accessToken) {
+        lanzarError("Falta configurar Mercado Pago en el .env.", 500);
+    }
 
     const respuesta = await fetch(
         `https://api.mercadopago.com/v1/orders/${encodeURIComponent(pedido.mercadoPagoOrderId)}`,
@@ -235,19 +249,18 @@ const verificarPagoMercadoPago = async (idPedido, usuario) => {
     };
 
     try {
-        const pago = await pagoRepository.crear({
+        const pago = await pagoRepository.crearPagando({
             idPedido,
             fechaHora: new Date(),
             ...importe,
             metodoPago: "MercadoPago"
-        });
+        }, pedido.mesaId);
 
         return {
             estado: "pagado",
             pago
         };
     } catch (error) {
-        // La clave primaria de Pago impide registrar dos pagos para el mismo pedido.
         if (error.code === "P2002") {
             const pagoExistente = await pagoRepository.obtenerPorId(idPedido);
 

@@ -36,9 +36,18 @@ const crearPago = async (req, res) => {
         res.status(201).json(pago);
     } catch (error) {
         console.error(error);
-        res.status(error.status || 500).json({
-            error: error.status ? error.message : "Error al crear el pago"
-        });
+
+        if (error.status) {
+            return res.status(error.status).json({ error: error.message });
+        }
+
+        if (error.code === "P2002") {
+            return res.status(409).json({
+                error: "El pedido ya tiene un pago registrado."
+            });
+        }
+
+        res.status(500).json({ error: "Error al crear el pago" });
     }
 };
 
