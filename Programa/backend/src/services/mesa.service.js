@@ -1,5 +1,6 @@
 const mesaRepository = require("../repositories/mesa.repository");
 const sucursalRepository = require("../repositories/sucursal.repository");
+const { MARGEN_RESERVA_MS } = require("../config/reservas");
 const { lanzarError } = require("../config/errores");
 
 // Busca una mesa o lanza 404

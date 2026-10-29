@@ -1,5 +1,6 @@
 const reservaRepository = require("../repositories/reserva.repository");
 const mesaRepository = require("../repositories/mesa.repository");
+const { MARGEN_RESERVA_MS } = require("../config/reservas");
 const { lanzarError } = require("../config/errores");
 
 // Busca una reserva por su clave compuesta (mesa + fecha y hora) o lanza 404

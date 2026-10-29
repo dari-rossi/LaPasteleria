@@ -29,9 +29,6 @@ DROP INDEX `TipoEmpleado_tipoEmpleado_key` ON `tipoempleado`;
 DROP INDEX `TipoEmpleado_usuario_key` ON `tipoempleado`;
 
 -- AlterTable
-ALTER TABLE `producto` ADD COLUMN `stockMinimo` INTEGER NOT NULL;
-
--- AlterTable
 ALTER TABLE `tipoempleado` DROP PRIMARY KEY,
     DROP COLUMN `contrasenia`,
     DROP COLUMN `id`,

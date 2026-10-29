@@ -16,6 +16,7 @@ const itemProductoRoutes = require("./src/routes/itemProducto.routes");
 const pedidoRoutes = require("./src/routes/pedido.routes");
 const authRoutes = require("./src/routes/auth.routes");
 const usuarioRoutes = require("./src/routes/usuario.routes");
+const reservaService = require("./src/services/reserva.service");
 const { rutaNoEncontrada, manejarErrores } = require("./src/config/errores");
 
 const app = express();
