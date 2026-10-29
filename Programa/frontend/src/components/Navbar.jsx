@@ -6,11 +6,16 @@ const SECCIONES_SUCURSAL = [
     { to: "/sucursal", label: "Sucursal" },
     { to: "/pedidos", label: "Pedidos" },
     { to: "/mesas", label: "Mesas" },
+<<<<<<< HEAD
     { to: "/inventario", label: "Inventario" },
     { to: "/empleados", label: "Empleados" },
     { to: "/reservas", label: "Reservas" },
     { to: "/gastos", label: "Gastos" },
     { to: "/planilla", label: "Planilla" },
+=======
+    { to: "/pedidos", label: "Pedidos" },
+    { to: "/reservas", label: "Reservas" }
+>>>>>>> mercado-pago
 ];
 
 function Navbar() {

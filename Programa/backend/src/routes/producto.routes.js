@@ -20,6 +20,32 @@ const router = express.Router();
  *   get:
  *     summary: Obtener todos los productos
  *     tags: [Producto]
+ *     parameters:
+ *       - in: query
+ *         name: tipoProducto
+ *         required: false
+ *         description: Filtra por tipo de producto
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: nombre
+ *         required: false
+ *         description: Busca por coincidencia parcial en el nombre
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: popularidad
+ *         required: false
+ *         description: Ordena por cantidad vendida de mayor a menor
+ *         schema:
+ *           type: string
+ *           enum: [desc]
+ *       - in: query
+ *         name: sucursalId
+ *         required: false
+ *         description: Sucursal para calcular la popularidad
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
  *         description: Lista de productos

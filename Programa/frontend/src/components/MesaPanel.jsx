@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import ReservaMesaForm from "./ReservaMesaForm";
+import { formatearFechaHora } from "../models/Reserva";
 
-function MesaPanel({ mesa, clientes, onEmpezarPedido, onReservaCreada, onEditar, onEliminar, onCerrar }) {
+function MesaPanel({ mesa, clientes, onEmpezarPedido, onReservaCreada, onEditar, onEliminar, onCerrar }) {    
     const [clienteId, setClienteId] = useState("");
     const [comensales, setComensales] = useState("");
     const [error, setError] = useState("");
@@ -47,7 +48,6 @@ function MesaPanel({ mesa, clientes, onEmpezarPedido, onReservaCreada, onEditar,
     const ocupada = mesa.estado === "Ocupada";
     const sinClientes = clientes.length === 0;
 
-    // Vista de reserva: reemplaza las opciones mientras se completa el formulario
     if (vista === "reservar") {
         return (
             <div className="card">
@@ -79,6 +79,15 @@ function MesaPanel({ mesa, clientes, onEmpezarPedido, onReservaCreada, onEditar,
                 <p className="text-muted">
                     {mesa.estado} · hasta {mesa.maxComensales} comensales
                 </p>
+
+                {mesa.estado === "Reservada" && mesa.reserva && (
+                    <div className="alert alert-warning py-2">
+                        <strong>Reserva</strong>
+                        <div>Horario: {formatearFechaHora(mesa.reserva.fechaHoraReservada)}</div>
+                        <div>Comensales: {mesa.reserva.cantComensales}</div>
+                        <div>DNI: {mesa.reserva.dni}</div>
+                    </div>
+                )}
 
                 {error && <div className="alert alert-danger py-2">{error}</div>}
 

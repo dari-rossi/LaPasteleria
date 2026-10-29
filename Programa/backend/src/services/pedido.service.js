@@ -104,9 +104,26 @@ const crearPedido = async (datos, usuario) => {
     return await pedidoRepository.crearOcupandoMesa(nuevoPedidoData);
 };
 
-// Solo se modifican el estado y los comensales (los productos se manejan desde itemProducto)
+// Solo se modifican el estado y los comensales; los productos se manejan desde itemProducto.
 const modificarPedido = async (id, datos, usuario) => {
     await buscarPedido(id, usuario);
+
+    if (ESTADOS_FINALES.includes(pedido.estadoPedido)) {
+        lanzarError(`Un pedido ${pedido.estadoPedido.toLowerCase()} no se puede modificar.`, 409);
+    }
+
+    if (datos.estadoPedido === "Pagado") {
+        lanzarError("Para pagar el pedido hay que registrar el pago.", 400);
+    }
+
+    if (datos.comensales !== undefined &&
+        datos.comensales > pedido.mesa.maxComensales) {
+        lanzarError(`La mesa admite hasta ${pedido.mesa.maxComensales} comensales.`, 400);
+    }
+
+    if (datos.estadoPedido === "Cancelado") {
+        return await pedidoRepository.cancelarDevolviendoStock(id);
+    }
 
     return await pedidoRepository.modificar(id, datos);
 };
@@ -116,6 +133,10 @@ const eliminarPedido = async (id, usuario) => {
 
     if (pedido.pago) {
         lanzarError("PEDIDO_CON_PAGO");
+    }
+
+    if (!ESTADOS_FINALES.includes(pedido.estadoPedido)) {
+        await pedidoRepository.cancelarDevolviendoStock(id);
     }
 
     return await pedidoRepository.eliminar(id);

@@ -25,6 +25,18 @@ const obtenerReservaPorId = async (idMesa, fechaHora) => {
 // Más adelante se puede validar acá que no haya solapamiento o que cantComensales no supere maxComensales
 const crearReserva = async (datos) => {
     const mesa = await mesaRepository.obtenerPorId(datos.idMesa);
+    const existente = await reservaRepository.obtenerPorId(
+        datos.idMesa,
+        new Date(datos.fechaHoraReservada)
+    );
+
+    if (existente && existente.estadoReserva === "Cancelada") {
+        return await reservaRepository.modificar(datos.idMesa, existente.fechaHoraReservada, {
+            cantComensales: datos.cantComensales,
+            estadoReserva: datos.estadoReserva,
+            dni: datos.dni
+        });
+    }
 
     if (!mesa) {
         lanzarError("MESA_NO_ENCONTRADA");

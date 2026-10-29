@@ -12,8 +12,9 @@ const buscarProducto = async (id) => {
     return producto;
 };
 
-const obtenerProductos = async () => {
-    return await productoRepository.obtenerTodos();
+// Obtener todos los productos
+const obtenerProductos = async (filtros) => {
+    return await productoRepository.obtenerTodos(filtros);
 };
 
 const obtenerProductoPorId = async (id) => {

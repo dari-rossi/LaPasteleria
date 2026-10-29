@@ -16,13 +16,45 @@ const { inventarioSchema } = require('../schemas/inventario.schema');
  * @swagger
  * /inventario:
  *   get:
- *     summary: Obtiene todos los registros de inventario
+ *     summary: Obtiene los registros de inventario, opcionalmente filtrados por producto
  *     tags: [Inventario]
+ *     parameters:
+ *       - in: query
+ *         name: productoId
+ *         required: false
+ *         description: Filtra el inventario por ID de producto
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
  *         description: Lista de inventarios devuelta exitosamente.
+ *       400:
+ *         description: ID de producto inválido.
  */
 router.get('/', autenticar, permitirRoles("DUENIO", "GERENTE", "AYUDANTE_COCINA"), inventarioController.getAll);
+
+/**
+ * @swagger
+ * /inventario/stock-bajo:
+ *   get:
+ *     summary: Obtiene los productos con stock bajo de una sucursal
+ *     tags: [Inventario]
+ *     parameters:
+ *       - in: query
+ *         name: sucursalId
+ *         required: false
+ *         description: ID de la sucursal (obligatorio para el dueño)
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Lista de inventarios con stock menor o igual al mínimo
+ *       400:
+ *         description: ID de sucursal inválido o faltante
+ *       403:
+ *         description: Sin permiso para consultar otra sucursal
+ */
+router.get('/stock-bajo', autenticar, permitirRoles("DUENIO", "GERENTE", "AYUDANTE_COCINA"), inventarioController.obtenerStockBajo);
 
 /**
  * @swagger

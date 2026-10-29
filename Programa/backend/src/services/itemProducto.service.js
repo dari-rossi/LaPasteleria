@@ -4,6 +4,7 @@ const productoRepository = require("../repositories/producto.repository");
 const { lanzarError } = require("../config/errores");
 
 const redondear = (valor) => Math.round(valor * 100) / 100;
+const { productoDisponibleAhora, mensajeHorario } = require("../config/horarios");
 
 // El pedido tiene que existir y ser de la sucursal del usuario
 const verificarAccesoPedido = (pedido, usuario) => {
@@ -61,25 +62,30 @@ const crearItemProducto = async (datos, usuario) => {
         lanzarError("PRODUCTO_NO_ENCONTRADO");
     }
 
-    const subTotal = redondear(datos.cantidad * producto.precio);
+    if (!productoDisponibleAhora(producto.tipoProducto)) {
+        lanzarError(mensajeHorario(producto.tipoProducto), 409);
+    }
 
     // Si el producto ya está en el pedido, Prisma avisa (P2002) y se traduce a ITEM_DUPLICADO
     return await itemProductoRepository.crear({ ...datos, subTotal });
 };
 
 const modificarItemProducto = async (id, datos, usuario) => {
-    const itemExistente = await buscarItem(id);
+    const item = await itemProductoRepository.obtenerPorId(id);
 
-    const pedido = await pedidoRepository.obtenerPorId(itemExistente.pedidoId);
+    if (!item) {
+        lanzarError("Item no encontrado.", 404);
+    }
+
+    const pedido = await pedidoRepository.obtenerPorId(item.pedidoId);
     verificarAccesoPedido(pedido, usuario);
 
-    const producto = await productoRepository.obtenerPorId(itemExistente.productoId);
-    const subTotal = redondear(datos.cantidad * producto.precio);
+    if (datos.cantidad > item.cantidad &&
+        !productoDisponibleAhora(item.producto.tipoProducto)) {
+        lanzarError(mensajeHorario(item.producto.tipoProducto), 409);
+    }
 
-    return await itemProductoRepository.modificar(id, {
-        cantidad: datos.cantidad,
-        subTotal
-    });
+    return await itemProductoRepository.cambiarCantidad(id, datos.cantidad);
 };
 
 const eliminarItemProducto = async (id, usuario) => {
@@ -88,7 +94,7 @@ const eliminarItemProducto = async (id, usuario) => {
     const pedido = await pedidoRepository.obtenerPorId(item.pedidoId);
     verificarAccesoPedido(pedido, usuario);
 
-    return await itemProductoRepository.eliminar(id);
+    return await itemProductoRepository.quitar(id);
 };
 
 module.exports = {

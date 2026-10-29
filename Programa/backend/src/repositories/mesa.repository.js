@@ -42,7 +42,8 @@ const obtenerTodasConReservaVigente = async (desde, hasta) => {
                 where: {
                     fechaHoraReservada: { gte: desde, lte: hasta },
                     estadoReserva: "Activa"
-                }
+                },
+                orderBy: { fechaHoraReservada: "asc" }
             }
         }
     });

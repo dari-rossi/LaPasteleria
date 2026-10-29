@@ -1,7 +1,52 @@
 const prisma = require("../prisma");
 
-const obtenerTodos = async () => {
-    return await prisma.producto.findMany();
+const filtroPorTipoProducto = (tipoProducto) => {
+    return tipoProducto
+        ? { tipoProducto: { contains: tipoProducto } }
+        : {};
+};
+
+const filtroPorNombre = (nombre) => {
+    return nombre ? { nombre: { contains: nombre } } : {};
+};
+
+const obtenerTodos = async ({ tipoProducto, nombre, sucursalId, popularidad } = {}) => {
+    const productos = await prisma.producto.findMany({
+        where: {
+            ...filtroPorTipoProducto(tipoProducto),
+            ...filtroPorNombre(nombre)
+        }
+    });
+
+    if (popularidad !== "desc") {
+        return productos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+    }
+
+    const ventas = await prisma.itemProducto.groupBy({
+        by: ["productoId"],
+        where: {
+            pedido: {
+                sucursalId: Number(sucursalId)
+            }
+        },
+        _sum: {
+            cantidad: true
+        }
+    });
+
+    const cantidadesVendidas = new Map(
+        ventas.map((venta) => [
+            venta.productoId,
+            venta._sum.cantidad ?? 0
+        ])
+    );
+
+    return productos.sort((a, b) => {
+        const cantidadA = cantidadesVendidas.get(a.idProducto) ?? 0;
+        const cantidadB = cantidadesVendidas.get(b.idProducto) ?? 0;
+
+        return cantidadB - cantidadA;
+    });
 };
 
 const obtenerPorId = async (id) => {

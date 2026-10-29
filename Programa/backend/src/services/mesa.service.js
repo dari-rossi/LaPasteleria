@@ -22,10 +22,15 @@ const obtenerMesas = async () => {
     const mesas = await mesaRepository.obtenerTodasConReservaVigente(desde, hasta);
 
     // Solo una mesa libre se muestra como reservada; si está ocupada, sigue ocupada
-    return mesas.map(({ reservas, ...mesa }) => ({
-        ...mesa,
-        estado: mesa.estado === "Libre" && reservas.length > 0 ? "Reservada" : mesa.estado
-    }));
+    return mesas.map(({ reservas, ...mesa }) => {
+        const reservada = mesa.estado === "Libre" && reservas.length > 0;
+
+        return {
+            ...mesa,
+            estado: reservada ? "Reservada" : mesa.estado,
+            reserva: reservada ? reservas[0] : null
+        };
+    });
 };
 
 const obtenerMesaPorId = async (id) => {

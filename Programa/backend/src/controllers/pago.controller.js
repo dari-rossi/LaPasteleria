@@ -17,8 +17,50 @@ const crearPago = async (req, res) => {
     res.status(201).json(pago);
 };
 
+const crearQrMercadoPago = async (req, res) => {
+    try {
+        const idPedido = Number(req.params.idPedido);
+
+        if (!Number.isInteger(idPedido) || idPedido <= 0) {
+            return res.status(400).json({ error: "ID de pedido incorrecto" });
+        }
+
+        const resultado = await pagoService.crearQrMercadoPago(idPedido, req.usuario);
+        res.status(201).json(resultado);
+    } catch (error) {
+        console.error(error);
+        res.status(error.status || 500).json({
+            error: error.status ? error.message : "Error al generar el QR"
+        });
+    }
+};
+
+const verificarPagoMercadoPago = async (req, res) => {
+    try {
+        const idPedido = Number(req.params.idPedido);
+
+        if (!Number.isInteger(idPedido) || idPedido <= 0) {
+            return res.status(400).json({ error: "ID de pedido incorrecto" });
+        }
+
+        const resultado = await pagoService.verificarPagoMercadoPago(
+            idPedido,
+            req.usuario
+        );
+
+        res.json(resultado);
+    } catch (error) {
+        console.error(error);
+        res.status(error.status || 500).json({
+            error: error.status ? error.message : "Error al verificar el pago"
+        });
+    }
+};
+
 module.exports = {
     obtenerPagos,
     obtenerPagoPorId,
-    crearPago
+    crearPago,
+    crearQrMercadoPago,
+    verificarPagoMercadoPago
 };
