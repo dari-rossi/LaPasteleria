@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/productos";
+import { apiFetch } from "./api";
 
 const obtenerMensajeError = (datos) => {
     return datos.detalles
@@ -7,7 +7,7 @@ const obtenerMensajeError = (datos) => {
 };
 
 export const obtenerProductos = async () => {
-    const response = await fetch(API_URL);
+    const response = await apiFetch("/productos");
 
     if (!response.ok) {
         throw new Error("No se pudieron obtener los productos");
@@ -17,9 +17,8 @@ export const obtenerProductos = async () => {
 };
 
 export const crearProducto = async (producto) => {
-    const response = await fetch(API_URL, {
+    const response = await apiFetch("/productos", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(producto)
     });
 
@@ -28,13 +27,13 @@ export const crearProducto = async (producto) => {
     if (!response.ok) {
         throw new Error(obtenerMensajeError(datos));
     }
+
     return datos;
 };
 
 export const modificarProducto = async (id, producto) => {
-    const response = await fetch(`${API_URL}/${id}`, {
+    const response = await apiFetch(`/productos/${id}`, {
         method: "PUT",
-        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(producto)
     });
 
@@ -43,13 +42,18 @@ export const modificarProducto = async (id, producto) => {
     if (!response.ok) {
         throw new Error(obtenerMensajeError(datos));
     }
+
     return datos;
 };
 
 export const eliminarProducto = async (id) => {
-    const response = await fetch(`${API_URL}/${id}`, {method: "DELETE"});
+    const response = await apiFetch(`/productos/${id}`, {
+        method: "DELETE"
+    });
+
     if (!response.ok) {
         throw new Error("No se pudo eliminar el producto");
     }
+
     return await response.json();
 };

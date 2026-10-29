@@ -1,32 +1,59 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { useAuth } from "./AuthContext";
 
 const SucursalContext = createContext(null);
 const CLAVE = "sucursalId";
 
-// Provisorio: cuando exista el login, esto sale del usuario logueado
-// (un empleado de una sucursal no puede elegir, un administrador sí)
-const PUEDE_ELEGIR = true;
-
 export function SucursalProvider({ children }) {
-    // Se guarda en localStorage para que al refrescar la página no se pierda la sucursal
-    const [sucursalId, setSucursalId] = useState(() => {
+    const { sesion } = useAuth();
+    const esDuenio = sesion?.rol === "DUENIO";
+
+    const [sucursalElegida, setSucursalElegida] = useState(() => {
         const guardada = localStorage.getItem(CLAVE);
         return guardada ? Number(guardada) : null;
     });
 
-    // cambiarSucursal(id) elige una sucursal; cambiarSucursal() deja de trabajar en una
-    const cambiarSucursal = (id = null) => {
-        setSucursalId(id);
+    const sucursalId = esDuenio
+        ? sucursalElegida
+        : sesion?.sucursalId ?? null;
 
-        if (id === null) {
+    useEffect(() => {
+        if (!sesion) {
+            setSucursalElegida(null);
+            localStorage.removeItem(CLAVE);
+            return;
+        }
+
+        if (!esDuenio) {
+            setSucursalElegida(null);
+            localStorage.removeItem(CLAVE);
+        }
+    }, [sesion, esDuenio]);
+
+    const cambiarSucursal = (id = null) => {
+        if (!esDuenio) {
+            return;
+        }
+
+        const nuevaSucursal = id === null ? null : Number(id);
+
+        setSucursalElegida(nuevaSucursal);
+
+        if (nuevaSucursal === null) {
             localStorage.removeItem(CLAVE);
         } else {
-            localStorage.setItem(CLAVE, String(id));
+            localStorage.setItem(CLAVE, String(nuevaSucursal));
         }
     };
 
     return (
-        <SucursalContext.Provider value={{ sucursalId, puedeElegir: PUEDE_ELEGIR, cambiarSucursal }}>
+        <SucursalContext.Provider
+            value={{
+                sucursalId,
+                puedeElegir: esDuenio,
+                cambiarSucursal
+            }}
+        >
             {children}
         </SucursalContext.Provider>
     );
@@ -36,7 +63,9 @@ export const useSucursal = () => {
     const contexto = useContext(SucursalContext);
 
     if (!contexto) {
-        throw new Error("useSucursal tiene que usarse dentro de SucursalProvider");
+        throw new Error(
+            "useSucursal tiene que usarse dentro de SucursalProvider"
+        );
     }
 
     return contexto;

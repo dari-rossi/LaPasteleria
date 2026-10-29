@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/inventario";
+import { apiFetch } from "./api";
 
 const obtenerMensajeError = (datos) => {
     return datos.detalles
@@ -7,7 +7,7 @@ const obtenerMensajeError = (datos) => {
 };
 
 export const obtenerInventarios = async () => {
-    const response = await fetch(API_URL);
+    const response = await apiFetch("/inventario");
 
     if (!response.ok) {
         throw new Error("No se pudo obtener el inventario");
@@ -17,9 +17,8 @@ export const obtenerInventarios = async () => {
 };
 
 export const crearInventario = async (inventario) => {
-    const response = await fetch(API_URL, {
+    const response = await apiFetch("/inventario", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(inventario)
     });
 
@@ -28,13 +27,13 @@ export const crearInventario = async (inventario) => {
     if (!response.ok) {
         throw new Error(obtenerMensajeError(datos));
     }
+
     return datos;
 };
 
 export const modificarInventario = async (id, inventario) => {
-    const response = await fetch(`${API_URL}/${id}`, {
+    const response = await apiFetch(`/inventario/${id}`, {
         method: "PUT",
-        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(inventario)
     });
 
@@ -43,13 +42,15 @@ export const modificarInventario = async (id, inventario) => {
     if (!response.ok) {
         throw new Error(obtenerMensajeError(datos));
     }
+
     return datos;
 };
 
 export const eliminarInventario = async (id) => {
-    const response = await fetch(`${API_URL}/${id}`, {method: "DELETE"});
+    const response = await apiFetch(`/inventario/${id}`, {
+        method: "DELETE"
+    });
 
-    // El backend responde 204 sin cuerpo, por eso acá no se hace response.json()
     if (!response.ok) {
         throw new Error("No se pudo eliminar el registro de inventario");
     }
