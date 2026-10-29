@@ -5,7 +5,9 @@ import {
 } from "../services/inventarioService";
 import InventarioForm from "./InventarioForm";
 
-// precioFinal puede venir en null (el backend todavía no lo calcula)
+const INVENTARIOS_POR_PAGINA = 10;
+
+// precioFinal puede venir en null
 const formatearPrecio = (valor) => {
     if (valor === null || valor === undefined) {
         return "—";
@@ -13,16 +15,38 @@ const formatearPrecio = (valor) => {
     return `$ ${valor.toLocaleString("es-AR", { minimumFractionDigits: 2 })}`;
 };
 
-// Fila con stock por debajo del mínimo: rojo medio, con letras negras legibles
 const ESTILO_STOCK_BAJO = {
     "--bs-table-bg": "#e57373",
     "--bs-table-color": "#000"
 };
 
-// Fila seleccionada: borde azul, sin cambiar el fondo ni las letras
+const ESTILO_BOTON_EDITAR = {
+    "--bs-btn-bg": "#fff3cd",
+    "--bs-btn-border-color": "#ffe69c",
+    "--bs-btn-color": "#664d03",
+    "--bs-btn-hover-bg": "#ffc107",
+    "--bs-btn-hover-border-color": "#ffc107",
+    "--bs-btn-hover-color": "#000"
+};
+
+const ESTILO_BOTON_ELIMINAR = {
+    "--bs-btn-bg": "#f8d7da",
+    "--bs-btn-border-color": "#f1aeb5",
+    "--bs-btn-color": "#58151c",
+    "--bs-btn-hover-bg": "#dc3545",
+    "--bs-btn-hover-border-color": "#dc3545",
+    "--bs-btn-hover-color": "#fff"
+};
+
+
 const ESTILO_FILA_SELECCIONADA = {
-    outline: "2px solid #0d6efd",
-    outlineOffset: "-2px"
+    outline: "4px solid #757575",
+    outlineOffset: "2px"
+};
+
+const ESTILO_CONTENEDOR_TABLA = {
+    padding: 8,
+    margin: -8
 };
 
 // sucursalId llega desde afuera: la sucursal se elige al iniciar el sistema,
@@ -41,6 +65,9 @@ function InventarioList({ sucursalId }) {
     // Filtros: "todos" o "stock-bajo", y el id del producto (vacío = sin filtrar)
     const [filtro, setFiltro] = useState("todos");
     const [idProductoFiltro, setIdProductoFiltro] = useState("");
+
+    // Paginación
+    const [pagina, setPagina] = useState(1);
 
     useEffect(() => {
         cargarInventarios();
@@ -106,6 +133,17 @@ function InventarioList({ sucursalId }) {
         setInventarioSeleccionado(inventarioSeleccionado === id ? null : id);
     };
 
+    // Al cambiar un filtro se vuelve a la primera página
+    const cambiarFiltro = (e) => {
+        setFiltro(e.target.value);
+        setPagina(1);
+    };
+
+    const cambiarIdProductoFiltro = (e) => {
+        setIdProductoFiltro(e.target.value);
+        setPagina(1);
+    };
+
     // Solo el inventario de la sucursal en la que se está trabajando
     const inventariosDeSucursal = inventarios.filter(
         (inventario) => inventario.sucursalId === Number(sucursalId)
@@ -127,6 +165,20 @@ function InventarioList({ sucursalId }) {
     // El registro elegido solo cuenta si sigue visible con los filtros actuales
     const inventarioElegido = inventariosFiltrados.find(
         (inventario) => inventario.id === inventarioSeleccionado
+    );
+
+    const totalPaginas = Math.max(
+        1,
+        Math.ceil(inventariosFiltrados.length / INVENTARIOS_POR_PAGINA)
+    );
+
+    // Si al borrar quedan menos páginas, no se pasa del final
+    const paginaActual = Math.min(pagina, totalPaginas);
+
+    const inicio = (paginaActual - 1) * INVENTARIOS_POR_PAGINA;
+    const inventariosDePagina = inventariosFiltrados.slice(
+        inicio,
+        inicio + INVENTARIOS_POR_PAGINA
     );
 
     return (
@@ -169,7 +221,7 @@ function InventarioList({ sucursalId }) {
                                     <select
                                         className="form-select"
                                         value={filtro}
-                                        onChange={(e) => setFiltro(e.target.value)}
+                                        onChange={cambiarFiltro}
                                     >
                                         <option value="todos">Todos</option>
                                         <option value="stock-bajo">Stock bajo</option>
@@ -184,7 +236,7 @@ function InventarioList({ sucursalId }) {
                                         min="1"
                                         className="form-control"
                                         value={idProductoFiltro}
-                                        onChange={(e) => setIdProductoFiltro(e.target.value)}
+                                        onChange={cambiarIdProductoFiltro}
                                     />
                                 </div>
                             </div>
@@ -195,7 +247,7 @@ function InventarioList({ sucursalId }) {
                         <p>No hay productos que coincidan con los filtros.</p>
                     ) : (
                         <>
-                            {/* Siempre ocupa el mismo lugar, así la tabla no se mueve al seleccionar */}
+                            {}
                             <div className="d-flex align-items-center mb-3">
                                 <span className="flex-grow-1 text-truncate me-3">
                                     {inventarioElegido
@@ -206,6 +258,7 @@ function InventarioList({ sucursalId }) {
                                 <div className={`flex-shrink-0 ${inventarioElegido ? "" : "invisible"}`}>
                                     <button
                                         className="btn btn-warning btn-sm me-2"
+                                        style={ESTILO_BOTON_EDITAR}
                                         onClick={() => editarInventario(inventarioElegido)}
                                     >
                                         Editar
@@ -213,6 +266,7 @@ function InventarioList({ sucursalId }) {
 
                                     <button
                                         className="btn btn-danger btn-sm"
+                                        style={ESTILO_BOTON_ELIMINAR}
                                         onClick={() =>
                                             borrarInventario(inventarioElegido.id)
                                         }
@@ -222,7 +276,7 @@ function InventarioList({ sucursalId }) {
                                 </div>
                             </div>
 
-                            <div className="table-responsive">
+                            <div className="table-responsive" style={ESTILO_CONTENEDOR_TABLA}>
                                 <table className="table table-bordered">
                                     <thead>
                                         <tr>
@@ -236,7 +290,7 @@ function InventarioList({ sucursalId }) {
                                     </thead>
 
                                     <tbody>
-                                        {inventariosFiltrados.map((inventario) => (
+                                        {inventariosDePagina.map((inventario) => (
                                             <tr
                                                 key={inventario.id}
                                                 style={{
@@ -262,6 +316,28 @@ function InventarioList({ sucursalId }) {
                                         ))}
                                     </tbody>
                                 </table>
+                            </div>
+
+                            <div className="d-flex justify-content-between align-items-center">
+                                <button
+                                    className="btn btn-outline-secondary btn-sm"
+                                    onClick={() => setPagina(paginaActual - 1)}
+                                    disabled={paginaActual === 1}
+                                >
+                                    Anterior
+                                </button>
+
+                                <span>
+                                    Página {paginaActual} de {totalPaginas}
+                                </span>
+
+                                <button
+                                    className="btn btn-outline-secondary btn-sm"
+                                    onClick={() => setPagina(paginaActual + 1)}
+                                    disabled={paginaActual === totalPaginas}
+                                >
+                                    Siguiente
+                                </button>
                             </div>
                         </>
                     )}

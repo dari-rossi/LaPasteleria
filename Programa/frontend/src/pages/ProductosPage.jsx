@@ -4,4 +4,4 @@ function ProductosPage() {
     return <ProductoList/>
 }
 
-export default ProductosPage
+export default ProductosPage;

@@ -2,3 +2,51 @@
     --bs-table-border-color: #495057;
 }
 
+
+.menu-general {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    border-top: 1px solid #dee2e6;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.menu-general__item {
+    padding: 1.75rem 1.5rem;
+    color: inherit;
+    text-decoration: none;
+    border-top: 1px solid #dee2e6;
+    transition: background-color 0.15s;
+}
+
+.menu-general__item:first-child {
+    border-top: none;
+}
+
+.menu-general__item:hover {
+    background-color: #f8f9fa;
+    color: inherit;
+}
+
+.menu-general__pie {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.menu-general__titulo {
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+.menu-general__flecha {
+    font-size: 1.25rem;
+    transition: transform 0.15s;
+}
+
+.menu-general__item:hover .menu-general__flecha {
+    transform: translateX(4px);
+}

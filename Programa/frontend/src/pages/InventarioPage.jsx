@@ -1,7 +1,9 @@
 import InventarioList from "../components/InventarioList";
+import { useSucursal } from "../context/SucursalContext";
 
 function InventarioPage() {
-    return <InventarioList sucursalId={1}/> // Para probar el inventario después modificar
+    const { sucursalId } = useSucursal();
+    return <InventarioList sucursalId={sucursalId} />;
 }
 
-export default InventarioPage
+export default InventarioPage;

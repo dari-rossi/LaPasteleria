@@ -7,6 +7,9 @@ import ProductoForm from "./ProductoForm";
 
 const PRODUCTOS_POR_PAGINA = 10;
 
+// Los tipos de producto se guardan tal cual: "Día", "Noche" o "Ambos"
+const TIPOS_PRODUCTO = ["Día", "Noche", "Ambos"];
+
 // precioFinal puede venir en null (el backend todavía no lo calcula)
 const formatearPrecio = (valor) => {
     if (valor === null || valor === undefined) {
@@ -15,19 +18,36 @@ const formatearPrecio = (valor) => {
     return `$ ${valor.toLocaleString("es-AR", { minimumFractionDigits: 2 })}`;
 };
 
-// Los tipos de producto son día y noche; se comparan sin tildes ni mayúsculas
-// para que "día", "Dia" o "dia" cuenten como lo mismo
-const normalizar = (texto) =>
-    texto
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .trim();
+// Botones Editar y Eliminar: suaves por defecto, con el color fuerte al pasar el mouse
+const ESTILO_BOTON_EDITAR = {
+    "--bs-btn-bg": "#fff3cd",
+    "--bs-btn-border-color": "#ffe69c",
+    "--bs-btn-color": "#664d03",
+    "--bs-btn-hover-bg": "#ffc107",
+    "--bs-btn-hover-border-color": "#ffc107",
+    "--bs-btn-hover-color": "#000"
+};
 
-// Fila seleccionada: borde azul, sin cambiar el fondo ni las letras
+const ESTILO_BOTON_ELIMINAR = {
+    "--bs-btn-bg": "#f8d7da",
+    "--bs-btn-border-color": "#f1aeb5",
+    "--bs-btn-color": "#58151c",
+    "--bs-btn-hover-bg": "#dc3545",
+    "--bs-btn-hover-border-color": "#dc3545",
+    "--bs-btn-hover-color": "#fff"
+};
+
+// Fila seleccionada: borde gris separado de la fila, igual que las mesas
 const ESTILO_FILA_SELECCIONADA = {
-    outline: "2px solid #0d6efd",
-    outlineOffset: "-2px"
+    outline: "4px solid #757575",
+    outlineOffset: "2px"
+};
+
+// Deja un margen alrededor de la tabla para que el borde de la fila seleccionada no se corte
+// (el margen negativo compensa el relleno, así la tabla queda alineada igual que antes)
+const ESTILO_CONTENEDOR_TABLA = {
+    padding: 8,
+    margin: -8
 };
 
 function ProductoList() {
@@ -126,7 +146,10 @@ function ProductoList() {
     const productosFiltrados = productos.filter(
         (producto) =>
             tipoProducto === "todos" ||
-            normalizar(producto.tipoProducto) === tipoProducto
+            producto.tipoProducto === tipoProducto ||
+            // Un producto de ambos turnos también se muestra al filtrar por día o por noche
+            (producto.tipoProducto === "Ambos" &&
+                (tipoProducto === "Día" || tipoProducto === "Noche"))
     );
 
     // El producto elegido solo cuenta si sigue visible con el filtro actual
@@ -191,8 +214,11 @@ function ProductoList() {
                                         onChange={cambiarTipoProducto}
                                     >
                                         <option value="todos">Todos</option>
-                                        <option value="dia">Día</option>
-                                        <option value="noche">Noche</option>
+                                        {TIPOS_PRODUCTO.map((tipo) => (
+                                            <option key={tipo} value={tipo}>
+                                                {tipo}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
                             </div>
@@ -214,6 +240,7 @@ function ProductoList() {
                                 <div className={`flex-shrink-0 ${productoElegido ? "" : "invisible"}`}>
                                     <button
                                         className="btn btn-warning btn-sm me-2"
+                                        style={ESTILO_BOTON_EDITAR}
                                         onClick={() => editarProducto(productoElegido)}
                                     >
                                         Editar
@@ -221,6 +248,7 @@ function ProductoList() {
 
                                     <button
                                         className="btn btn-danger btn-sm"
+                                        style={ESTILO_BOTON_ELIMINAR}
                                         onClick={() =>
                                             borrarProducto(productoElegido.idProducto)
                                         }
@@ -230,7 +258,7 @@ function ProductoList() {
                                 </div>
                             </div>
 
-                            <div className="table-responsive">
+                            <div className="table-responsive" style={ESTILO_CONTENEDOR_TABLA}>
                                 <table className="table table-bordered">
                                     <thead>
                                         <tr>

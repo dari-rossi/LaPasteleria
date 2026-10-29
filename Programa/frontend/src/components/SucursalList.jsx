@@ -1,51 +1,48 @@
 import { useEffect, useState } from "react";
-import {
-    obtenerSucursales,
-    eliminarSucursal
-} from "../services/sucursalService";
+import { useNavigate } from "react-router-dom";
+import { obtenerSucursales, eliminarSucursal } from "../services/sucursalService";
+import { useSucursal } from "../context/SucursalContext";
 import SucursalForm from "./SucursalForm";
 
 function SucursalList() {
+    const navigate = useNavigate();
+    const { sucursalId, cambiarSucursal } = useSucursal();
     const [sucursales, setSucursales] = useState([]);
     const [error, setError] = useState("");
-    const [sucursalEditar, setSucursalEditar] = useState(null);
+    const [abierta, setAbierta] = useState(null);
+    const [mostrarFormulario, setMostrarFormulario] = useState(false);
 
     useEffect(() => {
-        cargarSucursales();
+        const cargar = async () => {
+            try {
+                setSucursales(await obtenerSucursales());
+                setError("");
+            } catch (error) {
+                setError("No se pudieron cargar las sucursales.");
+            }
+        };
+
+        cargar();
     }, []);
 
-    const cargarSucursales = async () => {
-        try {
-            const datos = await obtenerSucursales();
-            setSucursales(datos);
-        } catch (error) {
-            setError("No se pudieron cargar las sucursales.");
-        }
+    const alternar = (id) => {
+        setAbierta((actual) => (actual === id ? null : id));
+    };
+
+    const entrar = (id) => {
+        cambiarSucursal(id);
+        navigate("/sucursal");
     };
 
     const agregarSucursal = (nuevaSucursal) => {
         setSucursales([...sucursales, nuevaSucursal]);
+        setMostrarFormulario(false);
+        setError("");
     };
 
-    const editarSucursal = (sucursal) => {
-        setSucursalEditar(sucursal);
-    };
-
-    const actualizarSucursal = (sucursalModificada) => {
-        setSucursales(
-            sucursales.map((sucursal) =>
-                sucursal.id === sucursalModificada.id
-                    ? sucursalModificada
-                    : sucursal
-            )
-        );
-
-        setSucursalEditar(null);
-    };
-
-    const borrarSucursal = async (id) => {
+    const borrar = async (sucursal) => {
         const confirmar = window.confirm(
-            "¿Está seguro de que desea eliminar esta sucursal?"
+            `¿Está seguro de que desea eliminar la sucursal ${sucursal.direccion}?`
         );
 
         if (!confirmar) {
@@ -53,84 +50,92 @@ function SucursalList() {
         }
 
         try {
-            await eliminarSucursal(id);
+            await eliminarSucursal(sucursal.id);
 
-            setSucursales(
-                sucursales.filter((sucursal) => sucursal.id !== id)
-            );
+            setSucursales(sucursales.filter((s) => s.id !== sucursal.id));
+            setAbierta(null);
+            setError("");
+
+            // Si era la sucursal en la que se estaba trabajando, se deja de trabajar en ella
+            if (sucursal.id === sucursalId) {
+                cambiarSucursal();
+            }
         } catch (error) {
-            setError("No se pudo eliminar la sucursal.");
+            setError(error.message);
         }
-    };
-
-    const cancelarEdicion = () => {
-        setSucursalEditar(null);
     };
 
     return (
         <div>
-            <h2 className="mb-3">Sucursales</h2>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                <h2 className="mb-0">Sucursales</h2>
+                {!mostrarFormulario && (
+                    <button className="btn btn-primary" onClick={() => setMostrarFormulario(true)}>
+                        Agregar sucursal
+                    </button>
+                )}
+            </div>
 
-            <SucursalForm
-                sucursalEditar={sucursalEditar}
-                onSucursalCreada={agregarSucursal}
-                onSucursalModificada={actualizarSucursal}
-                onCancelarEdicion={cancelarEdicion}
-            />
+            {error && <div className="alert alert-danger">{error}</div>}
 
-            {error && (
-                <div className="alert alert-danger">
-                    {error}
-                </div>
+            {mostrarFormulario && (
+                <>
+                    <SucursalForm
+                        onSucursalCreada={agregarSucursal}
+                        onCancelarEdicion={() => setMostrarFormulario(false)}
+                    />
+
+                    <button
+                        className="btn btn-link mb-3 p-0"
+                        onClick={() => setMostrarFormulario(false)}
+                    >
+                        Cerrar formulario
+                    </button>
+                </>
             )}
 
             {sucursales.length === 0 && !error ? (
                 <p>No hay sucursales registradas.</p>
             ) : (
-                <div className="table-responsive">
-                    <table className="table table-striped table-bordered">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Teléfono</th>
-                                <th>Dirección</th>
-                                <th>Código Postal</th>
-                                <th>Horarios</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
+                <div className="list-group">
+                    {sucursales.map((sucursal) => {
+                        const estaAbierta = abierta === sucursal.id;
 
-                        <tbody>
-                            {sucursales.map((sucursal) => (
-                                <tr key={sucursal.id}>
-                                    <td>{sucursal.id}</td>
-                                    <td>{sucursal.telefono}</td>
-                                    <td>{sucursal.direccion}</td>
-                                    <td>{sucursal.codigoPostal}</td>
-                                    <td>{sucursal.horarios}</td>
-                                    <td>
+                        return (
+                            <div key={sucursal.id} className="list-group-item p-0">
+                                <button
+                                    type="button"
+                                    className="btn w-100 text-start d-flex justify-content-between align-items-center p-3"
+                                    onClick={() => alternar(sucursal.id)}
+                                    aria-expanded={estaAbierta}
+                                >
+                                    <span className="fw-semibold">{sucursal.direccion}</span>
+                                    <span className="text-muted">{estaAbierta ? "▲" : "▼"}</span>
+                                </button>
+
+                                {estaAbierta && (
+                                    <div className="px-3 pb-3">
+                                        <p className="mb-1"><strong>Teléfono:</strong> {sucursal.telefono}</p>
+                                        <p className="mb-1"><strong>Código postal:</strong> {sucursal.codigoPostal}</p>
+                                        <p className="mb-3"><strong>Horarios:</strong> {sucursal.horarios}</p>
+
                                         <button
-                                            className="btn btn-warning btn-sm me-2"
-                                            onClick={() =>
-                                                editarSucursal(sucursal)
-                                            }
+                                            className="btn btn-primary btn-sm me-2"
+                                            onClick={() => entrar(sucursal.id)}
                                         >
-                                            Editar
+                                            Entrar a la sucursal
                                         </button>
-
                                         <button
-                                            className="btn btn-danger btn-sm"
-                                            onClick={() =>
-                                                borrarSucursal(sucursal.id)
-                                            }
+                                            className="btn btn-outline-danger btn-sm"
+                                            onClick={() => borrar(sucursal)}
                                         >
                                             Eliminar
                                         </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
             )}
         </div>

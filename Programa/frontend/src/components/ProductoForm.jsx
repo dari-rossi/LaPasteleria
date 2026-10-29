@@ -10,19 +10,8 @@ const FORMULARIO_VACIO = {
     proveedor: ""
 };
 
-// Los tipos de producto son solo estos dos
-const TIPOS_PRODUCTO = [
-    { valor: "dia", nombre: "Día" },
-    { valor: "noche", nombre: "Noche" }
-];
-
-// Para reconocer tipos ya guardados aunque tengan tilde o mayúsculas ("Día", "dia")
-const normalizar = (texto) =>
-    texto
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .trim();
+// Los tipos de producto son solo estos tres (se guardan tal cual, como en el seed)
+const TIPOS_PRODUCTO = ["Día", "Noche", "Ambos"];
 
 function ProductoForm({ productoEditar, onProductoCreado, onProductoModificado, onCancelarEdicion }) {
     const [formulario, setFormulario] = useState(FORMULARIO_VACIO);
@@ -31,14 +20,9 @@ function ProductoForm({ productoEditar, onProductoCreado, onProductoModificado, 
 
     useEffect(() => {
         if (productoEditar) {
-            const tipoNormalizado = normalizar(productoEditar.tipoProducto);
-
             setFormulario({
                 nombre: productoEditar.nombre,
-                // Si el tipo guardado no es ninguno de los dos, queda vacío para elegirlo de nuevo
-                tipoProducto: TIPOS_PRODUCTO.some((tipo) => tipo.valor === tipoNormalizado)
-                    ? tipoNormalizado
-                    : "",
+                tipoProducto: productoEditar.tipoProducto ?? "",
                 descripcion: productoEditar.descripcion ?? "",
                 stockMin: String(productoEditar.stockMin),
                 precio: String(productoEditar.precio),
@@ -132,8 +116,8 @@ function ProductoForm({ productoEditar, onProductoCreado, onProductoModificado, 
                         >
                             <option value="">Seleccioná un tipo</option>
                             {TIPOS_PRODUCTO.map((tipo) => (
-                                <option key={tipo.valor} value={tipo.valor}>
-                                    {tipo.nombre}
+                                <option key={tipo} value={tipo}>
+                                    {tipo}
                                 </option>
                             ))}
                         </select>

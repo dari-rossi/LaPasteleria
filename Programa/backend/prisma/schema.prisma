@@ -13,9 +13,18 @@ model Sucursal {
   direccion    String
   codigoPostal String
   horarios     String
-  
+
   // Para relacionar Sucursal y Producto
   inventarios  Inventario[]
+
+  // Para relacionar Sucursal y TipoEmpleado
+  tiposEmpleado SucursalTipoEmpleado[]
+
+  // Para relacionar Sucursal y Gasto
+  gastos        Gasto[]
+
+  // Para relacionar Sucursal y Pedido
+  pedidos       Pedido[]
 }
 
 model Producto {
@@ -29,7 +38,10 @@ model Producto {
   proveedor    String
 
   // Para relacionar Sucursal y Producto
-  inventarios  Inventario[]
+  inventarios   Inventario[]
+
+  // Para relacionar Pedido y Producto
+  itemsProducto ItemProducto[]
 }
 
 // La relation entre Sucursal y Producto
@@ -39,12 +51,12 @@ model Inventario {
   
   sucursalId   Int
   sucursal     Sucursal @relation(fields: [sucursalId], references: [id])
-  
+
   productoId   Int
   producto     Producto @relation(fields: [productoId], references: [idProducto])
 
   // Esto es para que no se cargue el mismo producto en una misma sucursal
-  @@unique([sucursalId, productoId]) 
+  @@unique([sucursalId, productoId])
 }
 
 model Reserva {
@@ -71,5 +83,108 @@ model Mesa {
   estado        EstadoMesa
   maxComensales Int
 
-  reservas Reserva[]
+  reservas      Reserva[]
+
+  // Para relacionar Mesa y Pedido
+  pedidos       Pedido[]
+}
+
+model Cliente {
+  id           Int        @id @default(autoincrement())
+  tipo         String
+  descuento    Int
+
+  // Para relacionar Cliente y Pedido
+  pedidos      Pedido[]
+}
+
+enum MetodoPago {
+  Efectivo
+  Tarjeta
+  Transferencia
+}
+
+// Un pago pertenece a un único pedido: su PK es la FK hacia Pedido (relación 0..1)
+model Pago {
+  idPedido      Int        @id
+  fechaHora     DateTime
+  precio        Float
+  tipoDescuento String
+  metodoPago    MetodoPago
+  precioFinal   Float
+
+  pedido        Pedido     @relation(fields: [idPedido], references: [idPedido])
+}
+
+model TipoEmpleado {
+  id           Int     @id @default(autoincrement())
+  usuario      String? @unique
+  contrasenia  String?
+  tipoEmpleado String  @unique
+  sueldo       Float
+
+  // Para relacionar Sucursal y TipoEmpleado
+  sucursales   SucursalTipoEmpleado[]
+}
+
+// La relación entre Sucursal y TipoEmpleado: cuántos empleados de ese tipo hay en esa sucursal
+model SucursalTipoEmpleado {
+  cantidad       Int
+
+  sucursalId     Int
+  sucursal       Sucursal     @relation(fields: [sucursalId], references: [id], onDelete: Cascade)
+
+  tipoEmpleadoId Int
+  tipoEmpleado   TipoEmpleado @relation(fields: [tipoEmpleadoId], references: [id], onDelete: Cascade)
+
+  // Un mismo tipo de empleado aparece una sola vez por sucursal
+  @@id([sucursalId, tipoEmpleadoId])
+}
+
+// Un gasto pertenece siempre a una sucursal (CRUD dependiente de Sucursal)
+model Gasto {
+  id         Int      @id @default(autoincrement())
+  fechaGasto DateTime @db.Date
+  nombre     String
+  costo      Float
+
+  sucursalId Int
+  sucursal   Sucursal @relation(fields: [sucursalId], references: [id])
+}
+
+model Pedido {
+  idPedido      Int            @id @default(autoincrement())
+  estadoPedido  String
+  comensales    Int
+
+  mesaId        Int
+  mesa          Mesa           @relation(fields: [mesaId], references: [idMesa])
+
+  clienteId     Int
+  cliente       Cliente        @relation(fields: [clienteId], references: [id])
+
+  sucursalId    Int
+  sucursal      Sucursal       @relation(fields: [sucursalId], references: [id])
+
+  // Un pedido tiene como máximo un pago (0..1)
+  pago          Pago?
+
+  // Los productos del pedido
+  items         ItemProducto[]
+}
+
+// La relación entre Pedido y Producto: cantidad y subTotal (calculado por el service)
+model ItemProducto {
+  idItemProducto Int      @id @default(autoincrement())
+  cantidad       Int
+  subTotal       Float
+
+  pedidoId       Int
+  pedido         Pedido   @relation(fields: [pedidoId], references: [idPedido], onDelete: Cascade)
+
+  productoId     Int
+  producto       Producto @relation(fields: [productoId], references: [idProducto])
+
+  // Un mismo producto aparece una sola vez por pedido
+  @@unique([pedidoId, productoId])
 }
