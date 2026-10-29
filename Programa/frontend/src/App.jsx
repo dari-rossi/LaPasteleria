@@ -37,7 +37,6 @@ function App() {
                         <Route path="/pedidos/:id" element={<PedidoDetallePage />} />
                         <Route path="/mesas" element={<MesasPage />} />
                         <Route path="/inventario" element={<InventarioPage />} />
-                        <Route path="/empleados" element={<Pendiente nombre="Empleados" />} />
                         <Route path="/reservas" element={<ReservasPage/>} />
                         <Route path="/gastos" element={<GastosPage/>} />
                         <Route path="/planilla" element={<Pendiente nombre="Planilla" />} />
