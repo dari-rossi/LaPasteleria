@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/mesas";
+import { apiFetch } from "./api";
 
 const obtenerMensajeError = (datos) => {
     return datos.detalles
@@ -7,7 +7,7 @@ const obtenerMensajeError = (datos) => {
 };
 
 export const obtenerMesas = async () => {
-    const response = await fetch(API_URL);
+    const response = await apiFetch("/mesas");
 
     if (!response.ok) {
         throw new Error("No se pudieron obtener las mesas");
@@ -17,9 +17,8 @@ export const obtenerMesas = async () => {
 };
 
 export const crearMesa = async (mesa) => {
-    const response = await fetch(API_URL, {
+    const response = await apiFetch("/mesas", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(mesa)
     });
 
@@ -28,13 +27,13 @@ export const crearMesa = async (mesa) => {
     if (!response.ok) {
         throw new Error(obtenerMensajeError(datos));
     }
+
     return datos;
 };
 
 export const modificarMesa = async (id, mesa) => {
-    const response = await fetch(`${API_URL}/${id}`, {
+    const response = await apiFetch(`/mesas/${id}`, {
         method: "PUT",
-        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(mesa)
     });
 
@@ -43,13 +42,18 @@ export const modificarMesa = async (id, mesa) => {
     if (!response.ok) {
         throw new Error(obtenerMensajeError(datos));
     }
+
     return datos;
 };
 
 export const eliminarMesa = async (id) => {
-    const response = await fetch(`${API_URL}/${id}`, {method: "DELETE"});
+    const response = await apiFetch(`/mesas/${id}`, {
+        method: "DELETE"
+    });
+
     if (!response.ok) {
         throw new Error("No se pudo eliminar la mesa");
     }
+
     return await response.json();
 };

@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/itemProducto";
+import { apiFetch } from "./api";
 
 const obtenerMensajeError = (datos) => {
     return datos.detalles
@@ -6,11 +6,10 @@ const obtenerMensajeError = (datos) => {
         : datos.error;
 };
 
-const enviar = async (url, metodo, cuerpo) => {
-    const response = await fetch(url, {
+const enviar = async (ruta, metodo, cuerpo) => {
+    const response = await apiFetch(ruta, {
         method: metodo,
-        headers: {"Content-Type": "application/json"},
-        body: cuerpo ? JSON.stringify(cuerpo) : undefined
+        body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo)
     });
 
     const datos = await response.json();
@@ -18,11 +17,15 @@ const enviar = async (url, metodo, cuerpo) => {
     if (!response.ok) {
         throw new Error(obtenerMensajeError(datos));
     }
+
     return datos;
 };
 
-export const agregarItem = (item) => enviar(API_URL, "POST", item);
+export const agregarItem = (item) =>
+    enviar("/itemProducto", "POST", item);
 
-export const modificarCantidad = (id, cantidad) => enviar(`${API_URL}/${id}`, "PUT", {cantidad});
+export const modificarCantidad = (id, cantidad) =>
+    enviar(`/itemProducto/${id}`, "PUT", { cantidad });
 
-export const quitarItem = (id) => enviar(`${API_URL}/${id}`, "DELETE");
+export const quitarItem = (id) =>
+    enviar(`/itemProducto/${id}`, "DELETE");

@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/tipos-empleado";
+import { apiFetch } from "./api";
 
 const obtenerMensajeError = (datos) => {
     return datos.detalles
@@ -7,10 +7,9 @@ const obtenerMensajeError = (datos) => {
 };
 
 // POST, PUT y DELETE comparten la misma forma de pedir y de leer los errores
-const enviar = async (url, metodo, cuerpo) => {
-    const response = await fetch(url, {
+const enviar = async (ruta, metodo, cuerpo) => {
+    const response = await apiFetch(ruta, {
         method: metodo,
-        headers: {"Content-Type": "application/json"},
         body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo)
     });
 
@@ -19,15 +18,16 @@ const enviar = async (url, metodo, cuerpo) => {
     if (!response.ok) {
         throw new Error(obtenerMensajeError(datos));
     }
+
     return datos;
 };
 
 export const obtenerTiposEmpleado = async (tipoEmpleado = "") => {
-    const url = tipoEmpleado
-        ? `${API_URL}?tipoEmpleado=${encodeURIComponent(tipoEmpleado)}`
-        : API_URL;
+    const ruta = tipoEmpleado
+        ? `/tipos-empleado?tipoEmpleado=${encodeURIComponent(tipoEmpleado)}`
+        : "/tipos-empleado";
 
-    const response = await fetch(url);
+    const response = await apiFetch(ruta);
 
     if (!response.ok) {
         throw new Error("No se pudieron obtener los tipos de empleado");
@@ -36,8 +36,11 @@ export const obtenerTiposEmpleado = async (tipoEmpleado = "") => {
     return await response.json();
 };
 
-export const crearTipoEmpleado = (tipo) => enviar(API_URL, "POST", tipo);
+export const crearTipoEmpleado = (tipo) =>
+    enviar("/tipos-empleado", "POST", tipo);
 
-export const modificarTipoEmpleado = (id, tipo) => enviar(`${API_URL}/${id}`, "PUT", tipo);
+export const modificarTipoEmpleado = (id, tipo) =>
+    enviar(`/tipos-empleado/${id}`, "PUT", tipo);
 
-export const eliminarTipoEmpleado = (id) => enviar(`${API_URL}/${id}`, "DELETE");
+export const eliminarTipoEmpleado = (id) =>
+    enviar(`/tipos-empleado/${id}`, "DELETE");

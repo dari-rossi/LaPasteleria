@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/gastos";
+import { apiFetch } from "./api";
 
 const obtenerMensajeError = (datos) => {
     return datos.detalles
@@ -6,10 +6,9 @@ const obtenerMensajeError = (datos) => {
         : datos.error;
 };
 
-const enviar = async (url, metodo, cuerpo) => {
-    const response = await fetch(url, {
+const enviar = async (ruta, metodo, cuerpo) => {
+    const response = await apiFetch(ruta, {
         method: metodo,
-        headers: {"Content-Type": "application/json"},
         body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo)
     });
 
@@ -18,6 +17,7 @@ const enviar = async (url, metodo, cuerpo) => {
     if (!response.ok) {
         throw new Error(obtenerMensajeError(datos));
     }
+
     return datos;
 };
 
@@ -34,7 +34,8 @@ export const obtenerGastos = async ({ nombre = "", sucursalId = "" } = {}) => {
     }
 
     const consulta = parametros.toString();
-    const response = await fetch(consulta ? `${API_URL}?${consulta}` : API_URL);
+    const ruta = consulta ? `/gastos?${consulta}` : "/gastos";
+    const response = await apiFetch(ruta);
 
     if (!response.ok) {
         throw new Error("No se pudieron obtener los gastos");
@@ -43,8 +44,11 @@ export const obtenerGastos = async ({ nombre = "", sucursalId = "" } = {}) => {
     return await response.json();
 };
 
-export const crearGasto = (gasto) => enviar(API_URL, "POST", gasto);
+export const crearGasto = (gasto) =>
+    enviar("/gastos", "POST", gasto);
 
-export const modificarGasto = (id, gasto) => enviar(`${API_URL}/${id}`, "PUT", gasto);
+export const modificarGasto = (id, gasto) =>
+    enviar(`/gastos/${id}`, "PUT", gasto);
 
-export const eliminarGasto = (id) => enviar(`${API_URL}/${id}`, "DELETE");
+export const eliminarGasto = (id) =>
+    enviar(`/gastos/${id}`, "DELETE");

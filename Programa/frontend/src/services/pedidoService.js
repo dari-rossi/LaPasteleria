@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/pedidos";
+import { apiFetch } from "./api";
 
 const obtenerMensajeError = (datos) => {
     return datos.detalles
@@ -7,7 +7,7 @@ const obtenerMensajeError = (datos) => {
 };
 
 export const obtenerPedidos = async () => {
-    const response = await fetch(API_URL);
+    const response = await apiFetch("/pedidos");
 
     if (!response.ok) {
         throw new Error("No se pudieron obtener los pedidos");
@@ -17,7 +17,7 @@ export const obtenerPedidos = async () => {
 };
 
 export const obtenerPedidoPorId = async (id) => {
-    const response = await fetch(`${API_URL}/${id}`);
+    const response = await apiFetch(`/pedidos/${id}`);
 
     if (!response.ok) {
         throw new Error("No se pudo obtener el pedido");
@@ -27,9 +27,8 @@ export const obtenerPedidoPorId = async (id) => {
 };
 
 export const crearPedido = async (pedido) => {
-    const response = await fetch(API_URL, {
+    const response = await apiFetch("/pedidos", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(pedido)
     });
 
@@ -38,13 +37,13 @@ export const crearPedido = async (pedido) => {
     if (!response.ok) {
         throw new Error(obtenerMensajeError(datos));
     }
+
     return datos;
 };
 
 export const modificarPedido = async (id, pedido) => {
-    const response = await fetch(`${API_URL}/${id}`, {
+    const response = await apiFetch(`/pedidos/${id}`, {
         method: "PUT",
-        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(pedido)
     });
 
@@ -53,15 +52,20 @@ export const modificarPedido = async (id, pedido) => {
     if (!response.ok) {
         throw new Error(obtenerMensajeError(datos));
     }
+
     return datos;
 };
 
 export const eliminarPedido = async (id) => {
-    const response = await fetch(`${API_URL}/${id}`, {method: "DELETE"});
+    const response = await apiFetch(`/pedidos/${id}`, {
+        method: "DELETE"
+    });
+
     const datos = await response.json();
 
     if (!response.ok) {
-        throw new Error(obtenerMensajeError(datos)); // ej: pedido con pago registrado
+        throw new Error(obtenerMensajeError(datos));
     }
+
     return datos;
 };
