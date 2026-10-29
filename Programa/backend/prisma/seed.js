@@ -150,16 +150,16 @@ async function main() {
     }
 
     const mesas = [
-        { idMesa: 1, estado: "Ocupada", maxComensales: 2 },
-        { idMesa: 2, estado: "Libre", maxComensales: 2 },
-        { idMesa: 3, estado: "Ocupada", maxComensales: 4 },
-        { idMesa: 4, estado: "Libre", maxComensales: 4 },
-        { idMesa: 5, estado: "Libre", maxComensales: 6 },
-        { idMesa: 6, estado: "Libre", maxComensales: 6 },
-        { idMesa: 7, estado: "Ocupada", maxComensales: 2 },
-        { idMesa: 8, estado: "Libre", maxComensales: 4 },
-        { idMesa: 9, estado: "Libre", maxComensales: 4 },
-        { idMesa: 10, estado: "Libre", maxComensales: 6 },
+        { idMesa: 1, estado: "Ocupada", maxComensales: 2, sucursalId: 1 },
+        { idMesa: 2, estado: "Libre", maxComensales: 2, sucursalId: 1 },
+        { idMesa: 3, estado: "Ocupada", maxComensales: 4, sucursalId: 1 },
+        { idMesa: 4, estado: "Libre", maxComensales: 4, sucursalId: 1 },
+        { idMesa: 5, estado: "Libre", maxComensales: 6, sucursalId: 1 },
+        { idMesa: 6, estado: "Libre", maxComensales: 6, sucursalId: 2 },
+        { idMesa: 7, estado: "Ocupada", maxComensales: 2, sucursalId: 2 },
+        { idMesa: 8, estado: "Libre", maxComensales: 4, sucursalId: 2 },
+        { idMesa: 9, estado: "Libre", maxComensales: 4, sucursalId: 2 },
+        { idMesa: 10, estado: "Libre", maxComensales: 6, sucursalId: 2 },
     ];
 
     for (const mesa of mesas) {
@@ -167,7 +167,8 @@ async function main() {
             where: { idMesa: mesa.idMesa },
             update: {
                 estado: mesa.estado,
-                maxComensales: mesa.maxComensales
+                maxComensales: mesa.maxComensales,
+                sucursalId: mesa.sucursalId
             },
             create: mesa
         });

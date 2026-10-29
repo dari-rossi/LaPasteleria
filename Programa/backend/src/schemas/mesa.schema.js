@@ -9,7 +9,14 @@ const mesaSchema = z.object({
     maxComensales: z
         .number({ error: "La cantidad máxima de comensales debe ser un número" })
         .int("La cantidad máxima de comensales debe ser un número entero")
-        .positive("La cantidad máxima de comensales debe ser mayor a 0")
+        .positive("La cantidad máxima de comensales debe ser mayor a 0"),
+    sucursalId: z
+        .number({ error: "La sucursal debe ser un número" })
+        .int("La sucursal debe ser un número entero")
+        .positive("La sucursal debe ser mayor a 0")
 });
 
-module.exports = { mesaSchema, ESTADOS_MESA };
+// Al modificar no se puede cambiar de sucursal
+const mesaModificarSchema = mesaSchema.omit({ sucursalId: true });
+
+module.exports = { mesaSchema, mesaModificarSchema, ESTADOS_MESA };

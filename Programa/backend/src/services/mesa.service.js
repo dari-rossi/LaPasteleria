@@ -1,4 +1,5 @@
 const mesaRepository = require("../repositories/mesa.repository");
+const sucursalRepository = require("../repositories/sucursal.repository");
 const { lanzarError } = require("../config/errores");
 
 // Busca una mesa o lanza 404
@@ -21,6 +22,12 @@ const obtenerMesaPorId = async (id) => {
 };
 
 const crearMesa = async (datos) => {
+    const sucursal = await sucursalRepository.obtenerPorId(datos.sucursalId);
+
+    if (!sucursal) {
+        lanzarError("SUCURSAL_NO_ENCONTRADA");
+    }
+
     return await mesaRepository.crear(datos);
 };
 

@@ -10,7 +10,7 @@ const {
 } = require("../controllers/mesa.controller");
 
 const validate = require("../middlewares/validate");
-const { mesaSchema } = require("../schemas/mesa.schema");
+const { mesaSchema, mesaModificarSchema } = require("../schemas/mesa.schema");
 
 const router = express.Router();
 
@@ -114,7 +114,7 @@ router.post("/",autenticar, permitirRoles("DUENIO", "GERENTE"), validate(mesaSch
  *       404:
  *         description: Mesa no encontrada
  */
-router.put("/:id",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), validate(mesaSchema), modificarMesa);
+router.put("/:id", autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), validate(mesaModificarSchema), modificarMesa);
 
 /**
  * @swagger

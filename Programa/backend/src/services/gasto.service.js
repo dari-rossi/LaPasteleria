@@ -1,28 +1,25 @@
 const gastoRepository = require("../repositories/gasto.repository");
 const sucursalRepository = require("../repositories/sucursal.repository");
+const { lanzarError } = require("../config/errores");
 
-const lanzarError = (mensaje, status) => {
-    const error = new Error(mensaje);
-    error.status = status;
-    throw error;
-};
-
+// La sucursal indicada tiene que existir
 const verificarSucursal = async (sucursalId) => {
     const sucursal = await sucursalRepository.obtenerPorId(sucursalId);
 
     if (!sucursal) {
-        lanzarError("La sucursal indicada no existe.", 400);
+        lanzarError("SUCURSAL_NO_ENCONTRADA");
     }
 };
 
+// El gasto tiene que existir y, si el usuario es gerente, ser de su sucursal
 const verificarAccesoGasto = (gasto, usuario) => {
     if (!gasto) {
-        lanzarError("Gasto no encontrado.", 404);
+        lanzarError("GASTO_NO_ENCONTRADO");
     }
 
     if (usuario.rol === "GERENTE" &&
         Number(gasto.sucursalId) !== Number(usuario.sucursalId)) {
-        lanzarError("No tenés permiso para operar sobre gastos de otra sucursal.", 403);
+        lanzarError("OTRA_SUCURSAL");
     }
 };
 
@@ -33,7 +30,7 @@ const obtenerGastos = async (filtros, usuario) => {
 
     if (filtros.sucursalId !== undefined &&
         Number(filtros.sucursalId) !== Number(usuario.sucursalId)) {
-        lanzarError("No tenés permiso para consultar gastos de otra sucursal.", 403);
+        lanzarError("OTRA_SUCURSAL");
     }
 
     return await gastoRepository.obtenerTodos({
@@ -51,7 +48,7 @@ const obtenerGastoPorId = async (id, usuario) => {
 const crearGasto = async (datos, usuario) => {
     if (usuario.rol === "GERENTE" &&
         Number(datos.sucursalId) !== Number(usuario.sucursalId)) {
-        lanzarError("No tenés permiso para crear gastos en otra sucursal.", 403);
+        lanzarError("OTRA_SUCURSAL");
     }
 
     await verificarSucursal(datos.sucursalId);
@@ -64,7 +61,7 @@ const modificarGasto = async (id, datos, usuario) => {
 
     if (usuario.rol === "GERENTE" &&
         Number(datos.sucursalId) !== Number(usuario.sucursalId)) {
-        lanzarError("No podés asignar un gasto a otra sucursal.", 403);
+        lanzarError("OTRA_SUCURSAL");
     }
 
     await verificarSucursal(datos.sucursalId);

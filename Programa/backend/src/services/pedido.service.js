@@ -4,23 +4,28 @@ const clienteRepository = require("../repositories/cliente.repository");
 const sucursalRepository = require("../repositories/sucursal.repository");
 const productoRepository = require("../repositories/producto.repository");
 const { ESTADO_INICIAL } = require("../config/estadosPedido");
-
-const lanzarError = (mensaje, status) => {
-    const error = new Error(mensaje);
-    error.status = status;
-    throw error;
-};
+const { lanzarError } = require("../config/errores");
 
 const redondear = (valor) => Math.round(valor * 100) / 100;
 
+// El pedido tiene que existir y ser de la sucursal del usuario
 const verificarAccesoPedido = (pedido, usuario) => {
     if (!pedido) {
-        lanzarError("Pedido no encontrado.", 404);
+        lanzarError("PEDIDO_NO_ENCONTRADO");
     }
 
     if (Number(pedido.sucursalId) !== Number(usuario.sucursalId)) {
-        lanzarError("No tenés permiso para operar sobre pedidos de otra sucursal.", 403);
+        lanzarError("OTRA_SUCURSAL");
     }
+};
+
+// Busca un pedido, controla el acceso y lo devuelve (o lanza 404 / 403)
+const buscarPedido = async (id, usuario) => {
+    const pedido = await pedidoRepository.obtenerPorId(id);
+
+    verificarAccesoPedido(pedido, usuario);
+
+    return pedido;
 };
 
 const obtenerPedidos = async (usuario) => {
@@ -32,37 +37,31 @@ const obtenerPedidos = async (usuario) => {
 };
 
 const obtenerPedidoPorId = async (id, usuario) => {
-    const pedido = await pedidoRepository.obtenerPorId(id);
-
-    if (pedido) {
-        verificarAccesoPedido(pedido, usuario);
-    }
-
-    return pedido;
+    return await buscarPedido(id, usuario);
 };
 
 // Un pedido siempre tiene una mesa, un cliente y una sucursal. Los productos pueden venir ahora o cargarse después
-const crearPedido = async (datos) => {
+const crearPedido = async (datos, usuario) => {
     const mesa = await mesaRepository.obtenerPorId(datos.mesaId);
 
     if (!mesa) {
-        lanzarError("La mesa indicada no existe.", 400);
+        lanzarError("MESA_NO_ENCONTRADA");
     }
 
     const cliente = await clienteRepository.obtenerPorId(datos.clienteId);
 
     if (!cliente) {
-        lanzarError("El cliente indicado no existe.", 400);
+        lanzarError("CLIENTE_NO_ENCONTRADO");
     }
 
     const sucursal = await sucursalRepository.obtenerPorId(datos.sucursalId);
 
     if (!sucursal) {
-        lanzarError("La sucursal indicada no existe.", 400);
+        lanzarError("SUCURSAL_NO_ENCONTRADA");
     }
 
     if (Number(datos.sucursalId) !== Number(usuario.sucursalId)) {
-        lanzarError("No tenés permiso para crear pedidos en otra sucursal.", 403);
+        lanzarError("OTRA_SUCURSAL");
     }
 
     // Se arma cada item con su subTotal (cantidad * precio del producto)
@@ -72,7 +71,7 @@ const crearPedido = async (datos) => {
         const producto = await productoRepository.obtenerPorId(item.productoId);
 
         if (!producto) {
-            lanzarError(`El producto ${item.productoId} no existe.`, 400);
+            lanzarError("PRODUCTO_NO_ENCONTRADO", `El producto ${item.productoId} no existe`);
         }
 
         items.push({
@@ -99,18 +98,16 @@ const crearPedido = async (datos) => {
 
 // Solo se modifican el estado y los comensales (los productos se manejan desde itemProducto)
 const modificarPedido = async (id, datos, usuario) => {
-    const pedido = await pedidoRepository.obtenerPorId(id);
-    verificarAccesoPedido(pedido, usuario);
+    await buscarPedido(id, usuario);
 
     return await pedidoRepository.modificar(id, datos);
 };
 
 const eliminarPedido = async (id, usuario) => {
-    const pedido = await pedidoRepository.obtenerPorId(id);
-    verificarAccesoPedido(pedido, usuario);
+    const pedido = await buscarPedido(id, usuario);
 
     if (pedido.pago) {
-        lanzarError("No se puede eliminar un pedido que ya tiene un pago registrado.", 409);
+        lanzarError("PEDIDO_CON_PAGO");
     }
 
     return await pedidoRepository.eliminar(id);

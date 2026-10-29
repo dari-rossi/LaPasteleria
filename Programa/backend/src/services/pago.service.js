@@ -1,20 +1,16 @@
 const pagoRepository = require("../repositories/pago.repository");
 const pedidoRepository = require("../repositories/pedido.repository");
+const { lanzarError } = require("../config/errores");
 
-const lanzarError = (mensaje, status) => {
-    const error = new Error(mensaje);
-    error.status = status;
-    throw error;
-};
-
+// El pedido tiene que existir y el usuario tiene que poder acceder a su sucursal
 const verificarAccesoPedido = (pedido, usuario) => {
     if (!pedido) {
-        lanzarError("El pedido indicado no existe.", 404);
+        lanzarError("PEDIDO_NO_ENCONTRADO");
     }
 
     if (usuario.rol !== "DUENIO" &&
         Number(pedido.sucursalId) !== Number(usuario.sucursalId)) {
-        lanzarError("No tenés permiso para acceder a pagos de otra sucursal.", 403);
+        lanzarError("OTRA_SUCURSAL");
     }
 };
 
@@ -38,7 +34,7 @@ const obtenerPagoPorId = async (idPedido, usuario) => {
     const pago = await pagoRepository.obtenerPorId(idPedido);
 
     if (!pago) {
-        lanzarError("Pago no encontrado.", 404);
+        lanzarError("PAGO_NO_ENCONTRADO");
     }
 
     return pago;
@@ -47,18 +43,14 @@ const obtenerPagoPorId = async (idPedido, usuario) => {
 const crearPago = async (datos, usuario) => {
     const pedido = await pedidoRepository.obtenerPorId(datos.idPedido);
 
-    if (!pedido) {
-        lanzarError("El pedido indicado no existe.", 400);
-    }
-
     verificarAccesoPedido(pedido, usuario);
 
     if (pedido.items.length === 0) {
-        lanzarError("No se puede registrar el pago de un pedido sin productos.", 400);
+        lanzarError("PAGO_PEDIDO_SIN_PRODUCTOS");
     }
 
     if (pedido.pago) {
-        lanzarError("El pedido ya tiene un pago registrado.", 409);
+        lanzarError("PAGO_DUPLICADO");
     }
 
     const nuevoPagoData = {

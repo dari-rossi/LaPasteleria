@@ -1,23 +1,30 @@
 const itemProductoRepository = require("../repositories/itemProducto.repository");
 const pedidoRepository = require("../repositories/pedido.repository");
 const productoRepository = require("../repositories/producto.repository");
-
-const lanzarError = (mensaje, status) => {
-    const error = new Error(mensaje);
-    error.status = status;
-    throw error;
-};
+const { lanzarError } = require("../config/errores");
 
 const redondear = (valor) => Math.round(valor * 100) / 100;
 
+// El pedido tiene que existir y ser de la sucursal del usuario
 const verificarAccesoPedido = (pedido, usuario) => {
     if (!pedido) {
-        lanzarError("El pedido indicado no existe.", 404);
+        lanzarError("PEDIDO_NO_ENCONTRADO");
     }
 
     if (Number(pedido.sucursalId) !== Number(usuario.sucursalId)) {
-        lanzarError("No tenés permiso para operar sobre pedidos de otra sucursal.", 403);
+        lanzarError("OTRA_SUCURSAL");
     }
+};
+
+// Busca un item o lanza 404
+const buscarItem = async (id) => {
+    const item = await itemProductoRepository.obtenerPorId(id);
+
+    if (!item) {
+        lanzarError("ITEM_NO_ENCONTRADO");
+    }
+
+    return item;
 };
 
 const obtenerItemProductos = async (usuario) => {
@@ -36,11 +43,7 @@ const obtenerItemProductosPorIdPedido = async (pedidoId, usuario) => {
 };
 
 const obtenerItemProductoPorId = async (id, usuario) => {
-    const item = await itemProductoRepository.obtenerPorId(id);
-
-    if (!item) {
-        return null;
-    }
+    const item = await buscarItem(id);
 
     const pedido = await pedidoRepository.obtenerPorId(item.pedidoId);
     verificarAccesoPedido(pedido, usuario);
@@ -55,20 +58,17 @@ const crearItemProducto = async (datos, usuario) => {
     const producto = await productoRepository.obtenerPorId(datos.productoId);
 
     if (!producto) {
-        lanzarError("El producto indicado no existe.", 400);
+        lanzarError("PRODUCTO_NO_ENCONTRADO");
     }
 
     const subTotal = redondear(datos.cantidad * producto.precio);
 
+    // Si el producto ya está en el pedido, Prisma avisa (P2002) y se traduce a ITEM_DUPLICADO
     return await itemProductoRepository.crear({ ...datos, subTotal });
 };
 
 const modificarItemProducto = async (id, datos, usuario) => {
-    const itemExistente = await itemProductoRepository.obtenerPorId(id);
-
-    if (!itemExistente) {
-        lanzarError("Item no encontrado.", 404);
-    }
+    const itemExistente = await buscarItem(id);
 
     const pedido = await pedidoRepository.obtenerPorId(itemExistente.pedidoId);
     verificarAccesoPedido(pedido, usuario);
@@ -83,11 +83,7 @@ const modificarItemProducto = async (id, datos, usuario) => {
 };
 
 const eliminarItemProducto = async (id, usuario) => {
-    const item = await itemProductoRepository.obtenerPorId(id);
-
-    if (!item) {
-        lanzarError("Item no encontrado.", 404);
-    }
+    const item = await buscarItem(id);
 
     const pedido = await pedidoRepository.obtenerPorId(item.pedidoId);
     verificarAccesoPedido(pedido, usuario);
