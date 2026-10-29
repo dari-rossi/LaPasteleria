@@ -1,22 +1,41 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { useAuth } from "./AuthContext";
 
 const SucursalContext = createContext(null);
 const CLAVE = "sucursalId";
 
-// Provisorio: cuando exista el login, esto sale del usuario logueado
-// (un empleado de una sucursal no puede elegir, un administrador sí)
-const PUEDE_ELEGIR = true;
-
+// La interfaz del hook no cambia (sucursalId, puedeElegir, cambiarSucursal),
+// así que las páginas que ya usan useSucursal() siguen funcionando igual.
 export function SucursalProvider({ children }) {
-    // Se guarda en localStorage para que al refrescar la página no se pierda la sucursal
-    const [sucursalId, setSucursalId] = useState(() => {
+    const { usuario, esDuenio } = useAuth();
+
+    // Sucursal que eligió el Dueño. Se guarda en localStorage para que al refrescar no se pierda.
+    const [elegida, setElegida] = useState(() => {
         const guardada = localStorage.getItem(CLAVE);
         return guardada ? Number(guardada) : null;
     });
 
-    // cambiarSucursal(id) elige una sucursal; cambiarSucursal() deja de trabajar en una
+    // Al cerrar sesión se olvida la sucursal elegida,
+    // así la próxima persona que entre no la hereda
+    useEffect(() => {
+        if (!usuario) {
+            setElegida(null);
+            localStorage.removeItem(CLAVE);
+        }
+    }, [usuario]);
+
+    // Dueño: la que eligió (o ninguna, y está en el menú general).
+    // Empleado: siempre la suya, la que vino en el login.
+    const sucursalId = esDuenio ? elegida : (usuario?.sucursalId ?? null);
+
+    // cambiarSucursal(id) elige una sucursal; cambiarSucursal() deja de trabajar en una.
+    // Solo el Dueño puede elegir.
     const cambiarSucursal = (id = null) => {
-        setSucursalId(id);
+        if (!esDuenio) {
+            return;
+        }
+
+        setElegida(id);
 
         if (id === null) {
             localStorage.removeItem(CLAVE);
@@ -26,7 +45,9 @@ export function SucursalProvider({ children }) {
     };
 
     return (
-        <SucursalContext.Provider value={{ sucursalId, puedeElegir: PUEDE_ELEGIR, cambiarSucursal }}>
+        <SucursalContext.Provider
+            value={{ sucursalId, puedeElegir: esDuenio, cambiarSucursal }}
+        >
             {children}
         </SucursalContext.Provider>
     );

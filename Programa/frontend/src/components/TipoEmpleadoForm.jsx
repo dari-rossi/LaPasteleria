@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
 import { crearTipoEmpleado, modificarTipoEmpleado } from "../services/tipoEmpleadoService";
-
-const TIPOS_PERMITIDOS = ["Gerente", "Mozo", "Ayudante de cocina"];
+import { ETIQUETA_ROL, ROLES_CREABLES } from "../config/roles";
 
 const FORMULARIO_VACIO = {
-    tipoEmpleado: "",
-    sueldo: "",
-    usuario: "",
-    contrasenia: ""
+    rol: "",
+    sueldo: ""
 };
 
 function TipoEmpleadoForm({ tipoEditar, onTipoGuardado, onCancelarEdicion }) {
@@ -17,11 +14,8 @@ function TipoEmpleadoForm({ tipoEditar, onTipoGuardado, onCancelarEdicion }) {
     useEffect(() => {
         if (tipoEditar) {
             setFormulario({
-                tipoEmpleado: tipoEditar.tipoEmpleado,
-                sueldo: String(tipoEditar.sueldo),
-                usuario: tipoEditar.usuario ?? "",
-                // La contraseña nunca viene del backend: vacía significa "no cambiarla"
-                contrasenia: ""
+                rol: tipoEditar.rol,
+                sueldo: String(tipoEditar.sueldo)
             });
         }
     }, [tipoEditar]);
@@ -37,26 +31,15 @@ function TipoEmpleadoForm({ tipoEditar, onTipoGuardado, onCancelarEdicion }) {
         e.preventDefault();
         setError("");
 
-        // El backend espera números, pero los inputs devuelven texto
-        const datos = {
-            tipoEmpleado: formulario.tipoEmpleado.trim(),
-            sueldo: Number(formulario.sueldo)
-        };
-
-        // Usuario y contraseña son opcionales: si están vacíos, no se mandan
-        if (formulario.usuario.trim()) {
-            datos.usuario = formulario.usuario.trim();
-        }
-
-        if (formulario.contrasenia) {
-            datos.contrasenia = formulario.contrasenia;
-        }
+        // El backend espera un número, pero el input devuelve texto
+        const sueldo = Number(formulario.sueldo);
 
         try {
             if (tipoEditar) {
-                await modificarTipoEmpleado(tipoEditar.id, datos);
+                // El rol no se puede modificar: solo se manda el sueldo
+                await modificarTipoEmpleado(tipoEditar.idTipoEmpleado, { sueldo });
             } else {
-                await crearTipoEmpleado(datos);
+                await crearTipoEmpleado({ rol: formulario.rol, sueldo });
             }
 
             setFormulario(FORMULARIO_VACIO);
@@ -78,10 +61,6 @@ function TipoEmpleadoForm({ tipoEditar, onTipoGuardado, onCancelarEdicion }) {
         onCancelarEdicion();
     };
 
-    // Al crear, usuario y contraseña van juntos o ninguno de los dos
-    const usuarioCargado = formulario.usuario.trim() !== "";
-    const contraseniaCargada = formulario.contrasenia !== "";
-
     return (
         <div className="card mb-4">
             <div className="card-body">
@@ -99,17 +78,17 @@ function TipoEmpleadoForm({ tipoEditar, onTipoGuardado, onCancelarEdicion }) {
                     <div className="mb-3">
                         <label className="form-label">Puesto</label>
                         <select
-                            name="tipoEmpleado"
+                            name="rol"
                             className="form-select"
-                            value={formulario.tipoEmpleado}
+                            value={formulario.rol}
                             onChange={manejarCambio}
                             disabled={Boolean(tipoEditar)}
                             required
                         >
                             <option value="">Seleccioná un puesto</option>
-                            {TIPOS_PERMITIDOS.map((tipo) => (
-                                <option key={tipo} value={tipo}>
-                                    {tipo}
+                            {ROLES_CREABLES.map((rol) => (
+                                <option key={rol} value={rol}>
+                                    {ETIQUETA_ROL[rol]}
                                 </option>
                             ))}
                         </select>
@@ -127,40 +106,6 @@ function TipoEmpleadoForm({ tipoEditar, onTipoGuardado, onCancelarEdicion }) {
                             onChange={manejarCambio}
                             required
                         />
-                    </div>
-
-                    <div className="mb-3">
-                        <label className="form-label">Usuario (opcional)</label>
-                        <input
-                            type="text"
-                            name="usuario"
-                            className="form-control"
-                            value={formulario.usuario}
-                            onChange={manejarCambio}
-                            required={!tipoEditar && contraseniaCargada}
-                            autoComplete="off"
-                        />
-                        <div className="form-text">
-                            Solo los puestos que inician sesión lo necesitan. De 3 a 30 caracteres: letras, números, punto, guion o guion bajo.
-                        </div>
-                    </div>
-
-                    <div className="mb-3">
-                        <label className="form-label">Contraseña (opcional)</label>
-                        <input
-                            type="password"
-                            name="contrasenia"
-                            className="form-control"
-                            value={formulario.contrasenia}
-                            onChange={manejarCambio}
-                            required={!tipoEditar && usuarioCargado}
-                            autoComplete="new-password"
-                        />
-                        <div className="form-text">
-                            {tipoEditar
-                                ? "Dejala vacía para no cambiarla."
-                                : "Mínimo 8 caracteres."}
-                        </div>
                     </div>
 
                     <button type="submit" className="btn btn-primary me-2">

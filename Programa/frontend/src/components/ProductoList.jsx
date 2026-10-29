@@ -74,7 +74,7 @@ function ProductoList() {
             const datos = await obtenerProductos();
             setProductos(datos);
         } catch (error) {
-            setError("No se pudieron cargar los productos.");
+            setError(error.message);
         }
     };
 
@@ -109,6 +109,7 @@ function ProductoList() {
         if (!confirmar) {
             return;
         }
+        setError("");
 
         try {
             await eliminarProducto(id);
@@ -118,7 +119,7 @@ function ProductoList() {
             );
             setProductoSeleccionado(null);
         } catch (error) {
-            setError("No se pudo eliminar el producto.");
+            setError(error.message);
         }
     };
 
@@ -266,9 +267,9 @@ function ProductoList() {
                                             <th>Nombre</th>
                                             <th>Tipo</th>
                                             <th>Descripción</th>
-                                            <th>Stock mínimo</th>
                                             <th>Precio</th>
                                             <th>Proveedor</th>
+                                            <th>Stock mínimo</th>
                                         </tr>
                                     </thead>
 

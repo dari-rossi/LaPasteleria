@@ -3,6 +3,7 @@ import {
     obtenerTiposEmpleado,
     eliminarTipoEmpleado
 } from "../services/tipoEmpleadoService";
+import { ETIQUETA_ROL } from "../config/roles";
 import TipoEmpleadoForm from "./TipoEmpleadoForm";
 
 // El sueldo puede llegar como número o como texto, por eso se convierte antes de formatear
@@ -55,7 +56,7 @@ function TipoEmpleadoList({ asignacionesVersion = 0, onTiposCambiados }) {
     // El panel para crear o editar un tipo está oculto hasta que se lo pide
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
 
-    // Fila seleccionada (id del tipo): al elegirla aparecen Editar y Eliminar
+    // Fila seleccionada (idTipoEmpleado): al elegirla aparecen Editar y Eliminar
     const [tipoSeleccionado, setTipoSeleccionado] = useState(null);
 
     // Cada vez que cambia este número se vuelve a pedir la lista
@@ -72,9 +73,9 @@ function TipoEmpleadoList({ asignacionesVersion = 0, onTiposCambiados }) {
                     setTipos(datos);
                     setError("");
                 }
-            } catch {
+            } catch (error) {
                 if (!cancelado) {
-                    setError("No se pudieron cargar los tipos de empleado.");
+                    setError(error.message);
                 }
             }
         };
@@ -113,18 +114,20 @@ function TipoEmpleadoList({ asignacionesVersion = 0, onTiposCambiados }) {
 
     const borrarTipo = async (tipo) => {
         const confirmar = window.confirm(
-            `¿Está seguro de que desea eliminar el tipo "${tipo.tipoEmpleado}"? También se va a quitar de las sucursales donde esté asignado.`
+            `¿Está seguro de que desea eliminar el tipo "${ETIQUETA_ROL[tipo.rol] ?? tipo.rol}"? También se va a quitar de las sucursales donde esté asignado.`
         );
 
         if (!confirmar) {
             return;
         }
 
+        setError("");
+
         try {
-            await eliminarTipoEmpleado(tipo.id);
+            await eliminarTipoEmpleado(tipo.idTipoEmpleado);
 
             // Si justo se estaba editando el tipo borrado, se cierra el panel
-            if (tipoEditar && tipoEditar.id === tipo.id) {
+            if (tipoEditar && tipoEditar.idTipoEmpleado === tipo.idTipoEmpleado) {
                 setTipoEditar(null);
                 setMostrarFormulario(false);
             }
@@ -133,7 +136,8 @@ function TipoEmpleadoList({ asignacionesVersion = 0, onTiposCambiados }) {
             recargar();
             avisarCambio();
         } catch (error) {
-            setError(error.message || "No se pudo eliminar el tipo de empleado.");
+            // Ej: "No se puede eliminar: hay usuarios que tienen este rol"
+            setError(error.message);
         }
     };
 
@@ -153,8 +157,7 @@ function TipoEmpleadoList({ asignacionesVersion = 0, onTiposCambiados }) {
         setTipoSeleccionado(tipoSeleccionado === id ? null : id);
     };
 
-    // El tipo elegido solo cuenta si sigue visible con la búsqueda actual
-    const tipoElegido = tipos.find((tipo) => tipo.id === tipoSeleccionado);
+    const tipoElegido = tipos.find((tipo) => tipo.idTipoEmpleado === tipoSeleccionado);
 
     return (
         <div>
@@ -191,7 +194,7 @@ function TipoEmpleadoList({ asignacionesVersion = 0, onTiposCambiados }) {
                     <div className="d-flex align-items-center mb-3">
                         <span className="flex-grow-1 text-truncate me-3">
                             {tipoElegido
-                                ? `Seleccionado: ${tipoElegido.tipoEmpleado}`
+                                ? `Seleccionado: ${ETIQUETA_ROL[tipoElegido.rol] ?? tipoElegido.rol}`
                                 : "Seleccioná una fila para editar o eliminar"}
                         </span>
 
@@ -220,7 +223,6 @@ function TipoEmpleadoList({ asignacionesVersion = 0, onTiposCambiados }) {
                                 <tr>
                                     <th>ID</th>
                                     <th>Puesto</th>
-                                    <th>Usuario</th>
                                     <th>Sueldo</th>
                                     <th title="Suma de la cantidad cargada en todas las sucursales">
                                         Cantidad asignada
@@ -231,18 +233,17 @@ function TipoEmpleadoList({ asignacionesVersion = 0, onTiposCambiados }) {
                             <tbody>
                                 {tipos.map((tipo) => (
                                     <tr
-                                        key={tipo.id}
+                                        key={tipo.idTipoEmpleado}
                                         style={{
                                             cursor: "pointer",
-                                            ...(tipoSeleccionado === tipo.id
+                                            ...(tipoSeleccionado === tipo.idTipoEmpleado
                                                 ? ESTILO_FILA_SELECCIONADA
                                                 : {})
                                         }}
-                                        onClick={() => seleccionarTipo(tipo.id)}
+                                        onClick={() => seleccionarTipo(tipo.idTipoEmpleado)}
                                     >
-                                        <td>{tipo.id}</td>
-                                        <td>{tipo.tipoEmpleado}</td>
-                                        <td>{tipo.usuario ?? "—"}</td>
+                                        <td>{tipo.idTipoEmpleado}</td>
+                                        <td>{ETIQUETA_ROL[tipo.rol] ?? tipo.rol}</td>
                                         <td>{formatearPrecio(tipo.sueldo)}</td>
                                         <td>{tipo.cantidadAsignada}</td>
                                     </tr>
