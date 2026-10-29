@@ -1,5 +1,4 @@
-// Estas rutas cuelgan de /sucursales: /sucursales/:sucursalId/tipos-empleado
-const API_URL = "http://localhost:3000/sucursales";
+import { apiFetch } from "./api";
 
 const obtenerMensajeError = (datos) => {
     return datos.detalles
@@ -7,10 +6,9 @@ const obtenerMensajeError = (datos) => {
         : datos.error;
 };
 
-const enviar = async (url, metodo, cuerpo) => {
-    const response = await fetch(url, {
+const enviar = async (ruta, metodo, cuerpo) => {
+    const response = await apiFetch(ruta, {
         method: metodo,
-        headers: {"Content-Type": "application/json"},
         body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo)
     });
 
@@ -19,11 +17,12 @@ const enviar = async (url, metodo, cuerpo) => {
     if (!response.ok) {
         throw new Error(obtenerMensajeError(datos));
     }
+
     return datos;
 };
 
 export const obtenerTiposDeSucursal = async (sucursalId) => {
-    const response = await fetch(`${API_URL}/${sucursalId}/tipos-empleado`);
+    const response = await apiFetch(`/sucursales/${sucursalId}/tipos-empleado`);
 
     if (!response.ok) {
         const datos = await response.json();
@@ -34,10 +33,10 @@ export const obtenerTiposDeSucursal = async (sucursalId) => {
 };
 
 export const asignarTipoEmpleado = (sucursalId, asignacion) =>
-    enviar(`${API_URL}/${sucursalId}/tipos-empleado`, "POST", asignacion);
+    enviar(`/sucursales/${sucursalId}/tipos-empleado`, "POST", asignacion);
 
 export const modificarCantidad = (sucursalId, tipoEmpleadoId, cantidad) =>
-    enviar(`${API_URL}/${sucursalId}/tipos-empleado/${tipoEmpleadoId}`, "PUT", { cantidad });
+    enviar(`/sucursales/${sucursalId}/tipos-empleado/${tipoEmpleadoId}`, "PUT", { cantidad });
 
 export const quitarTipoEmpleado = (sucursalId, tipoEmpleadoId) =>
-    enviar(`${API_URL}/${sucursalId}/tipos-empleado/${tipoEmpleadoId}`, "DELETE");
+    enviar(`/sucursales/${sucursalId}/tipos-empleado/${tipoEmpleadoId}`, "DELETE");

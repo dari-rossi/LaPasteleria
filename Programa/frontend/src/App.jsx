@@ -1,6 +1,9 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import RequiereSucursal from "./components/RequiereSucursal";
+import RequiereRol from "./components/RequiereRol";
+import LoginPage from "./pages/LoginPage";
 import MenuGeneralPage from "./pages/MenuGeneralPage";
 import SucursalesPage from "./pages/SucursalesPage";
 import SucursalPage from "./pages/SucursalPage";
@@ -14,33 +17,123 @@ import GastosPage from "./pages/GastosPage";
 import TiposEmpleadosPage from "./pages/TiposEmpleadosPage";
 import InformesPage from "./pages/InformesPage";
 
-// Placeholder para las secciones que todavía no tienen página
-const Pendiente = ({ nombre }) => <p className="text-muted">{nombre}: pendiente.</p>;
+const Pendiente = ({ nombre }) => (
+    <p className="text-muted">{nombre}: pendiente.</p>
+);
+
+function RequiereLogin({ children }) {
+    const { autenticado } = useAuth();
+
+    return autenticado
+        ? children
+        : <Navigate to="/login" replace />;
+}
 
 function App() {
+    const { autenticado } = useAuth();
+
     return (
         <>
-            <Navbar />
+            {autenticado && <Navbar />}
+
             <div className="container">
                 <Routes>
-                    {/* Menú general: lo que es de todas las sucursales */}
-                    <Route path="/" element={<MenuGeneralPage />} />
-                    <Route path="/sucursales" element={<SucursalesPage />} />
-                    <Route path="/productos" element={<ProductosPage />} />
-                    <Route path="/tipos-empleado" element={<TiposEmpleadosPage />} />
-                    <Route path="/informes" element={<InformesPage/>} />
+                    <Route
+                        path="/login"
+                        element={
+                            autenticado
+                                ? <Navigate to="/" replace />
+                                : <LoginPage />
+                        }
+                    />
 
-                    {/* Secciones de una sucursal: si no hay una elegida, vuelve al menú general */}
-                    <Route element={<RequiereSucursal />}>
-                        <Route path="/sucursal" element={<SucursalPage />} />
-                        <Route path="/pedidos" element={<PedidosPage />} />
-                        <Route path="/pedidos/:id" element={<PedidoDetallePage />} />
-                        <Route path="/mesas" element={<MesasPage />} />
-                        <Route path="/inventario" element={<InventarioPage />} />
-                        <Route path="/reservas" element={<ReservasPage/>} />
-                        <Route path="/gastos" element={<GastosPage/>} />
-                        <Route path="/planilla" element={<Pendiente nombre="Planilla" />} />
+                    <Route
+                        path="/"
+                        element={
+                            <RequiereLogin>
+                                <MenuGeneralPage />
+                            </RequiereLogin>
+                        }
+                    />
+
+                    {/* Opciones del dueño */}
+                    <Route element={
+                        <RequiereRol roles={["DUENIO"]} />
+                    }>
+                        <Route path="/sucursales" element={<SucursalesPage />} />
+                        <Route path="/informes" element={<InformesPage />} />
                     </Route>
+
+                    {/* Dueño y gerente */}
+                    <Route element={
+                        <RequiereRol roles={["DUENIO", "GERENTE"]} />
+                    }>
+                        <Route path="/tipos-empleado" element={<TiposEmpleadosPage />} />
+                    </Route>
+
+                    {/* Productos: todos pueden consultar */}
+                    <Route element={
+                        <RequiereRol
+                            roles={["DUENIO", "GERENTE", "MOZO", "AYUDANTE_COCINA"]}
+                        />
+                    }>
+                        <Route path="/productos" element={<ProductosPage />} />
+                    </Route>
+
+                    {/* Páginas que requieren una sucursal seleccionada */}
+                    <Route element={
+                        <RequiereLogin>
+                            <RequiereSucursal />
+                        </RequiereLogin>
+                    }>
+                        {/* Dueño y gerente */}
+                        <Route element={
+                            <RequiereRol roles={["DUENIO", "GERENTE"]} />
+                        }>
+                            <Route path="/sucursal" element={<SucursalPage />} />
+                            <Route path="/gastos" element={<GastosPage />} />
+                            <Route
+                                path="/planilla"
+                                element={<Pendiente nombre="Planilla" />}
+                            />
+                        </Route>
+
+                        {/* Dueño, gerente y mozo */}
+                        <Route element={
+                            <RequiereRol roles={["DUENIO", "GERENTE", "MOZO"]} />
+                        }>
+                            <Route path="/mesas" element={<MesasPage />} />
+                        </Route>
+
+                        {/* Dueño, gerente y ayudante de cocina */}
+                        <Route element={
+                            <RequiereRol
+                                roles={["DUENIO", "GERENTE", "AYUDANTE_COCINA"]}
+                            />
+                        }>
+                            <Route path="/inventario" element={<InventarioPage />} />
+                        </Route>
+
+                        {/* Dueño, gerente y mozo */}
+                        <Route element={
+                            <RequiereRol roles={["DUENIO", "GERENTE", "MOZO"]} />
+                        }>
+                            <Route path="/pedidos" element={<PedidosPage />} />
+                            <Route
+                                path="/pedidos/:id"
+                                element={<PedidoDetallePage />}
+                            />
+                        </Route>
+
+                        {/* Solo mozo */}
+                        <Route element={
+                            <RequiereRol roles={["MOZO"]} />
+                        }>
+                            <Route path="/reservas" element={<ReservasPage />} />
+                        </Route>
+                    </Route>
+
+                    <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </div>
         </>

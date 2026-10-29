@@ -1,7 +1,13 @@
-const API_URL = "http://localhost:3000/sucursales";
+import { apiFetch } from "./api";
+
+const obtenerMensajeError = (datos) => {
+    return datos.detalles
+        ? datos.detalles.map((detalle) => detalle.message).join(". ")
+        : datos.error;
+};
 
 export const obtenerSucursales = async () => {
-    const response = await fetch(API_URL);
+    const response = await apiFetch("/sucursales");
 
     if (!response.ok) {
         throw new Error("No se pudieron obtener las sucursales");
@@ -11,7 +17,7 @@ export const obtenerSucursales = async () => {
 };
 
 export const obtenerSucursalPorId = async (id) => {
-    const response = await fetch(`${API_URL}/${id}`);
+    const response = await apiFetch(`/sucursales/${id}`);
 
     if (!response.ok) {
         throw new Error("No se pudo obtener la sucursal");
@@ -21,47 +27,43 @@ export const obtenerSucursalPorId = async (id) => {
 };
 
 export const crearSucursal = async (sucursal) => {
-    const response = await fetch(API_URL, {
+    const response = await apiFetch("/sucursales", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(sucursal)
     });
 
     const datos = await response.json();
 
     if (!response.ok) {
-        throw new Error(
-            datos.detalles
-                ? datos.detalles.map((detalle) => detalle.message).join(". ")
-                : datos.error
-        );
+        throw new Error(obtenerMensajeError(datos));
     }
+
     return datos;
 };
 
 export const modificarSucursal = async (id, sucursal) => {
-    const response = await fetch(`${API_URL}/${id}`, {
+    const response = await apiFetch(`/sucursales/${id}`, {
         method: "PUT",
-        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(sucursal)
     });
 
     const datos = await response.json();
 
     if (!response.ok) {
-        throw new Error(
-            datos.detalles
-                ? datos.detalles.map((detalle) => detalle.message).join(". ")
-                : datos.error
-        );
+        throw new Error(obtenerMensajeError(datos));
     }
+
     return datos;
 };
 
 export const eliminarSucursal = async (id) => {
-    const response = await fetch(`${API_URL}/${id}`, {method: "DELETE"});
+    const response = await apiFetch(`/sucursales/${id}`, {
+        method: "DELETE"
+    });
+
     if (!response.ok) {
         throw new Error("No se pudo eliminar la sucursal");
     }
+
     return await response.json();
 };

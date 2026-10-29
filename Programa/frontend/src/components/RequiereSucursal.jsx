@@ -4,7 +4,9 @@ import { useSucursal } from "../context/SucursalContext";
 function RequiereSucursal() {
     const { sucursalId } = useSucursal();
 
-    return sucursalId ? <Outlet /> : <Navigate to="/" replace />;
+    return sucursalId
+        ? <Outlet />
+        : <Navigate to="/" replace />;
 }
 
 export default RequiereSucursal;

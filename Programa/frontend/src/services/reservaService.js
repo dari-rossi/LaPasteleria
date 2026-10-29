@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/reservas";
+import { apiFetch } from "./api";
 
 const obtenerMensajeError = (datos) => {
     return datos.detalles
@@ -6,13 +6,12 @@ const obtenerMensajeError = (datos) => {
         : datos.error;
 };
 
-// La clave compuesta viaja en la URL; la fecha lleva ":" y hay que codificarla
 const urlReserva = (idMesa, fechaHora) => {
-    return `${API_URL}/${idMesa}/${encodeURIComponent(fechaHora)}`;
+    return `/reservas/${idMesa}/${encodeURIComponent(fechaHora)}`;
 };
 
 export const obtenerReservas = async () => {
-    const response = await fetch(API_URL);
+    const response = await apiFetch("/reservas");
 
     if (!response.ok) {
         throw new Error("No se pudieron obtener las reservas");
@@ -22,9 +21,8 @@ export const obtenerReservas = async () => {
 };
 
 export const crearReserva = async (reserva) => {
-    const response = await fetch(API_URL, {
+    const response = await apiFetch("/reservas", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(reserva)
     });
 
@@ -33,13 +31,13 @@ export const crearReserva = async (reserva) => {
     if (!response.ok) {
         throw new Error(obtenerMensajeError(datos));
     }
+
     return datos;
 };
 
 export const modificarReserva = async (idMesa, fechaHora, reserva) => {
-    const response = await fetch(urlReserva(idMesa, fechaHora), {
+    const response = await apiFetch(urlReserva(idMesa, fechaHora), {
         method: "PUT",
-        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(reserva)
     });
 
@@ -48,13 +46,18 @@ export const modificarReserva = async (idMesa, fechaHora, reserva) => {
     if (!response.ok) {
         throw new Error(obtenerMensajeError(datos));
     }
+
     return datos;
 };
 
 export const eliminarReserva = async (idMesa, fechaHora) => {
-    const response = await fetch(urlReserva(idMesa, fechaHora), {method: "DELETE"});
+    const response = await apiFetch(urlReserva(idMesa, fechaHora), {
+        method: "DELETE"
+    });
+
     if (!response.ok) {
         throw new Error("No se pudo eliminar la reserva");
     }
+
     return await response.json();
 };
