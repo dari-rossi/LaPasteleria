@@ -5,9 +5,9 @@ const FORMULARIO_VACIO = {
     nombre: "",
     tipoProducto: "",
     descripcion: "",
-    stockMin: "",
     precio: "",
-    proveedor: ""
+    proveedor: "",
+    stockMinimo: ""
 };
 
 // Los tipos de producto son solo estos tres (se guardan tal cual, como en el seed)
@@ -24,9 +24,9 @@ function ProductoForm({ productoEditar, onProductoCreado, onProductoModificado, 
                 nombre: productoEditar.nombre,
                 tipoProducto: productoEditar.tipoProducto ?? "",
                 descripcion: productoEditar.descripcion ?? "",
-                stockMin: String(productoEditar.stockMin),
                 precio: String(productoEditar.precio),
-                proveedor: productoEditar.proveedor
+                proveedor: productoEditar.proveedor,
+                stockMinimo: String(productoEditar.stockMinimo)
             });
         }
     }, [productoEditar]);
@@ -45,7 +45,7 @@ function ProductoForm({ productoEditar, onProductoCreado, onProductoModificado, 
         // El input devuelve texto, pero el backend espera que precio sea un número
         const datos = {
             ...formulario,
-            stockMin: Number(formulario.stockMin),
+            stockMinimo: Number(formulario.stockMinimo),
             precio: Number(formulario.precio)
         };
 
@@ -140,9 +140,9 @@ function ProductoForm({ productoEditar, onProductoCreado, onProductoModificado, 
                             type="number"
                             step="1"
                             min="0"
-                            name="stockMin"
+                            name="stockMinimo"
                             className="form-control"
-                            value={formulario.stockMin}
+                            value={formulario.stockMinimo}
                             onChange={manejarCambio}
                         />
                     </div>

@@ -1,3 +1,4 @@
+const { autenticar, permitirRoles } = require("../middlewares/auth.middleware");
 const express = require("express");
 
 const {
@@ -20,7 +21,7 @@ const router = express.Router();
  *       200:
  *         description: Lista de pagos
  */
-router.get("/", obtenerPagos);
+router.get("/",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), obtenerPagos);
 
 /**
  * @swagger
@@ -40,7 +41,7 @@ router.get("/", obtenerPagos);
  *       404:
  *         description: Pago no encontrado
  */
-router.get("/:idPedido", obtenerPagoPorId);
+router.get("/:idPedido",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), obtenerPagoPorId);
 
 
 /**
@@ -75,6 +76,6 @@ router.get("/:idPedido", obtenerPagoPorId);
  *       409:
  *         description: El pedido ya tiene un pago registrado
  */
-router.post("/", validate(pagoSchema), crearPago);
+router.post("/",autenticar, permitirRoles("MOZO"), validate(pagoSchema), crearPago);
 
 module.exports = router;

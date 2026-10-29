@@ -5,7 +5,7 @@ const clave = (sucursalId, tipoEmpleadoId) => ({
 });
 
 const incluirTipoEmpleado = {
-    tipoEmpleado: { select: { id: true, tipoEmpleado: true, sueldo: true } }
+    tipoEmpleado: { select: { idTipoEmpleado: true, rol: true, sueldo: true } }
 };
 
 const obtenerPorSucursal = async (sucursalId) => {

@@ -1,3 +1,4 @@
+const { autenticar, permitirRoles } = require("../middlewares/auth.middleware");
 const express = require("express");
 
 const {
@@ -23,7 +24,7 @@ const router = express.Router();
  *       200:
  *         description: Lista de productos
  */
-router.get("/", obtenerProductos);
+router.get("/", autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO", "AYUDANTE_COCINA"), obtenerProductos);
 
 /**
  * @swagger
@@ -43,7 +44,7 @@ router.get("/", obtenerProductos);
  *       404:
  *         description: Producto no encontrado
  */
-router.get("/:id", obtenerProductoPorId);
+router.get("/:id", autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO", "AYUDANTE_COCINA"), obtenerProductoPorId);
 
 /**
  * @swagger
@@ -60,29 +61,30 @@ router.get("/:id", obtenerProductoPorId);
  *             required:
  *               - nombre
  *               - tipoProducto
- *               - stockMin
  *               - precio
  *               - proveedor
+ *               - stockMinimo
  *             properties:
  *               nombre:
  *                 type: string
  *               tipoProducto:
  *                 type: string
- *               stockMin: 
- *                 type: integer
  *               descripcion:
  *                 type: string
  *               precio:
  *                 type: number
  *               proveedor:
  *                 type: string
+ *               stockMinimo:
+ *                 type: integer
+ *                 example: 10
  *     responses:
  *       201:
  *         description: Producto creado
  *       400:
  *         description: Datos inválidos
  */
-router.post("/", validate(productoSchema), crearProducto);
+router.post("/", autenticar, permitirRoles("DUENIO"), validate(productoSchema), crearProducto);
 
 /**
  * @swagger
@@ -105,29 +107,31 @@ router.post("/", validate(productoSchema), crearProducto);
  *             required:
  *               - nombre
  *               - tipoProducto
- *               - stockMin
+
  *               - precio
  *               - proveedor
+ *               - stockMinimo
  *             properties:
  *               nombre:
  *                 type: string
  *               tipoProducto:
  *                 type: string
- *               stockMin:
- *                 type: integer
  *               descripcion:
  *                 type: string
  *               precio:
  *                 type: number
  *               proveedor:
  *                 type: string
+ *               stockMinimo:
+ *                 type: integer
+ *                 example: 10
  *     responses:
  *       200:
  *         description: Producto modificado
  *       404:
  *         description: Producto no encontrado
  */
-router.put("/:id", modificarProducto);
+router.put("/:id", autenticar, permitirRoles("DUENIO"), validate(productoSchema), modificarProducto);
 
 /**
  * @swagger
@@ -147,6 +151,6 @@ router.put("/:id", modificarProducto);
  *       404:
  *         description: Producto no encontrado
  */
-router.delete("/:id", eliminarProducto);
+router.delete("/:id", autenticar, permitirRoles("DUENIO"), eliminarProducto);
 
 module.exports = router;

@@ -1,14 +1,5 @@
-const normalizar = (texto) =>
-    texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+const ROLES = ["DUENIO", "GERENTE", "MOZO", "AYUDANTE_COCINA"];
 
-const DUENIO = "Dueño";
+const esDuenio = (rol) => rol === "DUENIO";
 
-const TIPOS_PERMITIDOS = ["Gerente", "Mozo", "Ayudante de cocina"];
-
-const esDuenio = (nombre) => normalizar(nombre) === normalizar(DUENIO);
-
-const nombreOficial = (nombre) =>
-    TIPOS_PERMITIDOS.find((tipo) => normalizar(tipo) === normalizar(nombre));
-
-
-module.exports = { DUENIO, TIPOS_PERMITIDOS, esDuenio, nombreOficial };
+module.exports = { ROLES, esDuenio };

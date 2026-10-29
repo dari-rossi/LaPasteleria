@@ -114,6 +114,11 @@ const eliminarReserva = async (req, res) => {
         res.json({mensaje: "reserva eliminada"});
     } catch (error) {
         console.error(error);
+
+        if (error.status) {
+            return res.status(error.status).json({error: error.message});
+        }
+
         res.status(500).json({error: "Error al eliminar la reserva"});
     }
 };

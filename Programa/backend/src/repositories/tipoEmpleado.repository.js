@@ -1,32 +1,28 @@
 const prisma = require("../prisma");
 
-const filtroPorTipo = (tipoEmpleado) => {
-    return tipoEmpleado ? { tipoEmpleado: { contains: tipoEmpleado } } : {};
-};
-
-const obtenerTodos = async (tipoEmpleado) => {
+const obtenerTodos = async (rol) => {
     return await prisma.tipoEmpleado.findMany({
-        where: filtroPorTipo(tipoEmpleado),
-        include: { sucursales: { select: { cantidad: true } } },
-        orderBy: { tipoEmpleado: "asc" }
+        where: rol ? { rol: rol } : {},
+        include: { sucursales: { select: { sucursalId: true, cantidad: true } } },
+        orderBy: { idTipoEmpleado: "asc" }
     });
 };
 
 const obtenerPorId = async (id) => {
     return await prisma.tipoEmpleado.findUnique({
-        where: { id: id }
+        where: { idTipoEmpleado: id }
     });
 };
 
-const obtenerPorUsuario = async (usuario) => {
+const obtenerPorRol = async (rol) => {
     return await prisma.tipoEmpleado.findUnique({
-        where: { usuario: usuario }
+        where: { rol: rol }
     });
 };
 
-const obtenerPorNombre = async (tipoEmpleado) => {
-    return await prisma.tipoEmpleado.findUnique({
-        where: { tipoEmpleado: tipoEmpleado }
+const contarUsuarios = async (id) => {
+    return await prisma.usuario.count({
+        where: { idTipoEmpleado: id }
     });
 };
 
@@ -36,22 +32,22 @@ const crear = async (datos) => {
 
 const modificar = async (id, datos) => {
     return await prisma.tipoEmpleado.update({
-        where: { id: id },
+        where: { idTipoEmpleado: id },
         data: datos
     });
 };
 
 const eliminar = async (id) => {
     return await prisma.tipoEmpleado.delete({
-        where: { id: id }
+        where: { idTipoEmpleado: id }
     });
 };
 
 module.exports = {
     obtenerTodos,
     obtenerPorId,
-    obtenerPorUsuario,
-    obtenerPorNombre,
+    obtenerPorRol,
+    contarUsuarios,
     crear,
     modificar,
     eliminar

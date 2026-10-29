@@ -153,7 +153,7 @@ function InventarioList({ sucursalId }) {
         // Stock bajo: el stock llegó al stock mínimo del producto o está por debajo
         const coincideStock =
             filtro === "todos" ||
-            inventario.stock <= inventario.producto.stockMin;
+            inventario.stock <= inventario.producto.stockMinimo;
 
         const coincideProducto =
             idProductoFiltro === "" ||
@@ -295,7 +295,7 @@ function InventarioList({ sucursalId }) {
                                                 key={inventario.id}
                                                 style={{
                                                     cursor: "pointer",
-                                                    ...(inventario.stock < inventario.producto.stockMin
+                                                    ...(inventario.stock < inventario.producto.stockMinimo
                                                         ? ESTILO_STOCK_BAJO
                                                         : {}),
                                                     ...(inventarioSeleccionado === inventario.id
@@ -310,7 +310,7 @@ function InventarioList({ sucursalId }) {
                                                 <td>{inventario.producto.nombre}</td>
                                                 <td>{inventario.producto.tipoProducto}</td>
                                                 <td>{formatearPrecio(inventario.producto.precio)}</td>
-                                                <td>{inventario.producto.stockMin}</td>
+                                                <td>{inventario.producto.stockMinimo}</td>
                                                 <td>{inventario.stock}</td>
                                             </tr>
                                         ))}

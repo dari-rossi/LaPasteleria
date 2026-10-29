@@ -1,7 +1,15 @@
 const prisma = require("../prisma");
 
 const obtenerTodos = async () => {
-    return await prisma.pago.findMany();
+    return await prisma.pago.findMany({
+        include: {
+            pedido: {
+                select: {
+                    sucursalId: true
+                }
+            }
+        }
+    });
 };
 
 const obtenerPorId = async (idPedido) => {

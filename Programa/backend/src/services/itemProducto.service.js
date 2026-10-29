@@ -10,24 +10,47 @@ const lanzarError = (mensaje, status) => {
 
 const redondear = (valor) => Math.round(valor * 100) / 100;
 
-const obtenerItemProductos = async () => {
-    return await itemProductoRepository.obtenerTodos();
+const verificarAccesoPedido = (pedido, usuario) => {
+    if (!pedido) {
+        lanzarError("El pedido indicado no existe.", 404);
+    }
+
+    if (Number(pedido.sucursalId) !== Number(usuario.sucursalId)) {
+        lanzarError("No tenés permiso para operar sobre pedidos de otra sucursal.", 403);
+    }
 };
 
-const obtenerItemProductosPorIdPedido = async (pedidoId) => {
+const obtenerItemProductos = async (usuario) => {
+    const items = await itemProductoRepository.obtenerTodos();
+
+    return items.filter(item =>
+        Number(item.pedido.sucursalId) === Number(usuario.sucursalId)
+    );
+};
+
+const obtenerItemProductosPorIdPedido = async (pedidoId, usuario) => {
+    const pedido = await pedidoRepository.obtenerPorId(pedidoId);
+    verificarAccesoPedido(pedido, usuario);
+
     return await itemProductoRepository.obtenerPorIdPedido(pedidoId);
 };
 
-const obtenerItemProductoPorId = async (id) => {
-    return await itemProductoRepository.obtenerPorId(id);
+const obtenerItemProductoPorId = async (id, usuario) => {
+    const item = await itemProductoRepository.obtenerPorId(id);
+
+    if (!item) {
+        return null;
+    }
+
+    const pedido = await pedidoRepository.obtenerPorId(item.pedidoId);
+    verificarAccesoPedido(pedido, usuario);
+
+    return item;
 };
 
-const crearItemProducto = async (datos) => {
+const crearItemProducto = async (datos, usuario) => {
     const pedido = await pedidoRepository.obtenerPorId(datos.pedidoId);
-
-    if (!pedido) {
-        lanzarError("El pedido indicado no existe.", 400);
-    }
+    verificarAccesoPedido(pedido, usuario);
 
     const producto = await productoRepository.obtenerPorId(datos.productoId);
 
@@ -40,17 +63,35 @@ const crearItemProducto = async (datos) => {
     return await itemProductoRepository.crear({ ...datos, subTotal });
 };
 
-// Solo se puede cambiar la cantidad: el subTotal se recalcula con el precio del producto
-const modificarItemProducto = async (id, datos) => {
+const modificarItemProducto = async (id, datos, usuario) => {
     const itemExistente = await itemProductoRepository.obtenerPorId(id);
-    const producto = await productoRepository.obtenerPorId(itemExistente.productoId);
 
+    if (!itemExistente) {
+        lanzarError("Item no encontrado.", 404);
+    }
+
+    const pedido = await pedidoRepository.obtenerPorId(itemExistente.pedidoId);
+    verificarAccesoPedido(pedido, usuario);
+
+    const producto = await productoRepository.obtenerPorId(itemExistente.productoId);
     const subTotal = redondear(datos.cantidad * producto.precio);
 
-    return await itemProductoRepository.modificar(id, { cantidad: datos.cantidad, subTotal });
+    return await itemProductoRepository.modificar(id, {
+        cantidad: datos.cantidad,
+        subTotal
+    });
 };
 
-const eliminarItemProducto = async (id) => {
+const eliminarItemProducto = async (id, usuario) => {
+    const item = await itemProductoRepository.obtenerPorId(id);
+
+    if (!item) {
+        lanzarError("Item no encontrado.", 404);
+    }
+
+    const pedido = await pedidoRepository.obtenerPorId(item.pedidoId);
+    verificarAccesoPedido(pedido, usuario);
+
     return await itemProductoRepository.eliminar(id);
 };
 

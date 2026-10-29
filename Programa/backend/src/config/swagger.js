@@ -9,7 +9,21 @@ const options = {
             description: "API REST de La Pastelería"
         },
         servers: [
-            {url: "http://localhost:3000"}
+            { url: "http://localhost:3000" }
+        ],
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: "http",
+                    scheme: "bearer",
+                    bearerFormat: "JWT"
+                }
+            }
+        },
+        security: [
+            {
+                bearerAuth: []
+            }
         ]
     },
     apis: ["./src/routes/*.js"]

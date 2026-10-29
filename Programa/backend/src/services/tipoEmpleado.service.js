@@ -1,135 +1,76 @@
 const tipoEmpleadoRepository = require("../repositories/tipoEmpleado.repository");
-const { TIPOS_PERMITIDOS, esDuenio, nombreOficial } = require("../config/tiposEmpleado");
+const { ROLES, esDuenio } = require("../config/tiposEmpleado");
+const { lanzarError } = require("../config/errores");
 
-const lanzarError = (mensaje, status) => {
-    const error = new Error(mensaje);
-    error.status = status;
-    throw error;
-};
+// Busca un tipo de empleado o lanza 404. El Dueño no se gestiona desde acá
+const buscarTipo = async (id) => {
+    const tipo = await tipoEmpleadoRepository.obtenerPorId(id);
 
-// La contraseña nunca sale por la API
-const sinContrasenia = (tipo) => {
-    const { contrasenia, ...resto } = tipo;
-    return resto;
-};
-
-const validarNombre = (nombre) => {
-    if (esDuenio(nombre)) {
-        lanzarError("El Dueño es una cuenta predefinida: ya es parte del sistema.", 409);
+    if (!tipo || esDuenio(tipo.rol)) {
+        lanzarError("TIPO_EMPLEADO_NO_ENCONTRADO");
     }
 
-    const oficial = nombreOficial(nombre);
-
-    if (!oficial) {
-        lanzarError(
-            `"${nombre.trim()}" no es parte del sistema. Los tipos de empleado permitidos son: ${TIPOS_PERMITIDOS.join(", ")}.`,
-            400
-        );
-    }
-
-    return oficial;
+    return tipo;
 };
 
-const verificarNombreLibre = async (nombre, idActual) => {
-    const existente = await tipoEmpleadoRepository.obtenerPorNombre(nombre);
-
-    if (existente && existente.id !== idActual) {
-        lanzarError(`El tipo "${nombre}" ya es parte del sistema.`, 409);
+const obtenerTiposEmpleado = async (rol, usuario) => {
+    if (rol && !ROLES.includes(rol)) {
+        lanzarError("ROL_INVALIDO", `El rol debe ser uno de: ${ROLES.join(", ")}`);
     }
-};
 
-const verificarUsuarioLibre = async (usuario, idActual) => {
-    const existente = await tipoEmpleadoRepository.obtenerPorUsuario(usuario);
+    const tipos = await tipoEmpleadoRepository.obtenerTodos(rol);
 
-    if (existente && existente.id !== idActual) {
-        lanzarError("Ya existe un tipo de empleado con ese usuario.", 409);
-    }
-};
-
-const obtenerTiposEmpleado = async (tipoEmpleado) => {
-    const tipos = await tipoEmpleadoRepository.obtenerTodos(tipoEmpleado);
-
-    // Cada tipo trae la cantidad total de empleados: suma lo cargado en todas las sucursales
     return tipos
-        .filter((tipo) => !esDuenio(tipo.tipoEmpleado))
-        .map(({ sucursales, contrasenia, ...tipo }) => ({
-            ...tipo,
-            cantidadAsignada: sucursales.reduce((total, item) => total + item.cantidad, 0)
-        }));
+        .filter((tipo) => !esDuenio(tipo.rol))
+        .map(({ sucursales, ...tipo }) => {
+            const cantidadAsignada = usuario.rol === "DUENIO"
+                ? sucursales.reduce((total, item) => total + item.cantidad, 0)
+                : sucursales
+                    .filter((item) => Number(item.sucursalId) === Number(usuario.sucursalId))
+                    .reduce((total, item) => total + item.cantidad, 0);
+
+            return {
+                ...tipo,
+                cantidadAsignada
+            };
+        });
 };
 
 const obtenerTipoEmpleadoPorId = async (id) => {
-    const tipo = await tipoEmpleadoRepository.obtenerPorId(id);
-
-    return tipo && !esDuenio(tipo.tipoEmpleado) ? sinContrasenia(tipo) : null;
+    return await buscarTipo(id);
 };
 
 const crearTipoEmpleado = async (datos) => {
-    const nombre = validarNombre(datos.tipoEmpleado);
-
-    // usuario y contraseña se cargan juntos o ninguno de los dos
-    if (Boolean(datos.usuario) !== Boolean(datos.contrasenia)) {
-        lanzarError("El usuario y la contraseña deben cargarse juntos.", 400);
+    if (esDuenio(datos.rol)) {
+        lanzarError("ROL_DUENIO_PREDEFINIDO");
     }
 
-    await verificarNombreLibre(nombre);
+    const existente = await tipoEmpleadoRepository.obtenerPorRol(datos.rol);
 
-    if (datos.usuario) {
-        await verificarUsuarioLibre(datos.usuario);
+    if (existente) {
+        lanzarError("TIPO_EMPLEADO_DUPLICADO");
     }
 
-    const tipo = await tipoEmpleadoRepository.crear({
-        tipoEmpleado: nombre,
-        sueldo: datos.sueldo,
-        usuario: datos.usuario ?? null,
-        contrasenia: datos.contrasenia ?? null
+    return await tipoEmpleadoRepository.crear({
+        rol: datos.rol,
+        sueldo: datos.sueldo
     });
-
-    return sinContrasenia(tipo);
 };
 
 const modificarTipoEmpleado = async (id, datos) => {
-    const existente = await tipoEmpleadoRepository.obtenerPorId(id);
+    await buscarTipo(id);
 
-    if (!existente || esDuenio(existente.tipoEmpleado)) {
-        lanzarError("Tipo de empleado no encontrado", 404);
-    }
-    const nombre = validarNombre(datos.tipoEmpleado);
-
-    await verificarNombreLibre(nombre, id);
-
-    const cambios = {
-        tipoEmpleado: nombre,
-        sueldo: datos.sueldo
-    };
-
-    if (datos.usuario) {
-        await verificarUsuarioLibre(datos.usuario, id);
-        cambios.usuario = datos.usuario;
-    }
-
-    if (datos.contrasenia) {
-        cambios.contrasenia = datos.contrasenia;
-    }
-
-    // Después del cambio, usuario y contraseña tienen que estar los dos o ninguno
-    const usuarioFinal = cambios.usuario ?? existente.usuario;
-    const contraseniaFinal = cambios.contrasenia ?? existente.contrasenia;
-
-    if (Boolean(usuarioFinal) !== Boolean(contraseniaFinal)) {
-        lanzarError("El usuario y la contraseña deben cargarse juntos.", 400);
-    }
-
-    const tipo = await tipoEmpleadoRepository.modificar(id, cambios);
-
-    return sinContrasenia(tipo);
+    // El rol no se modifica: solo el sueldo
+    return await tipoEmpleadoRepository.modificar(id, { sueldo: datos.sueldo });
 };
 
 const eliminarTipoEmpleado = async (id) => {
-    const existente = await tipoEmpleadoRepository.obtenerPorId(id);
+    await buscarTipo(id);
 
-    if (!existente || esDuenio(existente.tipoEmpleado)) {
-        lanzarError("Tipo de empleado no encontrado", 404);
+    const usuarios = await tipoEmpleadoRepository.contarUsuarios(id);
+
+    if (usuarios > 0) {
+        lanzarError("TIPO_EMPLEADO_CON_USUARIOS");
     }
 
     return await tipoEmpleadoRepository.eliminar(id);

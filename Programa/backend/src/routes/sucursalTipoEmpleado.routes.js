@@ -1,3 +1,4 @@
+const { autenticar, permitirRoles } = require("../middlewares/auth.middleware");
 const express = require("express");
 
 const {
@@ -33,7 +34,7 @@ const router = express.Router();
  *       404:
  *         description: Sucursal no encontrada
  */
-router.get("/:sucursalId/tipos-empleado", obtenerTiposEmpleadoDeSucursal);
+router.get("/:sucursalId/tipos-empleado",autenticar, permitirRoles("DUENIO", "GERENTE"), obtenerTiposEmpleadoDeSucursal);
 
 /**
  * @swagger
@@ -72,7 +73,7 @@ router.get("/:sucursalId/tipos-empleado", obtenerTiposEmpleadoDeSucursal);
  *       409:
  *         description: El tipo de empleado ya está asignado a la sucursal
  */
-router.post("/:sucursalId/tipos-empleado", validate(asignarTipoEmpleadoSchema), asignarTipoEmpleado);
+router.post("/:sucursalId/tipos-empleado",autenticar, permitirRoles("DUENIO", "GERENTE"), validate(asignarTipoEmpleadoSchema), asignarTipoEmpleado);
 
 /**
  * @swagger
@@ -111,7 +112,7 @@ router.post("/:sucursalId/tipos-empleado", validate(asignarTipoEmpleadoSchema), 
  *       404:
  *         description: El tipo de empleado no está asignado a la sucursal
  */
-router.put("/:sucursalId/tipos-empleado/:tipoEmpleadoId", validate(modificarCantidadSchema), modificarCantidad);
+router.put("/:sucursalId/tipos-empleado/:tipoEmpleadoId",autenticar, permitirRoles("DUENIO", "GERENTE"), validate(modificarCantidadSchema), modificarCantidad);
 
 /**
  * @swagger
@@ -136,6 +137,6 @@ router.put("/:sucursalId/tipos-empleado/:tipoEmpleadoId", validate(modificarCant
  *       404:
  *         description: El tipo de empleado no está asignado a la sucursal
  */
-router.delete("/:sucursalId/tipos-empleado/:tipoEmpleadoId", quitarTipoEmpleado);
+router.delete("/:sucursalId/tipos-empleado/:tipoEmpleadoId",autenticar, permitirRoles("DUENIO", "GERENTE"), quitarTipoEmpleado);
 
 module.exports = router;

@@ -13,11 +13,14 @@ const obtenerGastos = async (req, res) => {
 
         const nombre = typeof req.query.nombre === "string" ? req.query.nombre.trim() : undefined;
 
-        const gastos = await gastoService.obtenerGastos({ sucursalId, nombre });
+        const gastos = await gastoService.obtenerGastos({ sucursalId, nombre }, req.usuario);
 
         res.json(gastos);
     } catch (error) {
         console.error(error);
+        if (error.status) {
+            return res.status(error.status).json({error: error.message});
+        }
         res.status(500).json({error: "Error al obtener los gastos"});
     }
 };
@@ -29,7 +32,7 @@ const obtenerGastoPorId = async (req, res) => {
             return res.status(400).json({error: "ID incorrecto"});
         }
 
-        const gasto = await gastoService.obtenerGastoPorId(id);
+        const gasto = await gastoService.obtenerGastoPorId(id, req.usuario);
 
         if (!gasto) {
             return res.status(404).json({error: "Gasto no encontrado"});
@@ -38,13 +41,16 @@ const obtenerGastoPorId = async (req, res) => {
         res.json(gasto);
     } catch (error) {
         console.error(error);
+        if (error.status) {
+            return res.status(error.status).json({error: error.message});
+        }
         res.status(500).json({error: "Error al obtener el gasto"});
     }
 };
 
 const crearGasto = async (req, res) => {
     try {
-        const gasto = await gastoService.crearGasto(req.body);
+        const gasto = await gastoService.crearGasto(req.body, req.usuario);
 
         res.status(201).json(gasto);
     } catch (error) {
@@ -60,18 +66,13 @@ const crearGasto = async (req, res) => {
 
 const modificarGasto = async (req, res) => {
     try {
-        const id = Number(req.params.id);
-        if(!Number.isInteger(id) || id <= 0){
-            return res.status(400).json({error: "ID incorrecto"});
-        }
-
         const gastoExistente = await gastoService.obtenerGastoPorId(id);
 
         if (!gastoExistente) {
             return res.status(404).json({error: "Gasto no encontrado"});
         }
 
-        const gasto = await gastoService.modificarGasto(id, req.body);
+        const gasto = await gastoService.modificarGasto(id, req.body, req.usuario);
 
         res.json(gasto);
     } catch (error) {
@@ -98,11 +99,14 @@ const eliminarGasto = async (req, res) => {
             return res.status(404).json({error: "Gasto no encontrado"});
         }
 
-        await gastoService.eliminarGasto(id);
+        await gastoService.eliminarGasto(id, req.usuario);
 
         res.json({mensaje: "Gasto eliminado"});
     } catch (error) {
         console.error(error);
+        if (error.status) {
+            return res.status(error.status).json({error: error.message});
+        }
         res.status(500).json({error: "Error al eliminar el gasto"});
     }
 };

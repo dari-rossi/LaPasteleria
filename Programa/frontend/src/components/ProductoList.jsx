@@ -290,9 +290,9 @@ function ProductoList() {
                                                 <td>{producto.nombre}</td>
                                                 <td>{producto.tipoProducto}</td>
                                                 <td>{producto.descripcion}</td>
-                                                <td>{producto.stockMin}</td>
                                                 <td>{formatearPrecio(producto.precio)}</td>
                                                 <td>{producto.proveedor}</td>
+                                                <td>{producto.stockMinimo}</td>
                                             </tr>
                                         ))}
                                     </tbody>

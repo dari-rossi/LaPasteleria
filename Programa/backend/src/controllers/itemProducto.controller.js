@@ -2,11 +2,14 @@ const itemProductoService = require("../services/itemProducto.service");
 
 const obtenerItemProductos = async (req, res) => {
     try {
-        const items = await itemProductoService.obtenerItemProductos();
+        const items = await itemProductoService.obtenerItemProductos(req.usuario);
 
         res.json(items);
     } catch (error) {
         console.error(error);
+        if (error.status) {
+            return res.status(error.status).json({error: error.message});
+        }
         res.status(500).json({error: "Error al obtener los items"});
     }
 };
@@ -18,15 +21,17 @@ const obtenerItemProductosPorIdPedido = async (req, res) => {
             return res.status(400).json({error: "ID de pedido incorrecto"});
         }
 
-        const items = await itemProductoService.obtenerItemProductosPorIdPedido(pedidoId);
+        const items = await itemProductoService.obtenerItemProductosPorIdPedido(pedidoId, req.usuario);
 
         res.json(items);
     } catch (error) {
         console.error(error);
-        res.status(500).json({error: "Error al obtener los items del pedido"});
+        if (error.status) {
+            return res.status(error.status).json({error: error.message});
+        }
+        res.status(500).json({error: "Error al obtener el item"});
     }
 };
-
 const obtenerItemProductoPorId = async (req, res) => {
     try {
         const id = Number(req.params.id);
@@ -34,7 +39,7 @@ const obtenerItemProductoPorId = async (req, res) => {
             return res.status(400).json({error: "ID incorrecto"});
         }
 
-        const item = await itemProductoService.obtenerItemProductoPorId(id);
+        const item = await itemProductoService.obtenerItemProductoPorId(id, req.usuario);
 
         if (!item) {
             return res.status(404).json({error: "Item no encontrado"});
@@ -49,7 +54,7 @@ const obtenerItemProductoPorId = async (req, res) => {
 
 const crearItemProducto = async (req, res) => {
     try {
-        const item = await itemProductoService.crearItemProducto(req.body);
+        const item = await itemProductoService.crearItemProducto(req.body, req.usuario);
 
         res.status(201).json(item);
     } catch (error) {
@@ -81,7 +86,7 @@ const modificarItemProducto = async (req, res) => {
             return res.status(404).json({error: "Item no encontrado"});
         }
 
-        const item = await itemProductoService.modificarItemProducto(id, req.body);
+        const item = await itemProductoService.modificarItemProducto(id, req.body, req.usuario);
 
         res.json(item);
     } catch (error) {
@@ -108,7 +113,7 @@ const eliminarItemProducto = async (req, res) => {
             return res.status(404).json({error: "Item no encontrado"});
         }
 
-        await itemProductoService.eliminarItemProducto(id);
+        await itemProductoService.eliminarItemProducto(id, req.usuario);
 
         res.json({mensaje: "Item eliminado"});
     } catch (error) {

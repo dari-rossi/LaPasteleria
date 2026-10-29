@@ -2,40 +2,63 @@ const sucursalTipoEmpleadoRepository = require("../repositories/sucursalTipoEmpl
 const sucursalRepository = require("../repositories/sucursal.repository");
 const tipoEmpleadoRepository = require("../repositories/tipoEmpleado.repository");
 const { esDuenio } = require("../config/tiposEmpleado");
+const { lanzarError } = require("../config/errores");
 
-const lanzarError = (mensaje, status) => {
-    const error = new Error(mensaje);
-    error.status = status;
-    throw error;
+const verificarPermisoSucursal = (sucursalId, usuario) => {
+    if (!usuario) {
+        lanzarError("SESION_REQUERIDA");
+    }
+
+    if (usuario.rol !== "DUENIO" && usuario.rol !== "GERENTE") {
+        lanzarError("SIN_PERMISOS");
+    }
+
+    if (usuario.rol === "GERENTE" &&
+        Number(usuario.sucursalId) !== Number(sucursalId)) {
+        lanzarError("OTRA_SUCURSAL");
+    }
 };
 
 const verificarSucursal = async (sucursalId) => {
     const sucursal = await sucursalRepository.obtenerPorId(sucursalId);
 
     if (!sucursal) {
-        lanzarError("Sucursal no encontrada", 404);
+        lanzarError("SUCURSAL_NO_ENCONTRADA");
     }
 };
 
-const obtenerTiposEmpleadoDeSucursal = async (sucursalId) => {
+// Busca la asignación sucursal + tipo de empleado o lanza 404
+const buscarAsignacion = async (sucursalId, tipoEmpleadoId) => {
+    const asignacion = await sucursalTipoEmpleadoRepository.obtenerPorId(sucursalId, tipoEmpleadoId);
+
+    if (!asignacion) {
+        lanzarError("ASIGNACION_NO_ENCONTRADA");
+    }
+
+    return asignacion;
+};
+
+const obtenerTiposEmpleadoDeSucursal = async (sucursalId, usuario) => {
+    verificarPermisoSucursal(sucursalId, usuario);
     await verificarSucursal(sucursalId);
 
     return await sucursalTipoEmpleadoRepository.obtenerPorSucursal(sucursalId);
 };
 
-const asignarTipoEmpleado = async (sucursalId, datos) => {
+const asignarTipoEmpleado = async (sucursalId, datos, usuario) => {
+    verificarPermisoSucursal(sucursalId, usuario);
     await verificarSucursal(sucursalId);
 
     const tipo = await tipoEmpleadoRepository.obtenerPorId(datos.tipoEmpleadoId);
 
-    if (!tipo || esDuenio(tipo.tipoEmpleado)) {
-        lanzarError("Tipo de empleado no encontrado", 404);
+    if (!tipo || esDuenio(tipo.rol)) {
+        lanzarError("TIPO_EMPLEADO_NO_ENCONTRADO");
     }
 
     const asignacion = await sucursalTipoEmpleadoRepository.obtenerPorId(sucursalId, datos.tipoEmpleadoId);
 
     if (asignacion) {
-        lanzarError("Ese tipo de empleado ya está asignado a la sucursal. Modificá su cantidad.", 409);
+        lanzarError("ASIGNACION_DUPLICADA");
     }
 
     return await sucursalTipoEmpleadoRepository.crear({
@@ -45,22 +68,16 @@ const asignarTipoEmpleado = async (sucursalId, datos) => {
     });
 };
 
-const modificarCantidad = async (sucursalId, tipoEmpleadoId, datos) => {
-    const asignacion = await sucursalTipoEmpleadoRepository.obtenerPorId(sucursalId, tipoEmpleadoId);
-
-    if (!asignacion) {
-        lanzarError("Ese tipo de empleado no está asignado a la sucursal", 404);
-    }
+const modificarCantidad = async (sucursalId, tipoEmpleadoId, datos, usuario) => {
+    verificarPermisoSucursal(sucursalId, usuario);
+    await buscarAsignacion(sucursalId, tipoEmpleadoId);
 
     return await sucursalTipoEmpleadoRepository.modificarCantidad(sucursalId, tipoEmpleadoId, datos.cantidad);
 };
 
-const quitarTipoEmpleado = async (sucursalId, tipoEmpleadoId) => {
-    const asignacion = await sucursalTipoEmpleadoRepository.obtenerPorId(sucursalId, tipoEmpleadoId);
-
-    if (!asignacion) {
-        lanzarError("Ese tipo de empleado no está asignado a la sucursal", 404);
-    }
+const quitarTipoEmpleado = async (sucursalId, tipoEmpleadoId, usuario) => {
+    verificarPermisoSucursal(sucursalId, usuario);
+    await buscarAsignacion(sucursalId, tipoEmpleadoId);
 
     return await sucursalTipoEmpleadoRepository.eliminar(sucursalId, tipoEmpleadoId);
 };

@@ -1,3 +1,4 @@
+const { autenticar, permitirRoles } = require("../middlewares/auth.middleware");
 const express = require("express");
 
 const {
@@ -35,7 +36,7 @@ const router = express.Router();
  *       400:
  *         description: ID de sucursal incorrecto
  */
-router.get("/", obtenerGastos);
+router.get("/",autenticar, permitirRoles("DUENIO", "GERENTE"), obtenerGastos);
 
 /**
  * @swagger
@@ -57,7 +58,7 @@ router.get("/", obtenerGastos);
  *       404:
  *         description: Gasto no encontrado
  */
-router.get("/:id", obtenerGastoPorId);
+router.get("/:id",autenticar, permitirRoles("DUENIO", "GERENTE"), obtenerGastoPorId);
 
 /**
  * @swagger
@@ -93,7 +94,7 @@ router.get("/:id", obtenerGastoPorId);
  *       400:
  *         description: Datos inválidos o sucursal inexistente
  */
-router.post("/", validate(gastoSchema), crearGasto);
+router.post("/",autenticar, permitirRoles("DUENIO", "GERENTE"), validate(gastoSchema), crearGasto);
 
 /**
  * @swagger
@@ -137,7 +138,7 @@ router.post("/", validate(gastoSchema), crearGasto);
  *       404:
  *         description: Gasto no encontrado
  */
-router.put("/:id", validate(gastoSchema), modificarGasto);
+router.put("/:id",autenticar, permitirRoles("DUENIO", "GERENTE"), validate(gastoSchema), modificarGasto);
 
 /**
  * @swagger
@@ -157,6 +158,6 @@ router.put("/:id", validate(gastoSchema), modificarGasto);
  *       404:
  *         description: Gasto no encontrado
  */
-router.delete("/:id", eliminarGasto);
+router.delete("/:id",autenticar, permitirRoles("DUENIO", "GERENTE"), eliminarGasto);
 
 module.exports = router;

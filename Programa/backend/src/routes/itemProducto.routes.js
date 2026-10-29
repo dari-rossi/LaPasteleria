@@ -1,3 +1,4 @@
+const { autenticar, permitirRoles } = require("../middlewares/auth.middleware");
 const express = require("express");
 
 const {
@@ -23,7 +24,7 @@ const router = express.Router();
  *       200:
  *         description: Lista de items
  */
-router.get("/", obtenerItemProductos);
+router.get("/",autenticar, permitirRoles("MOZO"), obtenerItemProductos);
 
 /**
  * @swagger
@@ -41,7 +42,7 @@ router.get("/", obtenerItemProductos);
  *       200:
  *         description: Items del pedido
  */
-router.get("/pedido/:pedidoId", obtenerItemProductosPorIdPedido);
+router.get("/pedido/:pedidoId",autenticar, permitirRoles("MOZO"), obtenerItemProductosPorIdPedido);
 
 /**
  * @swagger
@@ -61,7 +62,7 @@ router.get("/pedido/:pedidoId", obtenerItemProductosPorIdPedido);
  *       404:
  *         description: Item no encontrado
  */
-router.get("/:id", obtenerItemProductoPorId);
+router.get("/:id",autenticar, permitirRoles("MOZO"), obtenerItemProductoPorId);
 
 /**
  * @swagger
@@ -94,7 +95,7 @@ router.get("/:id", obtenerItemProductoPorId);
  *       409:
  *         description: Ese producto ya está cargado en el pedido
  */
-router.post("/", validate(itemProductoSchema), crearItemProducto);
+router.post("/",autenticar, permitirRoles("MOZO"), validate(itemProductoSchema), crearItemProducto);
 
 /**
  * @swagger
@@ -125,7 +126,7 @@ router.post("/", validate(itemProductoSchema), crearItemProducto);
  *       404:
  *         description: Item no encontrado
  */
-router.put("/:id", validate(itemProductoModificarSchema), modificarItemProducto);
+router.put("/:id",autenticar, permitirRoles("MOZO"), validate(itemProductoModificarSchema), modificarItemProducto);
 
 /**
  * @swagger
@@ -145,6 +146,6 @@ router.put("/:id", validate(itemProductoModificarSchema), modificarItemProducto)
  *       404:
  *         description: Item no encontrado
  */
-router.delete("/:id", eliminarItemProducto);
+router.delete("/:id",autenticar, permitirRoles("MOZO"), eliminarItemProducto);
 
 module.exports = router;
