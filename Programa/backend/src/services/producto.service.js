@@ -1,27 +1,38 @@
 const productoRepository = require("../repositories/producto.repository");
+const { lanzarError } = require("../config/errores");
 
-// Obtener todos los productos
+// Busca un producto o lanza 404
+const buscarProducto = async (id) => {
+    const producto = await productoRepository.obtenerPorId(id);
+
+    if (!producto) {
+        lanzarError("PRODUCTO_NO_ENCONTRADO");
+    }
+
+    return producto;
+};
+
 const obtenerProductos = async () => {
     return await productoRepository.obtenerTodos();
 };
 
-// Obtener un producto por ID
 const obtenerProductoPorId = async (id) => {
-    return await productoRepository.obtenerPorId(id);
+    return await buscarProducto(id);
 };
 
-// Crear un producto
 const crearProducto = async (datos) => {
     return await productoRepository.crear(datos);
 };
 
-// Modificar un producto
 const modificarProducto = async (id, datos) => {
+    await buscarProducto(id);
+
     return await productoRepository.modificar(id, datos);
 };
 
-// Eliminar un producto
 const eliminarProducto = async (id) => {
+    await buscarProducto(id);
+
     return await productoRepository.eliminar(id);
 };
 

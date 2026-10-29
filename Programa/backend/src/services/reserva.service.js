@@ -1,29 +1,48 @@
 const reservaRepository = require("../repositories/reserva.repository");
+const mesaRepository = require("../repositories/mesa.repository");
+const { lanzarError } = require("../config/errores");
 
-// Obtener todas las reservas
+// Busca una reserva por su clave compuesta (mesa + fecha y hora) o lanza 404
+const buscarReserva = async (idMesa, fechaHora) => {
+    const reserva = await reservaRepository.obtenerPorId(idMesa, fechaHora);
+
+    if (!reserva) {
+        lanzarError("RESERVA_NO_ENCONTRADA");
+    }
+
+    return reserva;
+};
+
 const obtenerReservas = async () => {
     return await reservaRepository.obtenerTodos();
 };
 
-// Obtener una reserva por su clave compuesta (mesa + fecha y hora)
 const obtenerReservaPorId = async (idMesa, fechaHora) => {
-    return await reservaRepository.obtenerPorId(idMesa, fechaHora);
+    return await buscarReserva(idMesa, fechaHora);
 };
 
-// Crear una reserva (dejo un espacio por si más adelante fuese necesario validar acá que la mesa exista, que no haya solapamiento o que cantComensales no supere maxComensales)
+// Más adelante se puede validar acá que no haya solapamiento o que cantComensales no supere maxComensales
 const crearReserva = async (datos) => {
+    const mesa = await mesaRepository.obtenerPorId(datos.idMesa);
 
+    if (!mesa) {
+        lanzarError("MESA_NO_ENCONTRADA");
+    }
+
+    // Si ya hay una reserva para esa mesa y hora, Prisma avisa (P2002) y se traduce a RESERVA_DUPLICADA
     return await reservaRepository.crear(datos);
 };
 
-// Modificar una reserva (la clave idMesa + fechaHora no se modifica)
+// La clave idMesa + fechaHora no se modifica
 const modificarReserva = async (idMesa, fechaHora, datos) => {
+    await buscarReserva(idMesa, fechaHora);
 
     return await reservaRepository.modificar(idMesa, fechaHora, datos);
 };
 
-// Eliminar una reserva
 const eliminarReserva = async (idMesa, fechaHora) => {
+    await buscarReserva(idMesa, fechaHora);
+
     return await reservaRepository.eliminar(idMesa, fechaHora);
 };
 
