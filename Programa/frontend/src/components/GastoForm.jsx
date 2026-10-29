@@ -1,42 +1,17 @@
 import { useEffect, useState } from "react";
 import { crearGasto, modificarGasto } from "../services/gastoService";
-import { obtenerSucursales } from "../services/sucursalService";
 
 const FORMULARIO_VACIO = {
     nombre: "",
     costo: "",
-    fechaGasto: "",
-    sucursalId: ""
+    fechaGasto: ""
 };
 
-function GastoForm({ gastoEditar, onGastoGuardado, onCancelarEdicion }) {
+// sucursalId llega desde afuera: el gasto se crea siempre para la sucursal
+// en la que se está trabajando, por eso no se elige acá
+function GastoForm({ sucursalId, gastoEditar, onGastoGuardado, onCancelarEdicion }) {
     const [formulario, setFormulario] = useState(FORMULARIO_VACIO);
-    const [sucursales, setSucursales] = useState([]);
     const [error, setError] = useState("");
-
-    useEffect(() => {
-        let cancelado = false;
-
-        const cargarSucursales = async () => {
-            try {
-                const datos = await obtenerSucursales();
-
-                if (!cancelado) {
-                    setSucursales(datos);
-                }
-            } catch {
-                if (!cancelado) {
-                    setError("No se pudieron cargar las sucursales.");
-                }
-            }
-        };
-
-        cargarSucursales();
-
-        return () => {
-            cancelado = true;
-        };
-    }, []);
 
     useEffect(() => {
         if (gastoEditar) {
@@ -44,8 +19,7 @@ function GastoForm({ gastoEditar, onGastoGuardado, onCancelarEdicion }) {
                 nombre: gastoEditar.nombre,
                 costo: String(gastoEditar.costo),
                 // El backend manda "2026-10-06T00:00:00.000Z": el input de fecha solo quiere AAAA-MM-DD
-                fechaGasto: gastoEditar.fechaGasto.slice(0, 10),
-                sucursalId: String(gastoEditar.sucursalId)
+                fechaGasto: gastoEditar.fechaGasto.slice(0, 10)
             });
         }
     }, [gastoEditar]);
@@ -66,7 +40,7 @@ function GastoForm({ gastoEditar, onGastoGuardado, onCancelarEdicion }) {
             nombre: formulario.nombre.trim(),
             costo: Number(formulario.costo),
             fechaGasto: formulario.fechaGasto,
-            sucursalId: Number(formulario.sucursalId)
+            sucursalId: Number(sucursalId)
         };
 
         try {
@@ -147,26 +121,8 @@ function GastoForm({ gastoEditar, onGastoGuardado, onCancelarEdicion }) {
                         />
                     </div>
 
-                    <div className="mb-3">
-                        <label className="form-label">Sucursal</label>
-                        <select
-                            name="sucursalId"
-                            className="form-select"
-                            value={formulario.sucursalId}
-                            onChange={manejarCambio}
-                            required
-                        >
-                            <option value="">Seleccioná una sucursal</option>
-                            {sucursales.map((sucursal) => (
-                                <option key={sucursal.id} value={sucursal.id}>
-                                    {sucursal.id} - {sucursal.direccion}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
                     <button type="submit" className="btn btn-primary me-2">
-                        {gastoEditar ? "Guardar cambios" : "Crear gasto"}
+                        {gastoEditar ? "Guardar cambios" : "Agregar gasto"}
                     </button>
 
                     {gastoEditar && (

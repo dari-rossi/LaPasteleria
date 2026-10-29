@@ -107,6 +107,7 @@ router.post("/", autenticar, permitirRoles("DUENIO"), validate(productoSchema), 
  *             required:
  *               - nombre
  *               - tipoProducto
+
  *               - precio
  *               - proveedor
  *               - stockMinimo

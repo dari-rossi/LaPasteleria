@@ -10,6 +10,16 @@ export const obtenerSucursales = async () => {
     return await response.json();
 };
 
+export const obtenerSucursalPorId = async (id) => {
+    const response = await fetch(`${API_URL}/${id}`);
+
+    if (!response.ok) {
+        throw new Error("No se pudo obtener la sucursal");
+    }
+
+    return await response.json();
+};
+
 export const crearSucursal = async (sucursal) => {
     const response = await fetch(API_URL, {
         method: "POST",

@@ -46,10 +46,17 @@ const eliminarReserva = async (idMesa, fechaHora) => {
     return await reservaRepository.eliminar(idMesa, fechaHora);
 };
 
+const cancelarReservasVencidas = async () => {
+    const limite = new Date(Date.now() - MARGEN_RESERVA_MS);
+
+    return await reservaRepository.cancelarVencidas(limite);
+};
+
 module.exports = {
     obtenerReservas,
     obtenerReservaPorId,
     crearReserva,
     modificarReserva,
-    eliminarReserva
+    eliminarReserva,
+    cancelarReservasVencidas
 };

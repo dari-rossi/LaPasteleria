@@ -87,6 +87,7 @@ async function main() {
         { sucursalId: 2, productoId: 15, stock: 15 }
     ];
 
+
     for (const inventario of inventarios) {
         await prisma.inventario.upsert({
             where: {

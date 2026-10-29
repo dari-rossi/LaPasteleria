@@ -40,9 +40,6 @@ router.get('/', autenticar, permitirRoles("DUENIO", "GERENTE", "AYUDANTE_COCINA"
  *               stock:
  *                 type: integer
  *                 example: 50
- *               stockMin:
- *                 type: integer
- *                 example: 10
  *               sucursalId:
  *                 type: integer
  *                 example: 1

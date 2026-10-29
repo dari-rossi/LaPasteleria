@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { obtenerGastos, eliminarGasto } from "../services/gastoService";
-import { obtenerSucursales } from "../services/sucursalService";
 import GastoForm from "./GastoForm";
 
-// La fecha llega como "2026-10-06T00:00:00.000Z". Se arma a mano (sin new Date)
-// para que la zona horaria no la corra un día
+const GASTOS_POR_PAGINA = 10;
+
 const formatearFecha = (fecha) => {
     const [anio, mes, dia] = fecha.slice(0, 10).split("-");
 
@@ -18,42 +17,59 @@ const formatearCosto = (costo) => {
     });
 };
 
-function GastoList() {
+// Botones Editar y Eliminar: suaves por defecto, con el color fuerte al pasar el mouse
+const ESTILO_BOTON_EDITAR = {
+    "--bs-btn-bg": "#fff3cd",
+    "--bs-btn-border-color": "#ffe69c",
+    "--bs-btn-color": "#664d03",
+    "--bs-btn-hover-bg": "#ffc107",
+    "--bs-btn-hover-border-color": "#ffc107",
+    "--bs-btn-hover-color": "#000"
+};
+
+const ESTILO_BOTON_ELIMINAR = {
+    "--bs-btn-bg": "#f8d7da",
+    "--bs-btn-border-color": "#f1aeb5",
+    "--bs-btn-color": "#58151c",
+    "--bs-btn-hover-bg": "#dc3545",
+    "--bs-btn-hover-border-color": "#dc3545",
+    "--bs-btn-hover-color": "#fff"
+};
+
+// Fila seleccionada: borde gris separado de la fila, igual que las mesas
+const ESTILO_FILA_SELECCIONADA = {
+    outline: "4px solid #757575",
+    outlineOffset: "2px"
+};
+
+// Deja un margen alrededor de la tabla para que el borde de la fila seleccionada no se corte
+// (el margen negativo compensa el relleno, así la tabla queda alineada igual que antes)
+const ESTILO_CONTENEDOR_TABLA = {
+    padding: 8,
+    margin: -8
+};
+
+// sucursalId llega desde afuera: la sucursal se elige al iniciar el sistema,
+// y esta tabla siempre muestra los gastos de esa sucursal
+function GastoList({ sucursalId }) {
     const [gastos, setGastos] = useState([]);
-    const [sucursales, setSucursales] = useState([]);
     const [error, setError] = useState("");
     const [gastoEditar, setGastoEditar] = useState(null);
 
-    // Filtros del listado (los dos son opcionales y se combinan)
+    // El panel para crear o editar un gasto está oculto hasta que se lo pide
+    const [mostrarFormulario, setMostrarFormulario] = useState(false);
+
+    // Fila seleccionada (id del gasto): al elegirla aparecen Editar y Eliminar
+    const [gastoSeleccionado, setGastoSeleccionado] = useState(null);
+
+    // Búsqueda por nombre (opcional)
     const [filtroNombre, setFiltroNombre] = useState("");
-    const [filtroSucursalId, setFiltroSucursalId] = useState("");
+
+    // Paginación
+    const [pagina, setPagina] = useState(1);
 
     // Cada vez que cambia este número se vuelve a pedir la lista
     const [version, setVersion] = useState(0);
-
-    useEffect(() => {
-        let cancelado = false;
-
-        const cargarSucursales = async () => {
-            try {
-                const datos = await obtenerSucursales();
-
-                if (!cancelado) {
-                    setSucursales(datos);
-                }
-            } catch {
-                if (!cancelado) {
-                    setError("No se pudieron cargar las sucursales.");
-                }
-            }
-        };
-
-        cargarSucursales();
-
-        return () => {
-            cancelado = true;
-        };
-    }, []);
 
     useEffect(() => {
         let cancelado = false;
@@ -62,7 +78,7 @@ function GastoList() {
             try {
                 const datos = await obtenerGastos({
                     nombre: filtroNombre.trim(),
-                    sucursalId: filtroSucursalId
+                    sucursalId
                 });
 
                 if (!cancelado) {
@@ -82,7 +98,7 @@ function GastoList() {
         return () => {
             cancelado = true;
         };
-    }, [filtroNombre, filtroSucursalId, version]);
+    }, [filtroNombre, sucursalId, version]);
 
     const recargar = () => {
         setVersion((actual) => actual + 1);
@@ -92,11 +108,13 @@ function GastoList() {
     // para respetar el orden y los filtros que estén puestos
     const gastoGuardado = () => {
         setGastoEditar(null);
+        setMostrarFormulario(false);
         recargar();
     };
 
     const editarGasto = (gasto) => {
         setGastoEditar(gasto);
+        setMostrarFormulario(true);
     };
 
     const borrarGasto = async (id) => {
@@ -111,10 +129,13 @@ function GastoList() {
         try {
             await eliminarGasto(id);
 
+            // Si justo se estaba editando el gasto borrado, se cierra el panel
             if (gastoEditar && gastoEditar.id === id) {
                 setGastoEditar(null);
+                setMostrarFormulario(false);
             }
 
+            setGastoSeleccionado(null);
             recargar();
         } catch (error) {
             setError(error.message || "No se pudo eliminar el gasto.");
@@ -123,57 +144,88 @@ function GastoList() {
 
     const cancelarEdicion = () => {
         setGastoEditar(null);
+        setMostrarFormulario(false);
     };
 
-    // Suma de los gastos que se están viendo (respeta los filtros)
+    // El botón abre el panel para crear un gasto, o lo cierra si ya está abierto
+    const alternarFormulario = () => {
+        setGastoEditar(null);
+        setMostrarFormulario(!mostrarFormulario);
+    };
+
+    // Un clic selecciona la fila y otro clic sobre la misma la deselecciona
+    const seleccionarGasto = (id) => {
+        setGastoSeleccionado(gastoSeleccionado === id ? null : id);
+    };
+
+    // Al cambiar la búsqueda se vuelve a la primera página
+    const cambiarFiltroNombre = (e) => {
+        setFiltroNombre(e.target.value);
+        setPagina(1);
+    };
+
+    const gastoElegido = gastos.find((gasto) => gasto.id === gastoSeleccionado);
+
     const total = Math.round(
-        gastos.reduce((suma, gasto) => suma + gasto.costo, 0) * 100
+        gastos.reduce((suma, gasto) => suma + Number(gasto.costo), 0) * 100
     ) / 100;
 
-    const hayFiltros = filtroNombre.trim() !== "" || filtroSucursalId !== "";
+    const hayFiltros = filtroNombre.trim() !== "";
+
+    const totalPaginas = Math.max(
+        1,
+        Math.ceil(gastos.length / GASTOS_POR_PAGINA)
+    );
+
+    const paginaActual = Math.min(pagina, totalPaginas);
+
+    const inicio = (paginaActual - 1) * GASTOS_POR_PAGINA;
+    const gastosDePagina = gastos.slice(inicio, inicio + GASTOS_POR_PAGINA);
 
     return (
         <div>
-            <h2 className="mb-3">Gastos</h2>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                <h2 className="mb-0">Gastos</h2>
 
-            <GastoForm
-                gastoEditar={gastoEditar}
-                onGastoGuardado={gastoGuardado}
-                onCancelarEdicion={cancelarEdicion}
-            />
-
-            <div className="row g-2 mb-3">
-                <div className="col-md-6">
-                    <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Buscar por nombre"
-                        value={filtroNombre}
-                        onChange={(e) => setFiltroNombre(e.target.value)}
-                    />
-                </div>
-
-                <div className="col-md-6">
-                    <select
-                        className="form-select"
-                        value={filtroSucursalId}
-                        onChange={(e) => setFiltroSucursalId(e.target.value)}
-                    >
-                        <option value="">Todas las sucursales</option>
-                        {sucursales.map((sucursal) => (
-                            <option key={sucursal.id} value={sucursal.id}>
-                                {sucursal.id} - {sucursal.direccion}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                <button
+                    className="btn btn-primary"
+                    onClick={alternarFormulario}
+                >
+                    {mostrarFormulario ? "Cerrar" : "+ Agregar gasto"}
+                </button>
             </div>
+
+            {mostrarFormulario && (
+                <GastoForm
+                    sucursalId={sucursalId}
+                    gastoEditar={gastoEditar}
+                    onGastoGuardado={gastoGuardado}
+                    onCancelarEdicion={cancelarEdicion}
+                />
+            )}
 
             {error && (
                 <div className="alert alert-danger">
                     {error}
                 </div>
             )}
+
+            {}
+            <div className="card mb-4">
+                <div className="card-body">
+                    <div className="row">
+                        <div className="col-md-6">
+                            <label className="form-label">Nombre</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={filtroNombre}
+                                onChange={cambiarFiltroNombre}
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             {gastos.length === 0 && !error ? (
                 <p>
@@ -182,54 +234,96 @@ function GastoList() {
                         : "No hay gastos registrados."}
                 </p>
             ) : (
-                <div className="table-responsive">
-                    <table className="table table-striped table-bordered">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nombre</th>
-                                <th>Costo</th>
-                                <th>Fecha</th>
-                                <th>Sucursal</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
+                <>
+                    {/* Siempre ocupa el mismo lugar, así la tabla no se mueve al seleccionar */}
+                    <div className="d-flex align-items-center mb-3">
+                        <span className="flex-grow-1 text-truncate me-3">
+                            {gastoElegido
+                                ? `Seleccionado: ${gastoElegido.nombre}`
+                                : "Seleccioná una fila para editar o eliminar"}
+                        </span>
 
-                        <tbody>
-                            {gastos.map((gasto) => (
-                                <tr key={gasto.id}>
-                                    <td>{gasto.id}</td>
-                                    <td>{gasto.nombre}</td>
-                                    <td>{formatearCosto(gasto.costo)}</td>
-                                    <td>{formatearFecha(gasto.fechaGasto)}</td>
-                                    <td>{gasto.sucursal.direccion}</td>
-                                    <td>
-                                        <button
-                                            className="btn btn-warning btn-sm me-2"
-                                            onClick={() => editarGasto(gasto)}
-                                        >
-                                            Editar
-                                        </button>
+                        <div className={`flex-shrink-0 ${gastoElegido ? "" : "invisible"}`}>
+                            <button
+                                className="btn btn-warning btn-sm me-2"
+                                style={ESTILO_BOTON_EDITAR}
+                                onClick={() => editarGasto(gastoElegido)}
+                            >
+                                Editar
+                            </button>
 
-                                        <button
-                                            className="btn btn-danger btn-sm"
-                                            onClick={() => borrarGasto(gasto.id)}
-                                        >
-                                            Eliminar
-                                        </button>
-                                    </td>
+                            <button
+                                className="btn btn-danger btn-sm"
+                                style={ESTILO_BOTON_ELIMINAR}
+                                onClick={() => borrarGasto(gastoElegido.id)}
+                            >
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="table-responsive" style={ESTILO_CONTENEDOR_TABLA}>
+                        <table className="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Costo</th>
+                                    <th>Fecha</th>
                                 </tr>
-                            ))}
-                        </tbody>
+                            </thead>
 
-                        <tfoot>
-                            <tr>
-                                <th colSpan="2">Total de los gastos</th>
-                                <th colSpan="4">{formatearCosto(total)}</th>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
+                            <tbody>
+                                {gastosDePagina.map((gasto) => (
+                                    <tr
+                                        key={gasto.id}
+                                        style={{
+                                            cursor: "pointer",
+                                            ...(gastoSeleccionado === gasto.id
+                                                ? ESTILO_FILA_SELECCIONADA
+                                                : {})
+                                        }}
+                                        onClick={() => seleccionarGasto(gasto.id)}
+                                    >
+                                        <td>{gasto.id}</td>
+                                        <td>{gasto.nombre}</td>
+                                        <td>{formatearCosto(gasto.costo)}</td>
+                                        <td>{formatearFecha(gasto.fechaGasto)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+
+                            <tfoot>
+                                <tr>
+                                    <th colSpan="2">Total de los gastos</th>
+                                    <th colSpan="2">{formatearCosto(total)}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div className="d-flex justify-content-between align-items-center">
+                        <button
+                            className="btn btn-outline-secondary btn-sm"
+                            onClick={() => setPagina(paginaActual - 1)}
+                            disabled={paginaActual === 1}
+                        >
+                            Anterior
+                        </button>
+
+                        <span>
+                            Página {paginaActual} de {totalPaginas}
+                        </span>
+
+                        <button
+                            className="btn btn-outline-secondary btn-sm"
+                            onClick={() => setPagina(paginaActual + 1)}
+                            disabled={paginaActual === totalPaginas}
+                        >
+                            Siguiente
+                        </button>
+                    </div>
+                </>
             )}
         </div>
     );

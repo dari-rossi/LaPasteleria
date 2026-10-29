@@ -1,4 +1,5 @@
 const prisma = require("../prisma");
+const { MARGEN_RESERVA_MS } = require("../config/reservas");
 
 // Todo lo que se devuelve junto con el pedido
 const incluir = {
@@ -31,6 +32,30 @@ const crear = async (datos) => {
     });
 };
 
+const crearOcupandoMesa = async (datos) => {
+    const ahora = new Date();
+    const desde = new Date(ahora.getTime() - MARGEN_RESERVA_MS);
+    const hasta = new Date(ahora.getTime() + MARGEN_RESERVA_MS);
+
+    const [pedido] = await prisma.$transaction([
+        prisma.pedido.create({ data: datos, include: incluir }),
+        prisma.mesa.update({
+            where: { idMesa: datos.mesaId },
+            data: { estado: "Ocupada" }
+        }),
+        prisma.reserva.updateMany({
+            where: {
+                idMesa: datos.mesaId,
+                estadoReserva: "Activa",
+                fechaHoraReservada: { gte: desde, lte: hasta }
+            },
+            data: { estadoReserva: "En curso" }
+        })
+    ]);
+
+    return pedido;
+};
+
 const modificar = async (id, datos) => {
     return await prisma.pedido.update({
         where: { idPedido: id },
@@ -49,6 +74,7 @@ module.exports = {
     obtenerTodos,
     obtenerPorId,
     crear,
+    crearOcupandoMesa,
     modificar,
     eliminar
 };

@@ -21,6 +21,17 @@ const { rutaNoEncontrada, manejarErrores } = require("./src/config/errores");
 const app = express();
 const PORT = 3000;
 
+const revisarReservas = async () => {
+    try {
+        await reservaService.cancelarReservasVencidas();
+    } catch (error) {
+        console.error("Error al cancelar las reservas vencidas:", error);
+    }
+};
+
+revisarReservas();
+setInterval(revisarReservas, 60 * 1000);
+
 app.use(express.json());
 app.use(cors());
 

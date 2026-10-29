@@ -6,8 +6,12 @@ const FORMULARIO_VACIO = {
     tipoProducto: "",
     descripcion: "",
     precio: "",
-    proveedor: ""
+    proveedor: "",
+    stockMinimo: ""
 };
+
+// Los tipos de producto son solo estos tres (se guardan tal cual, como en el seed)
+const TIPOS_PRODUCTO = ["Día", "Noche", "Ambos"];
 
 function ProductoForm({ productoEditar, onProductoCreado, onProductoModificado, onCancelarEdicion }) {
     const [formulario, setFormulario] = useState(FORMULARIO_VACIO);
@@ -18,10 +22,11 @@ function ProductoForm({ productoEditar, onProductoCreado, onProductoModificado, 
         if (productoEditar) {
             setFormulario({
                 nombre: productoEditar.nombre,
-                tipoProducto: productoEditar.tipoProducto,
+                tipoProducto: productoEditar.tipoProducto ?? "",
                 descripcion: productoEditar.descripcion ?? "",
                 precio: String(productoEditar.precio),
-                proveedor: productoEditar.proveedor
+                proveedor: productoEditar.proveedor,
+                stockMinimo: String(productoEditar.stockMinimo)
             });
         }
     }, [productoEditar]);
@@ -40,6 +45,7 @@ function ProductoForm({ productoEditar, onProductoCreado, onProductoModificado, 
         // El input devuelve texto, pero el backend espera que precio sea un número
         const datos = {
             ...formulario,
+            stockMinimo: Number(formulario.stockMinimo),
             precio: Number(formulario.precio)
         };
 
@@ -102,13 +108,19 @@ function ProductoForm({ productoEditar, onProductoCreado, onProductoModificado, 
 
                     <div className="mb-3">
                         <label className="form-label">Tipo de producto</label>
-                        <input
-                            type="text"
+                        <select
                             name="tipoProducto"
-                            className="form-control"
+                            className="form-select"
                             value={formulario.tipoProducto}
                             onChange={manejarCambio}
-                        />
+                        >
+                            <option value="">Seleccioná un tipo</option>
+                            {TIPOS_PRODUCTO.map((tipo) => (
+                                <option key={tipo} value={tipo}>
+                                    {tipo}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="mb-3">
@@ -118,6 +130,19 @@ function ProductoForm({ productoEditar, onProductoCreado, onProductoModificado, 
                             name="descripcion"
                             className="form-control"
                             value={formulario.descripcion}
+                            onChange={manejarCambio}
+                        />
+                    </div>
+
+                    <div className="mb-3">
+                        <label className="form-label">Stock mínimo</label>
+                        <input
+                            type="number"
+                            step="1"
+                            min="0"
+                            name="stockMinimo"
+                            className="form-control"
+                            value={formulario.stockMinimo}
                             onChange={manejarCambio}
                         />
                     </div>

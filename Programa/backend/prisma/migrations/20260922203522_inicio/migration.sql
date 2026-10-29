@@ -7,6 +7,7 @@ CREATE TABLE `Producto` (
     `precio` DOUBLE NOT NULL,
     `precioFinal` DOUBLE NULL,
     `proveedor` VARCHAR(191) NOT NULL,
+    `stockMinimo` INTEGER NOT NULL,
 
     PRIMARY KEY (`idProducto`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -15,7 +16,6 @@ CREATE TABLE `Producto` (
 CREATE TABLE `Inventario` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `stock` INTEGER NOT NULL,
-    `stockMin` INTEGER NOT NULL,
     `sucursalId` INTEGER NOT NULL,
     `productoId` INTEGER NOT NULL,
 
