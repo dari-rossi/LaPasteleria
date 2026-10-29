@@ -41,6 +41,10 @@ const crearPagando = async (datos, mesaId) => {
         prisma.mesa.update({
             where: { idMesa: mesaId },
             data: { estado: "Libre" }
+        }),
+        prisma.reserva.updateMany({
+            where: { idMesa: mesaId, estadoReserva: "En curso" },
+            data: { estadoReserva: "Finalizada" }
         })
     ]);
 

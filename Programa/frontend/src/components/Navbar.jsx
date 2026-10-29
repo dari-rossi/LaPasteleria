@@ -2,7 +2,8 @@ import { NavLink } from "react-router-dom";
 
 const SECCIONES = [
     { to: "/mesas", label: "Mesas" },
-    { to: "/pedidos", label: "Pedidos" }
+    { to: "/pedidos", label: "Pedidos" },
+    { to: "/reservas", label: "Reservas" }
 ];
 
 function Navbar() {

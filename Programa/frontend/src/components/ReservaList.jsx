@@ -1,26 +1,11 @@
 import { useEffect, useState } from "react";
-import {
-    obtenerReservas,
-    eliminarReserva
-} from "../services/reservaService";
-import ReservaForm from "./ReservaForm";
-
-const formatearFecha = (iso) => {
-    return new Date(iso).toLocaleString("es-AR", {
-        dateStyle: "short",
-        timeStyle: "short"
-    });
-};
-
-// La identidad de una reserva es la mesa + la fecha y hora
-const mismaReserva = (a, b) => {
-    return a.idMesa === b.idMesa && a.fechaHoraReservada === b.fechaHoraReservada;
-};
+import { obtenerReservas, modificarReserva } from "../services/reservaService";
+import { ESTADOS_RESERVA, COLORES_ESTADO_RESERVA, formatearFechaHora } from "../models/Reserva";
 
 function ReservaList() {
     const [reservas, setReservas] = useState([]);
     const [error, setError] = useState("");
-    const [reservaEditar, setReservaEditar] = useState(null);
+    const [filtroEstado, setFiltroEstado] = useState("");
 
     useEffect(() => {
         cargarReservas();
@@ -28,82 +13,66 @@ function ReservaList() {
 
     const cargarReservas = async () => {
         try {
-            const datos = await obtenerReservas();
-            setReservas(datos);
+            setReservas(await obtenerReservas());
+            setError("");
         } catch (error) {
             setError("No se pudieron cargar las reservas.");
         }
     };
 
-    const agregarReserva = (nuevaReserva) => {
-        setReservas([...reservas, nuevaReserva]);
-    };
+    const cancelarReserva = async (reserva) => {
+    if (!window.confirm("¿Cancelar esta reserva? El horario queda libre.")) {
+        return;
+    }
 
-    const editarReserva = (reserva) => {
-        setReservaEditar(reserva);
-    };
+    try {
+        await modificarReserva(reserva.idMesa, reserva.fechaHoraReservada, {
+            cantComensales: reserva.cantComensales,
+            estadoReserva: "Cancelada",
+            dni: reserva.dni
+        });
+        await cargarReservas();
+    } catch (error) {
+        setError(error.message || "No se pudo cancelar la reserva.");
+    }
+};
 
-    const actualizarReserva = (reservaModificada) => {
-        setReservas(
-            reservas.map((reserva) =>
-                mismaReserva(reserva, reservaModificada)
-                    ? reservaModificada
-                    : reserva
-            )
-        );
-
-        setReservaEditar(null);
-    };
-
-    const borrarReserva = async (reservaABorrar) => {
-        const confirmar = window.confirm(
-            "¿Está seguro de que desea eliminar esta reserva?"
-        );
-
-        if (!confirmar) {
-            return;
-        }
-
-        try {
-            await eliminarReserva(
-                reservaABorrar.idMesa,
-                reservaABorrar.fechaHoraReservada
-            );
-
-            setReservas(
-                reservas.filter((reserva) => !mismaReserva(reserva, reservaABorrar))
-            );
-        } catch (error) {
-            setError("No se pudo eliminar la reserva.");
-        }
-    };
-
-    const cancelarEdicion = () => {
-        setReservaEditar(null);
-    };
+    const reservasVisibles = reservas
+        .filter((reserva) => !filtroEstado || reserva.estadoReserva === filtroEstado)
+        .sort((a, b) => new Date(b.fechaHoraReservada) - new Date(a.fechaHoraReservada));
 
     return (
         <div>
             <h2 className="mb-3">Reservas</h2>
 
-            <ReservaForm
-                reservaEditar={reservaEditar}
-                onReservaCreada={agregarReserva}
-                onReservaModificada={actualizarReserva}
-                onCancelarEdicion={cancelarEdicion}
-            />
+            {error && <div className="alert alert-danger">{error}</div>}
 
-            {error && (
-                <div className="alert alert-danger">
-                    {error}
-                </div>
-            )}
+            <div className="d-flex align-items-center gap-2 mb-3">
+                <select
+                    className="form-select w-auto"
+                    value={filtroEstado}
+                    onChange={(e) => setFiltroEstado(e.target.value)}
+                >
+                    <option value="">Todos los estados</option>
+                    {ESTADOS_RESERVA.map((estado) => (
+                        <option key={estado} value={estado}>{estado}</option>
+                    ))}
+                </select>
 
-            {reservas.length === 0 && !error ? (
-                <p>No hay reservas registradas.</p>
+                <button className="btn btn-outline-secondary" onClick={cargarReservas}>
+                    Refrescar
+                </button>
+
+                <span className="text-muted ms-2">
+                    {reservasVisibles.length} reserva(s)
+                </span>
+            </div>
+
+            {reservasVisibles.length === 0 && !error ? (
+                <p>No hay reservas para mostrar.</p>
             ) : (
                 <div className="table-responsive">
-                    <table className="table table-striped table-bordered">
+                    <table className="table table-striped table-bordered align-middle">
                         <thead>
                             <tr>
                                 <th>Mesa</th>
@@ -116,31 +85,26 @@ function ReservaList() {
                         </thead>
 
                         <tbody>
-                            {reservas.map((reserva) => (
+                            {reservasVisibles.map((reserva) => (
                                 <tr key={`${reserva.idMesa}-${reserva.fechaHoraReservada}`}>
                                     <td>{reserva.idMesa}</td>
-                                    <td>{formatearFecha(reserva.fechaHoraReservada)}</td>
+                                    <td>{formatearFechaHora(reserva.fechaHoraReservada)}</td>
                                     <td>{reserva.cantComensales}</td>
-                                    <td>{reserva.estadoReserva}</td>
+                                    <td>
+                                        <span className={`badge ${COLORES_ESTADO_RESERVA[reserva.estadoReserva]}`}>
+                                            {reserva.estadoReserva}
+                                        </span>
+                                    </td>
                                     <td>{reserva.dni}</td>
                                     <td>
-                                        <button
-                                            className="btn btn-warning btn-sm me-2"
-                                            onClick={() =>
-                                                editarReserva(reserva)
-                                            }
-                                        >
-                                            Editar
-                                        </button>
-
-                                        <button
-                                            className="btn btn-danger btn-sm"
-                                            onClick={() =>
-                                                borrarReserva(reserva)
-                                            }
-                                        >
-                                            Eliminar
-                                        </button>
+                                        {reserva.estadoReserva === "Activa" && (
+                                            <button
+                                                className="btn btn-outline-danger btn-sm"
+                                                onClick={() => cancelarReserva(reserva)}
+                                            >
+                                                Cancelar
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import MesasPage from "./pages/MesasPage";
 import PedidosPage from "./pages/PedidosPage";
 import PedidoDetallePage from "./pages/PedidoDetallePage";
+import ReservasPage from "./pages/ReservasPage";
 
 import SucursalList from "./components/SucursalList";
 import ProductoList from "./components/ProductoList";
@@ -14,11 +15,8 @@ import PagoList from "./components/PagoList";
 import TipoEmpleadoList from "./components/TipoEmpleadoList";
 import SucursalTipoEmpleadoList from "./components/SucursalTipoEmpleadoList";
 import GastoList from "./components/GastoList";
-import MercadoPago from "./components/mercadoPago/mercadoPago";
 
 function App() {
-    const token = localStorage.getItem("token");
-
     return (
         <>
             <Navbar />
@@ -28,6 +26,7 @@ function App() {
                     <Route path="/mesas" element={<MesasPage />} />
                     <Route path="/pedidos" element={<PedidosPage />} />
                     <Route path="/pedidos/:id" element={<PedidoDetallePage />} />
+                    <Route path="/reservas" element={<ReservasPage />} />
 
                     <Route
                         path="/administracion"
@@ -51,8 +50,6 @@ function App() {
                                 <SucursalTipoEmpleadoList />
                                 <hr className="my-5" />
                                 <GastoList />
-                                <hr className="my-5" />
-                                <MercadoPago pedidoId={2} token={token} />
                             </div>
                         }
                     />

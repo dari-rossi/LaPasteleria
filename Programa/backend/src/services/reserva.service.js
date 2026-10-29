@@ -10,6 +10,18 @@ const obtenerReservaPorId = async (idMesa, fechaHora) => {
 };
 
 const crearReserva = async (datos) => {
+    const existente = await reservaRepository.obtenerPorId(
+        datos.idMesa,
+        new Date(datos.fechaHoraReservada)
+    );
+
+    if (existente && existente.estadoReserva === "Cancelada") {
+        return await reservaRepository.modificar(datos.idMesa, existente.fechaHoraReservada, {
+            cantComensales: datos.cantComensales,
+            estadoReserva: datos.estadoReserva,
+            dni: datos.dni
+        });
+    }
 
     return await reservaRepository.crear(datos);
 };
