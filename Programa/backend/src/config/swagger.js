@@ -9,7 +9,7 @@ const options = {
             description: "API REST de La Pastelería"
         },
         servers: [
-            { url: "http://localhost:3000" }
+            { url: "/" }
         ],
         components: {
             securitySchemes: {

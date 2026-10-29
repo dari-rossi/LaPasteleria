@@ -21,7 +21,7 @@ const { rutaNoEncontrada, manejarErrores } = require("./src/config/errores");
 
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 const revisarReservas = async () => {
     try {
@@ -35,7 +35,12 @@ revisarReservas();
 setInterval(revisarReservas, 60 * 1000);
 
 app.use(express.json());
-app.use(cors());
+
+const origenesPermitidos = (process.env.FRONTEND_URL || "http://localhost:5173")
+    .split(",")
+    .map((url) => url.trim());
+
+app.use(cors({ origin: origenesPermitidos }));
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -63,5 +68,5 @@ app.use(rutaNoEncontrada);
 app.use(manejarErrores);
 
 app.listen(PORT, () => {
-    console.log(`Servidor funcionando en http://localhost:${PORT}`);
+    console.log(`Servidor funcionando en el puerto ${PORT}`);
 });
