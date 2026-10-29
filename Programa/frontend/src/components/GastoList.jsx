@@ -191,7 +191,7 @@ function GastoList({ sucursalId }) {
                     className="btn btn-primary"
                     onClick={alternarFormulario}
                 >
-                    {mostrarFormulario ? "Cerrar" : "+ Crear gasto"}
+                    {mostrarFormulario ? "Cerrar" : "+ Agregar gasto"}
                 </button>
             </div>
 

@@ -122,7 +122,7 @@ function GastoForm({ sucursalId, gastoEditar, onGastoGuardado, onCancelarEdicion
                     </div>
 
                     <button type="submit" className="btn btn-primary me-2">
-                        {gastoEditar ? "Guardar cambios" : "Crear gasto"}
+                        {gastoEditar ? "Guardar cambios" : "Agregar gasto"}
                     </button>
 
                     {gastoEditar && (
