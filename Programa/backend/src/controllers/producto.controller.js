@@ -2,8 +2,6 @@ const productoService = require("../services/producto.service");
 const { leerId } = require("../config/errores");
 
 const obtenerProductos = async (req, res) => {
-    const productos = await productoService.obtenerProductos();
-    res.json(productos);
     try {
         const { tipoProducto, nombre, popularidad } = req.query;
         const sucursalId = req.query.sucursalId
