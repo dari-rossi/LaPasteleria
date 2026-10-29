@@ -1,6 +1,16 @@
 const mesaRepository = require("../repositories/mesa.repository");
+const { lanzarError } = require("../config/errores");
 
-const { MARGEN_RESERVA_MS } = require("../config/reservas");
+// Busca una mesa o lanza 404
+const buscarMesa = async (id) => {
+    const mesa = await mesaRepository.obtenerPorId(id);
+
+    if (!mesa) {
+        lanzarError("MESA_NO_ENCONTRADA");
+    }
+
+    return mesa;
+};
 
 const obtenerMesas = async () => {
     const ahora = new Date();
@@ -16,23 +26,23 @@ const obtenerMesas = async () => {
     }));
 };
 
-// Obtener una mesa por ID
 const obtenerMesaPorId = async (id) => {
-    return await mesaRepository.obtenerPorId(id);
+    return await buscarMesa(id);
 };
 
-// Crear una mesa
 const crearMesa = async (datos) => {
     return await mesaRepository.crear(datos);
 };
 
-// Modificar una mesa
 const modificarMesa = async (id, datos) => {
+    await buscarMesa(id);
+
     return await mesaRepository.modificar(id, datos);
 };
 
-// Eliminar una mesa
 const eliminarMesa = async (id) => {
+    await buscarMesa(id);
+
     return await mesaRepository.eliminar(id);
 };
 
