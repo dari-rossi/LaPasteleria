@@ -77,8 +77,7 @@ function GastoList({ sucursalId }) {
         const cargarGastos = async () => {
             try {
                 const datos = await obtenerGastos({
-                    nombre: filtroNombre.trim(),
-                    sucursalId
+                    nombre: filtroNombre.trim()
                 });
 
                 if (!cancelado) {

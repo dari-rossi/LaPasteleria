@@ -10,8 +10,16 @@ const urlReserva = (idMesa, fechaHora) => {
     return `/reservas/${idMesa}/${encodeURIComponent(fechaHora)}`;
 };
 
-export const obtenerReservas = async (sucursalId) => {
-    const response = await apiFetch(`/reservas?sucursalId=${sucursalId}`);
+export const obtenerReservas = async ({ estadoReserva = "" } = {}) => {
+    const parametros = new URLSearchParams();
+
+    if (estadoReserva) {
+        parametros.append("estadoReserva", estadoReserva);
+    }
+
+    const consulta = parametros.toString();
+    const ruta = consulta ? `/reservas?${consulta}` : "/reservas";
+    const response = await apiFetch(ruta);
 
     if (!response.ok) {
         throw new Error("No se pudieron obtener las reservas");

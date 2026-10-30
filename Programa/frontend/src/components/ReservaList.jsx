@@ -15,11 +15,11 @@ function ReservaList() {
 
     useEffect(() => {
         cargarReservas();
-    }, [sucursalId]);
+     }, [sucursalId, filtroEstado]);
 
     const cargarReservas = async () => {
         try {
-            setReservas(await obtenerReservas(sucursalId));
+            setReservas(await obtenerReservas({ estadoReserva: filtroEstado }));
             setError("");
         } catch (error) {
             setError("No se pudieron cargar las reservas.");
@@ -42,10 +42,6 @@ function ReservaList() {
             setError(error.message || "No se pudo cancelar la reserva.");
         }
     };
-
-    const reservasVisibles = reservas
-        .filter((reserva) => !filtroEstado || reserva.estadoReserva === filtroEstado)
-        .sort((a, b) => new Date(b.fechaHoraReservada) - new Date(a.fechaHoraReservada));
 
     return (
         <div>
@@ -70,11 +66,11 @@ function ReservaList() {
                 </button>
 
                 <span className="text-muted ms-2">
-                    {reservasVisibles.length} reserva(s)
+                    {reservas.length} reserva(s)
                 </span>
             </div>
 
-            {reservasVisibles.length === 0 && !error ? (
+            {reservas.length === 0 && !error ? (
                 <p>No hay reservas para mostrar.</p>
             ) : (
                 <div className="table-responsive">
@@ -91,7 +87,7 @@ function ReservaList() {
                         </thead>
 
                         <tbody>
-                            {reservasVisibles.map((reserva) => (
+                            {reservas.map((reserva) => (
                                 <tr key={`${reserva.idMesa}-${reserva.fechaHoraReservada}`}>
                                     <td>{reserva.idMesa}</td>
                                     <td>{formatearFechaHora(reserva.fechaHoraReservada)}</td>

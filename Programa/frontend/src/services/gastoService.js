@@ -22,15 +22,11 @@ const enviar = async (ruta, metodo, cuerpo) => {
 };
 
 // Los dos filtros son opcionales y se pueden combinar
-export const obtenerGastos = async ({ nombre = "", sucursalId = "" } = {}) => {
+export const obtenerGastos = async ({ nombre = "" } = {}) => {
     const parametros = new URLSearchParams();
 
     if (nombre) {
         parametros.append("nombre", nombre);
-    }
-
-    if (sucursalId) {
-        parametros.append("sucursalId", sucursalId);
     }
 
     const consulta = parametros.toString();

@@ -30,30 +30,23 @@ router.get("/", autenticar, permitirRoles(...ROLES), obtenerReservas);
 
 /**
  * @swagger
- * /reservas/{idMesa}/{fechaHora}:
+ * /reservas:
  *   get:
- *     summary: Obtener una reserva por mesa y fecha/hora
+ *     summary: Obtener las reservas de la sucursal, de la más reciente a la más antigua
  *     tags: [Reserva]
  *     parameters:
- *       - in: path
- *         name: idMesa
- *         required: true
- *         schema:
- *           type: integer
- *       - in: path
- *         name: fechaHora
- *         required: true
+ *       - in: query
+ *         name: estadoReserva
+ *         required: false
+ *         description: Filtra por estado de la reserva
  *         schema:
  *           type: string
- *           format: date-time
- *         example: "2026-10-10T21:00:00.000Z"
+ *           enum: [Activa, En curso, Finalizada, Cancelada]
  *     responses:
  *       200:
- *         description: Reserva encontrada
+ *         description: Lista de reservas
  *       400:
- *         description: Mesa o fecha/hora incorrectas
- *       404:
- *         description: Reserva no encontrada
+ *         description: Estado inválido o sucursal no indicada
  */
 router.get("/:idMesa/:fechaHora", autenticar, permitirRoles(...ROLES), obtenerReservaPorId);
 
