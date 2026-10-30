@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import "./MercadoPago.css";
+import "./mercadoPago.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+import { API_URL } from "../../services/api";
 
 const MercadoPago = ({ pedidoId, token, onPagoConfirmado }) => {
     const [orden, setOrden] = useState(null);

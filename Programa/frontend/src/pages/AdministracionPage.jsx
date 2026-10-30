@@ -2,7 +2,6 @@ import SucursalList from "../components/SucursalList";
 import GastoList from "../components/GastoList";
 import ClienteList from "../components/ClienteList";
 import TipoEmpleadoList from "../components/TipoEmpleadoList";
-import SucursalTipoEmpleadoList from "../components/SucursalTipoEmpleadoList";
 
 function AdministracionPage() {
     return (
