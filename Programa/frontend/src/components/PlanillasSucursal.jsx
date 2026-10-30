@@ -2,7 +2,6 @@ import { useState } from "react";
 import PlanillaDiaria from "./PlanillaDiaria";
 import PlanillaMensual from "./PlanillaMensual";
 
-// Las planillas de la sucursal (solo las ve el gerente): una pestaña para cada una
 function PlanillasSucursal() {
     const [pestania, setPestania] = useState("diaria");
 
@@ -20,6 +19,7 @@ function PlanillasSucursal() {
                         Diaria
                     </button>
                 </li>
+
                 <li className="nav-item">
                     <button
                         type="button"
@@ -31,7 +31,9 @@ function PlanillasSucursal() {
                 </li>
             </ul>
 
-            {pestania === "diaria" ? <PlanillaDiaria /> : <PlanillaMensual />}
+            {pestania === "diaria"
+                ? <PlanillaDiaria />
+                : <PlanillaMensual />}
         </div>
     );
 }

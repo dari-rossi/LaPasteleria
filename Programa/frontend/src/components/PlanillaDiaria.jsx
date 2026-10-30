@@ -9,27 +9,36 @@ function PlanillaDiaria() {
     const [fecha, setFecha] = useState(hoyArgentina());
     const [planilla, setPlanilla] = useState(null);
     const [error, setError] = useState("");
+    const [cargando, setCargando] = useState(false);
 
     useEffect(() => {
-        if (!fecha || !sucursalId) { 
+        if (!fecha || !sucursalId) {
             setPlanilla(null);
+            setError("");
+            setCargando(false);
             return;
         }
 
         let vigente = true;
 
         const cargar = async () => {
+            setCargando(true);
+            setError("");
+            setPlanilla(null);
+
             try {
-                const datos = await obtenerPlanillaDiaria(fecha, sucursalId);
+                const datos = await obtenerPlanillaDiaria(fecha);
 
                 if (vigente) {
                     setPlanilla(datos);
-                    setError("");
                 }
             } catch (error) {
                 if (vigente) {
-                    setPlanilla(null);
                     setError(error.message);
+                }
+            } finally {
+                if (vigente) {
+                    setCargando(false);
                 }
             }
         };
@@ -46,7 +55,10 @@ function PlanillaDiaria() {
     return (
         <div>
             <div className="d-flex justify-content-end align-items-center gap-2 mb-3">
-                <label htmlFor="planilla-fecha" className="form-label mb-0">Fecha:</label>
+                <label htmlFor="planilla-fecha" className="form-label mb-0">
+                    Fecha:
+                </label>
+
                 <input
                     id="planilla-fecha"
                     type="date"
@@ -57,28 +69,50 @@ function PlanillaDiaria() {
                 />
             </div>
 
-            {error && <div className="alert alert-danger">{error}</div>}
+            {!sucursalId && (
+                <div className="alert alert-info">
+                    Seleccioná una sucursal para consultar la planilla.
+                </div>
+            )}
 
-            {planilla && (
+            {error && (
+                <div className="alert alert-danger">{error}</div>
+            )}
+
+            {cargando && <p>Cargando planilla diaria...</p>}
+
+            {planilla && !cargando && (
                 <div className="row g-3">
-                    <PlanillaCampo etiqueta="Ventas" valor={planilla.ventas} />
+                    <PlanillaCampo
+                        etiqueta="Ventas"
+                        valor={planilla.ventas}
+                    />
+
                     <PlanillaCampo
                         etiqueta="Monto promedio por venta (en $)"
                         valor={formatearMonto(planilla.montoPromedioPorVenta)}
                     />
-                    <PlanillaCampo etiqueta="Total de clientes" valor={planilla.totalClientes} />
+
+                    <PlanillaCampo
+                        etiqueta="Total de clientes"
+                        valor={planilla.totalClientes}
+                    />
+
                     <PlanillaCampo
                         etiqueta="Monto promedio por persona (en $)"
                         valor={formatearMonto(planilla.montoPromedioPorPersona)}
                     />
+
                     <PlanillaCampo
                         etiqueta="ID Producto Estrella"
                         valor={estrella ? formatearId(estrella.idProducto) : "—"}
                     />
+
                     <PlanillaCampo
                         etiqueta="Nombre Producto Estrella"
                         valor={estrella ? estrella.nombre : "—"}
                     />
+
                     <PlanillaCampo
                         etiqueta="Monto total al cierre (en $)"
                         valor={formatearMonto(planilla.montoTotal)}

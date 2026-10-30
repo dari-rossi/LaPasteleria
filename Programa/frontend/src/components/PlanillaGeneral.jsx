@@ -1,32 +1,58 @@
 import { useEffect, useState } from "react";
 import { obtenerPlanillaGeneral } from "../services/planillaService";
-import { formatearId, formatearMes } from "../models/Planilla";
+import {
+    formatearId,
+    formatearMes,
+    formatearMonto
+} from "../models/Planilla";
 import PlanillaCampo from "./PlanillaCampo";
 
-// Planilla general del mes actual, sumando todas las sucursales (solo la ve el dueño)
 function PlanillaGeneral() {
     const [planilla, setPlanilla] = useState(null);
     const [error, setError] = useState("");
+    const [cargando, setCargando] = useState(true);
 
     useEffect(() => {
+        let vigente = true;
+
         const cargar = async () => {
+            setCargando(true);
+            setError("");
+
             try {
-                setPlanilla(await obtenerPlanillaGeneral());
-                setError("");
+                const datos = await obtenerPlanillaGeneral();
+
+                if (vigente) {
+                    setPlanilla(datos);
+                }
             } catch (error) {
-                setError(error.message);
+                if (vigente) {
+                    setError(error.message);
+                }
+            } finally {
+                if (vigente) {
+                    setCargando(false);
+                }
             }
         };
 
         cargar();
+
+        return () => {
+            vigente = false;
+        };
     }, []);
+
+    if (cargando) {
+        return <p>Cargando planilla general...</p>;
+    }
 
     if (error) {
         return <div className="alert alert-danger">{error}</div>;
     }
 
     if (!planilla) {
-        return <p>Cargando planilla...</p>;
+        return <p>No se pudo obtener la planilla general.</p>;
     }
 
     const estrella = planilla.productoEstrella;
@@ -43,23 +69,44 @@ function PlanillaGeneral() {
 
                 <div className="row g-3">
                     <PlanillaCampo
-                        etiqueta="ID Producto Estrella:"
+                        etiqueta="ID Producto Estrella"
                         valor={estrella ? formatearId(estrella.idProducto) : "—"}
                         columnas=""
                     />
+
                     <PlanillaCampo
-                        etiqueta="Nombre Producto Estrella:"
+                        etiqueta="Nombre Producto Estrella"
                         valor={estrella ? estrella.nombre : "—"}
                         columnas=""
                     />
+
                     <PlanillaCampo
-                        etiqueta="Sucursal Más Concurrida en el Mes:"
-                        valor={concurrida ? formatearId(concurrida.sucursalId) : "—"}
+                        etiqueta="Sucursal Más Concurrida en el Mes"
+                        valor={concurrida
+                            ? formatearId(concurrida.sucursalId)
+                            : "—"}
                         columnas=""
                     />
+
                     <PlanillaCampo
-                        etiqueta="Sucursal con Mayor Recaudación en el Mes:"
-                        valor={recaudacion ? formatearId(recaudacion.sucursalId) : "—"}
+                        etiqueta="Cantidad de comensales"
+                        valor={concurrida ? concurrida.comensales : "—"}
+                        columnas=""
+                    />
+
+                    <PlanillaCampo
+                        etiqueta="Sucursal con Mayor Recaudación en el Mes"
+                        valor={recaudacion
+                            ? formatearId(recaudacion.sucursalId)
+                            : "—"}
+                        columnas=""
+                    />
+
+                    <PlanillaCampo
+                        etiqueta="Monto recaudado (en $)"
+                        valor={recaudacion
+                            ? formatearMonto(recaudacion.recaudacion)
+                            : "—"}
                         columnas=""
                     />
                 </div>

@@ -7,7 +7,7 @@ function PlanillaCampo({ etiqueta, valor, columnas = "col-md-6" }) {
                 readOnly
                 tabIndex={-1}
                 className="form-control text-center bg-white pe-none user-select-none"
-                value={valor}
+                value={valor ?? "—"}
             />
         </div>
     );

@@ -1,12 +1,23 @@
 const prisma = require("../prisma");
 
-// Pagos registrados entre dos fechas, con la cantidad de comensales del pedido
-// y los productos que se vendieron. Si se indica sucursalId, solo los de esa sucursal.
-const obtenerPagosDelPeriodo = async (desde, hasta, sucursalId) => {
+// Obtiene los pagos registrados entre dos fechas.
+// Si se indica una sucursal, solo devuelve sus pagos.
+const obtenerPagosDelPeriodo = async (desde, hasta, sucursalId = null) => {
     return await prisma.pago.findMany({
         where: {
-            fechaHora: { gte: desde, lt: hasta },
-            ...(sucursalId !== undefined ? { pedido: { sucursalId } } : {})
+            fechaHora: {
+                gte: desde,
+                lt: hasta
+            },
+            ...(sucursalId !== null
+                ? {
+                    pedido: {
+                        is: {
+                            sucursalId: Number(sucursalId)
+                        }
+                    }
+                }
+                : {})
         },
         include: {
             pedido: {
@@ -17,7 +28,11 @@ const obtenerPagosDelPeriodo = async (desde, hasta, sucursalId) => {
                         select: {
                             productoId: true,
                             cantidad: true,
-                            producto: { select: { nombre: true } }
+                            producto: {
+                                select: {
+                                    nombre: true
+                                }
+                            }
                         }
                     }
                 }
@@ -26,4 +41,6 @@ const obtenerPagosDelPeriodo = async (desde, hasta, sucursalId) => {
     });
 };
 
-module.exports = { obtenerPagosDelPeriodo };
+module.exports = {
+    obtenerPagosDelPeriodo
+};

@@ -3,7 +3,6 @@ const API_URL = "http://localhost:3000";
 export const apiFetch = async (ruta, opciones = {}) => {
     const sesion = JSON.parse(localStorage.getItem("sesion"));
     const token = sesion?.token;
-
     const sucursalElegida = localStorage.getItem("sucursalId");
 
     if (sucursalElegida) {
