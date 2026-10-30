@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { obtenerSucursalPorId, modificarSucursal } from "../services/sucursalService";
 import { useSucursal } from "../context/SucursalContext";
 import { useAuth } from "../context/AuthContext";
+import PlanillasSucursal from "./PlanillasSucursal";
 
 function Campo({ id, etiqueta, name, valor, onChange, columnas, bloqueado }) {
     return (
@@ -157,6 +158,8 @@ function SucursalDetalle() {
                     )}
                 </div>
             </form>
+             {/* Las planillas las ven el gerente y el dueño, debajo de los datos de la sucursal */}
+            {(sesion?.rol === "GERENTE" || sesion?.rol === "DUENIO") && <PlanillasSucursal />}
         </div>
     );
 }

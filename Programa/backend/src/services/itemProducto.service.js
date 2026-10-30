@@ -67,7 +67,6 @@ const crearItemProducto = async (datos, usuario) => {
         lanzarError(mensajeHorario(producto.tipoProducto), 409);
     }
 
-    // El estado del pedido, el stock y el subtotal se resuelven dentro de la transacción
     return await itemProductoRepository.agregar(datos.pedidoId, producto, datos.cantidad);
 };
 

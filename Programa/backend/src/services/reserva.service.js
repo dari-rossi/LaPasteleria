@@ -20,8 +20,16 @@ const buscarReserva = async (idMesa, fechaHora, usuario) => {
     return reserva;
 };
 
-const obtenerReservas = async (usuario, sucursalIdElegida) => {
-    return await reservaRepository.obtenerTodos(resolverSucursal(usuario, sucursalIdElegida));
+const obtenerReservas = async (usuario, sucursalId) => {
+    if (usuario.rol === "DUENIO") {
+        if (!Number.isInteger(sucursalId) || sucursalId <= 0) {
+            lanzarError("SUCURSAL_REQUERIDA");
+        }
+
+        return await reservaRepository.obtenerTodos(sucursalId);
+    }
+
+    return await reservaRepository.obtenerTodos(usuario.sucursalId);
 };
 
 const obtenerReservaPorId = async (idMesa, fechaHora, usuario) => {
