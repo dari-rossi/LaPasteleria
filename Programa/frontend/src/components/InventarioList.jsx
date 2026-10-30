@@ -4,6 +4,7 @@ import {
     eliminarInventario
 } from "../services/inventarioService";
 import InventarioForm from "./InventarioForm";
+import { useAuth } from "../context/AuthContext";
 
 const INVENTARIOS_POR_PAGINA = 10;
 
@@ -66,8 +67,15 @@ function InventarioList({ sucursalId }) {
     const [filtro, setFiltro] = useState("todos");
     const [idProductoFiltro, setIdProductoFiltro] = useState("");
 
-    // Paginación
     const [pagina, setPagina] = useState(1);
+
+    const { sesion } = useAuth();
+    const rol = sesion?.rol;
+
+    // Dueño: crea, edita y elimina. Ayudante: solo edita el stock. Gerente: solo consulta.
+    const puedeCrear = rol === "DUENIO";
+    const puedeEditar = rol === "DUENIO" || rol === "AYUDANTE_COCINA";
+    const puedeEliminar = rol === "DUENIO";
 
     useEffect(() => {
         cargarInventarios();
@@ -185,13 +193,14 @@ function InventarioList({ sucursalId }) {
         <div>
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h2 className="mb-0">Inventario</h2>
-
-                <button
-                    className="btn btn-primary"
-                    onClick={alternarFormulario}
-                >
-                    {mostrarFormulario ? "Cerrar" : "+ Crear inventario"}
-                </button>
+                    {puedeCrear && (
+                        <button
+                            className="btn btn-primary"
+                            onClick={alternarFormulario}
+                        >
+                            {mostrarFormulario ? "Cerrar" : "+ Crear inventario"}
+                        </button>
+                    )}
             </div>
 
             {mostrarFormulario && (
@@ -247,34 +256,39 @@ function InventarioList({ sucursalId }) {
                         <p>No hay productos que coincidan con los filtros.</p>
                     ) : (
                         <>
-                            {}
+                        {(puedeEditar || puedeEliminar) && (
                             <div className="d-flex align-items-center mb-3">
                                 <span className="flex-grow-1 text-truncate me-3">
                                     {inventarioElegido
                                         ? `Seleccionado: ${inventarioElegido.producto.nombre}`
-                                        : "Seleccioná una fila para editar o eliminar"}
+                                        : puedeEliminar
+                                            ? "Seleccioná una fila para editar o eliminar"
+                                            : "Seleccioná una fila para editar el stock"}
                                 </span>
 
                                 <div className={`flex-shrink-0 ${inventarioElegido ? "" : "invisible"}`}>
-                                    <button
-                                        className="btn btn-warning btn-sm me-2"
-                                        style={ESTILO_BOTON_EDITAR}
-                                        onClick={() => editarInventario(inventarioElegido)}
-                                    >
-                                        Editar
-                                    </button>
+                                    {puedeEditar && (
+                                        <button
+                                            className="btn btn-warning btn-sm me-2"
+                                            style={ESTILO_BOTON_EDITAR}
+                                            onClick={() => editarInventario(inventarioElegido)}
+                                        >
+                                            Editar
+                                        </button>
+                                    )}
 
-                                    <button
-                                        className="btn btn-danger btn-sm"
-                                        style={ESTILO_BOTON_ELIMINAR}
-                                        onClick={() =>
-                                            borrarInventario(inventarioElegido.id)
-                                        }
-                                    >
-                                        Eliminar
-                                    </button>
+                                    {puedeEliminar && (
+                                        <button
+                                            className="btn btn-danger btn-sm"
+                                            style={ESTILO_BOTON_ELIMINAR}
+                                            onClick={() => borrarInventario(inventarioElegido.id)}
+                                        >
+                                            Eliminar
+                                        </button>
+                                    )}
                                 </div>
                             </div>
+                        )}
 
                             <div className="table-responsive" style={ESTILO_CONTENEDOR_TABLA}>
                                 <table className="table table-bordered">

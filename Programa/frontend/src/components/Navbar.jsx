@@ -5,20 +5,20 @@ import { useAuth } from "../context/AuthContext";
 const SECCIONES_POR_ROL = {
     DUENIO: [
         { to: "/sucursal", label: "Sucursal" },
+        { to: "/empleados", label: "Empleados" },
+        { to: "/mesas", label: "Mesas" },
+        { to: "/pedidos", label: "Pedidos" },
+        { to: "/inventario", label: "Inventario" },
+        { to: "/gastos", label: "Gastos" }
+    ],
+    GERENTE: [
+        { to: "/sucursal", label: "Sucursal" },
+        { to: "/empleados", label: "Empleados" },
         { to: "/mesas", label: "Mesas" },
         { to: "/pedidos", label: "Pedidos" },
         { to: "/inventario", label: "Inventario" },
         { to: "/gastos", label: "Gastos" },
         { to: "/productos", label: "Productos" }
-    ],
-    GERENTE: [
-        { to: "/sucursal", label: "Sucursal" },
-        { to: "/mesas", label: "Mesas" },
-        { to: "/pedidos", label: "Pedidos" },
-        { to: "/inventario", label: "Inventario" },
-        { to: "/gastos", label: "Gastos" },
-        { to: "/productos", label: "Productos" },
-        { to: "/tipos-empleado", label: "Tipos de empleado" }
     ],
     MOZO: [
         { to: "/mesas", label: "Mesas" },
@@ -32,6 +32,8 @@ const SECCIONES_POR_ROL = {
     ]
 };
 
+const RUTAS_GENERALES = ["/", "/sucursales", "/informes", "/tipos-empleado"];
+
 function Navbar() {
     const { sucursalId, puedeElegir, cambiarSucursal } = useSucursal();
     const { sesion, cerrarSesion } = useAuth();
@@ -40,6 +42,9 @@ function Navbar() {
 
     const rol = sesion?.rol;
     const secciones = SECCIONES_POR_ROL[rol] ?? [];
+
+    const enSucursal = sucursalId !== null &&
+        !(puedeElegir && RUTAS_GENERALES.includes(pathname));
 
     const irAlMenuGeneral = () => {
         if (puedeElegir) {
@@ -62,18 +67,24 @@ function Navbar() {
                 La Pastelería
             </NavLink>
 
-            {sucursalId !== null && (
-                <div className="navbar-nav flex-wrap">
-                    {secciones.map((seccion) => (
-                        <NavLink
-                            key={seccion.to}
-                            className="nav-link"
-                            to={seccion.to}
-                        >
-                            {seccion.label}
-                        </NavLink>
-                    ))}
-                </div>
+            {enSucursal && (
+                <>
+                    <span className="navbar-text text-light small me-3">
+                        Sucursal {String(sucursalId).padStart(4, "0")}
+                    </span>
+
+                    <div className="navbar-nav flex-wrap">
+                        {secciones.map((seccion) => (
+                            <NavLink
+                                key={seccion.to}
+                                className="nav-link"
+                                to={seccion.to}
+                            >
+                                {seccion.label}
+                            </NavLink>
+                        ))}
+                    </div>
+                </>
             )}
 
             {mostrarMenuGeneral && (

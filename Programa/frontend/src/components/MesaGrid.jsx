@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { obtenerMesas, eliminarMesa } from "../services/mesaService";
 import { obtenerClientes } from "../services/clienteService";
 import { crearPedido } from "../services/pedidoService";
-import { ID_SUCURSAL_ACTUAL } from "../config/sucursal";
+import { useSucursal } from "../context/SucursalContext";
 import MesaForm from "./MesaForm";
 import MesaPanel from "./MesaPanel";
 
@@ -21,6 +21,7 @@ const LEYENDA = [
 
 function MesaGrid({ onReservaCreada }) {
     const navigate = useNavigate();
+    const { sucursalId } = useSucursal();
     const [mesas, setMesas] = useState([]);
     const [error, setError] = useState("");
     const [seleccionada, setSeleccionada] = useState(null);
@@ -73,7 +74,7 @@ function MesaGrid({ onReservaCreada }) {
             mesaId: seleccionada.idMesa,
             comensales,
             clienteId,
-            sucursalId: ID_SUCURSAL_ACTUAL
+            sucursalId  
         });
 
         navigate(`/pedidos/${pedido.idPedido}`);

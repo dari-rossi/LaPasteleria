@@ -4,6 +4,7 @@ import {
     eliminarProducto
 } from "../services/productoService";
 import ProductoForm from "./ProductoForm";
+import { useAuth } from "../context/AuthContext";
 
 const PRODUCTOS_POR_PAGINA = 10;
 
@@ -63,7 +64,12 @@ function ProductoList() {
 
     // Filtro y paginación
     const [tipoProducto, setTipoProducto] = useState("todos");
+
     const [pagina, setPagina] = useState(1);
+
+    const { sesion } = useAuth();
+    // Solo el dueño modifica productos; el resto solo los consulta (R)
+    const puedeModificar = sesion?.rol === "DUENIO";
 
     useEffect(() => {
         cargarProductos();
@@ -176,13 +182,15 @@ function ProductoList() {
         <div>
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h2 className="mb-0">Productos</h2>
+                {puedeModificar && (
+                    <button
+                        className="btn btn-primary"
+                        onClick={alternarFormulario}
+                    >
+                        {mostrarFormulario ? "Cerrar" : "+ Crear producto"}
+                    </button>
+                )}
 
-                <button
-                    className="btn btn-primary"
-                    onClick={alternarFormulario}
-                >
-                    {mostrarFormulario ? "Cerrar" : "+ Crear producto"}
-                </button>
             </div>
 
             {mostrarFormulario && (
@@ -230,34 +238,35 @@ function ProductoList() {
                         <p>No hay productos que coincidan con el filtro.</p>
                     ) : (
                         <>
-                            {/* Siempre ocupa el mismo lugar, así la tabla no se mueve al seleccionar */}
-                            <div className="d-flex align-items-center mb-3">
-                                <span className="flex-grow-1 text-truncate me-3">
-                                    {productoElegido
-                                        ? `Seleccionado: ${productoElegido.nombre}`
-                                        : "Seleccioná una fila para editar o eliminar"}
-                                </span>
+                            {puedeModificar && (
+                                <div className="d-flex align-items-center mb-3">
+                                    <span className="flex-grow-1 text-truncate me-3">
+                                        {productoElegido
+                                            ? `Seleccionado: ${productoElegido.nombre}`
+                                            : "Seleccioná una fila para editar o eliminar"}
+                                    </span>
 
-                                <div className={`flex-shrink-0 ${productoElegido ? "" : "invisible"}`}>
-                                    <button
-                                        className="btn btn-warning btn-sm me-2"
-                                        style={ESTILO_BOTON_EDITAR}
-                                        onClick={() => editarProducto(productoElegido)}
-                                    >
-                                        Editar
-                                    </button>
+                                    <div className={`flex-shrink-0 ${productoElegido ? "" : "invisible"}`}>
+                                        <button
+                                            className="btn btn-warning btn-sm me-2"
+                                            style={ESTILO_BOTON_EDITAR}
+                                            onClick={() => editarProducto(productoElegido)}
+                                        >
+                                            Editar
+                                        </button>
 
-                                    <button
-                                        className="btn btn-danger btn-sm"
-                                        style={ESTILO_BOTON_ELIMINAR}
-                                        onClick={() =>
-                                            borrarProducto(productoElegido.idProducto)
-                                        }
-                                    >
-                                        Eliminar
-                                    </button>
+                                        <button
+                                            className="btn btn-danger btn-sm"
+                                            style={ESTILO_BOTON_ELIMINAR}
+                                            onClick={() =>
+                                                borrarProducto(productoElegido.idProducto)
+                                            }
+                                        >
+                                            Eliminar
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             <div className="table-responsive" style={ESTILO_CONTENEDOR_TABLA}>
                                 <table className="table table-bordered">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { obtenerSucursalPorId, modificarSucursal } from "../services/sucursalService";
 import { useSucursal } from "../context/SucursalContext";
+import { useAuth } from "../context/AuthContext";
 
 function Campo({ id, etiqueta, name, valor, onChange, columnas, bloqueado }) {
     return (
@@ -30,6 +31,9 @@ const desdeSucursal = (sucursal) => ({
 // Datos de la sucursal en la que se está trabajando; se editan al apretar "Editar"
 function SucursalDetalle() {
     const { sucursalId } = useSucursal();
+    const { sesion } = useAuth();
+    // Solo el dueño modifica los datos de la sucursal; el gerente solo los ve
+    const puedeEditar = sesion?.rol === "DUENIO";
     const [sucursal, setSucursal] = useState(null);
     const [formulario, setFormulario] = useState(null);
     const [editando, setEditando] = useState(false);
@@ -145,9 +149,11 @@ function SucursalDetalle() {
                             </button>
                         </>
                     ) : (
-                        <button key="editar" type="button" className="btn btn-primary" onClick={empezarEdicion}>
-                            Editar
-                        </button>
+                        puedeEditar && (
+                            <button key="editar" type="button" className="btn btn-primary" onClick={empezarEdicion}>
+                                Editar
+                            </button>
+                        )
                     )}
                 </div>
             </form>

@@ -137,6 +137,6 @@ router.put("/:sucursalId/tipos-empleado/:tipoEmpleadoId",autenticar, permitirRol
  *       404:
  *         description: El tipo de empleado no está asignado a la sucursal
  */
-router.delete("/:sucursalId/tipos-empleado/:tipoEmpleadoId",autenticar, permitirRoles("DUENIO", "GERENTE"), quitarTipoEmpleado);
+router.delete("/:sucursalId/tipos-empleado/:tipoEmpleadoId", autenticar, permitirRoles("DUENIO"), quitarTipoEmpleado);
 
 module.exports = router;
