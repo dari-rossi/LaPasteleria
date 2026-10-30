@@ -58,7 +58,8 @@ const modificar = async (id, datos) => {
 
 const eliminar = async (id) => {
     return await prisma.usuario.delete({
-        where: { idUsuario: id }
+        where: { idUsuario: id },
+        select: seleccion
     });
 };
 

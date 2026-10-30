@@ -30,7 +30,12 @@ const obtenerSucursales = async () => {
     return await sucursalRepository.obtenerTodas();
 };
 
-const obtenerSucursalPorId = async (id) => {
+const obtenerSucursalPorId = async (id, usuario) => {
+    if (usuario && usuario.rol === "GERENTE" &&
+        Number(usuario.sucursalId) !== Number(id)) {
+        lanzarError("OTRA_SUCURSAL");
+    }
+
     return await buscarSucursal(id);
 };
 

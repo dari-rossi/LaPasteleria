@@ -22,21 +22,21 @@ async function main() {
     }
 
     const productos = [
-        { idProducto: 1, nombre: "Espresso", tipoProducto: "Ambos", descripcion: "Café espresso", precio: 1800, proveedor: "La Fazenda", stockMinimo: 20 },
-        { idProducto: 2, nombre: "Americano", tipoProducto: "Ambos", descripcion: "Café americano", precio: 2000, proveedor: "La Fazenda", stockMinimo: 15 },
-        { idProducto: 3, nombre: "Macchiato", tipoProducto: "Ambos", descripcion: "Espresso con espuma de leche", precio: 2200, proveedor: "La Fazenda", stockMinimo: 10 },
-        { idProducto: 4, nombre: "Latte", tipoProducto: "Ambos", descripcion: "Café con leche vaporizada", precio: 2500, proveedor: "La Fazenda", stockMinimo: 10 },
-        { idProducto: 5, nombre: "Cappuccino", tipoProducto: "Ambos", descripcion: "Café con leche y espuma", precio: 2500, proveedor: "La Fazenda", stockMinimo: 10 },
-        { idProducto: 6, nombre: "Iced Coffee", tipoProducto: "Ambos", descripcion: "Café frío con hielo", precio: 2800, proveedor: "La Fazenda", stockMinimo: 10 },
-        { idProducto: 7, nombre: "Chipa", tipoProducto: "Día", descripcion: "Panificado de queso", precio: 1000, proveedor: "Cocina La Esquina", stockMinimo: 10 },
-        { idProducto: 8, nombre: "Croissant gratinado", tipoProducto: "Día", descripcion: "Croissant gratinado", precio: 3500, proveedor: "Cocina La Esquina", stockMinimo: 5 },
-        { idProducto: 9, nombre: "Panini", tipoProducto: "Día", descripcion: "Sándwich caliente", precio: 4500, proveedor: "Cocina La Esquina", stockMinimo: 5 },
-        { idProducto: 10, nombre: "Tostado", tipoProducto: "Día", descripcion: "Tostado de jamón y queso", precio: 4000, proveedor: "Panadería Panero", stockMinimo: 5 },
+        { idProducto: 1, nombre: "Espresso", tipoProducto: "Ambos", descripcion: "Café espresso", precio: 1800, proveedor: "La Fazenda", stockMinimo: 40 },
+        { idProducto: 2, nombre: "Americano", tipoProducto: "Ambos", descripcion: "Café americano", precio: 2000, proveedor: "La Fazenda", stockMinimo: 40 },
+        { idProducto: 3, nombre: "Macchiato", tipoProducto: "Ambos", descripcion: "Espresso con espuma de leche", precio: 2200, proveedor: "La Fazenda", stockMinimo: 40 },
+        { idProducto: 4, nombre: "Latte", tipoProducto: "Ambos", descripcion: "Café con leche vaporizada", precio: 2500, proveedor: "La Fazenda", stockMinimo: 40 },
+        { idProducto: 5, nombre: "Cappuccino", tipoProducto: "Ambos", descripcion: "Café con leche y espuma", precio: 2500, proveedor: "La Fazenda", stockMinimo: 40 },
+        { idProducto: 6, nombre: "Iced Coffee", tipoProducto: "Ambos", descripcion: "Café frío con hielo", precio: 2800, proveedor: "La Fazenda", stockMinimo: 30 },
+        { idProducto: 7, nombre: "Chipa", tipoProducto: "Día", descripcion: "Panificado de queso", precio: 1000, proveedor: "Cocina La Esquina", stockMinimo: 40 },
+        { idProducto: 8, nombre: "Croissant gratinado", tipoProducto: "Día", descripcion: "Croissant gratinado", precio: 3500, proveedor: "Cocina La Esquina", stockMinimo: 10 },
+        { idProducto: 9, nombre: "Panini", tipoProducto: "Día", descripcion: "Sándwich caliente", precio: 4500, proveedor: "Cocina La Esquina", stockMinimo: 10 },
+        { idProducto: 10, nombre: "Tostado", tipoProducto: "Día", descripcion: "Tostado de jamón y queso", precio: 4000, proveedor: "Panadería Panero", stockMinimo: 30 },
         { idProducto: 11, nombre: "Alfajor clásico", tipoProducto: "Día", descripcion: "Alfajor clásico", precio: 1500, proveedor: "Panadería Panero", stockMinimo: 10 },
-        { idProducto: 12, nombre: "Medialuna dulce", tipoProducto: "Día", descripcion: "Medialuna dulce", precio: 1000, proveedor: "Panadería Panero", stockMinimo: 10 },
-        { idProducto: 13, nombre: "Medialuna salada", tipoProducto: "Día", descripcion: "Medialuna salada", precio: 1100, proveedor: "Panadería Panero", stockMinimo: 10 },
-        { idProducto: 14, nombre: "Gin Tonic", tipoProducto: "Noche", descripcion: "Gin, agua tónica y limón", precio: 11000, proveedor: "Fiesta fiesta", stockMinimo: 5 },
-        { idProducto: 15, nombre: "Daiquiri", tipoProducto: "Noche", descripcion: "Ron, lima y azúcar", precio: 14000, proveedor: "Fiesta fiesta", stockMinimo: 5 }
+        { idProducto: 12, nombre: "Medialuna dulce", tipoProducto: "Día", descripcion: "Medialuna dulce", precio: 1000, proveedor: "Panadería Panero", stockMinimo: 40 },
+        { idProducto: 13, nombre: "Medialuna salada", tipoProducto: "Día", descripcion: "Medialuna salada", precio: 1100, proveedor: "Panadería Panero", stockMinimo: 40 },
+        { idProducto: 14, nombre: "Gin Tonic", tipoProducto: "Noche", descripcion: "Gin, agua tónica y limón", precio: 11000, proveedor: "Fiesta fiesta", stockMinimo: 10 },
+        { idProducto: 15, nombre: "Daiquiri", tipoProducto: "Noche", descripcion: "Ron, lima y azúcar", precio: 14000, proveedor: "Fiesta fiesta", stockMinimo: 10 }
     ];
 
     for (const producto of productos) {

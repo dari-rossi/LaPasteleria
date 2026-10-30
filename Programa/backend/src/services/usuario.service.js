@@ -79,7 +79,7 @@ const modificarUsuario = async (id, datos, usuarioActual) => {
     const existente = await buscarUsuario(id);
 
     if (Number(id) === Number(usuarioActual.id) &&
-        datos.idTipoEmpleado !== existente.idTipoEmpleado) {
+        Number(datos.idTipoEmpleado) !== Number(existente.idTipoEmpleado)) {
         lanzarError("NO_CAMBIAR_PROPIO_ROL");
     }
 
