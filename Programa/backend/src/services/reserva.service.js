@@ -21,7 +21,9 @@ const buscarReserva = async (idMesa, fechaHora, usuario) => {
 };
 
 const obtenerReservas = async (usuario, sucursalIdElegida) => {
-    return await reservaRepository.obtenerTodos(resolverSucursal(usuario, sucursalIdElegida));
+    return await reservaRepository.obtenerTodos(
+        resolverSucursal(usuario, sucursalIdElegida)
+    );
 };
 
 const obtenerReservaPorId = async (idMesa, fechaHora, usuario) => {

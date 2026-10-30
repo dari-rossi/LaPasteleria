@@ -16,6 +16,7 @@ const itemProductoRoutes = require("./src/routes/itemProducto.routes");
 const pedidoRoutes = require("./src/routes/pedido.routes");
 const authRoutes = require("./src/routes/auth.routes");
 const usuarioRoutes = require("./src/routes/usuario.routes");
+const planillaRoutes = require("./src/routes/planilla.routes");
 const { rutaNoEncontrada, manejarErrores } = require("./src/config/errores");
 
 const app = express();
@@ -45,6 +46,7 @@ app.use("/gastos", gastoRoutes);
 app.use("/itemProducto", itemProductoRoutes);
 app.use("/pedidos", pedidoRoutes);
 app.use("/usuarios", usuarioRoutes);
+app.use("/planillas", planillaRoutes);
 
 app.use(rutaNoEncontrada);
 app.use(manejarErrores);

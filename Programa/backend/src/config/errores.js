@@ -6,7 +6,7 @@ const ERRORES = {
     RUTA_NO_ENCONTRADA: { status: 404, mensaje: "La ruta solicitada no existe" },
     ERROR_INTERNO: { status: 500, mensaje: "Error interno del servidor" },
 
-    // Errores de base de datos que se detectan solos (ver traducirErrorPrisma)
+    // Errores de base de datos que se detectan solos
     REGISTRO_NO_ENCONTRADO: { status: 404, mensaje: "El registro solicitado no existe" },
     REGISTRO_DUPLICADO: { status: 409, mensaje: "Ya existe un registro con esos datos" },
     REFERENCIA_INVALIDA: { status: 400, mensaje: "Alguno de los datos relacionados no existe" },
@@ -51,6 +51,13 @@ const ERRORES = {
     PAGO_DUPLICADO: { status: 409, mensaje: "El pedido ya tiene un pago registrado" },
     PAGO_PEDIDO_SIN_PRODUCTOS: { status: 400, mensaje: "No se puede registrar el pago de un pedido sin productos" },
 
+    // ----- Planillas y reservas por sucursal -----
+    FECHA_INVALIDA: { status: 400, mensaje: "La fecha es inválida. Usá el formato AAAA-MM-DD" },
+    FECHA_FUTURA: { status: 400, mensaje: "La fecha no puede ser futura" },
+    MES_INVALIDO: { status: 400, mensaje: "El mes es inválido. Usá el formato AAAA-MM" },
+    MES_FUTURO: { status: 400, mensaje: "El mes no puede ser futuro" },
+    SUCURSAL_REQUERIDA: { status: 400, mensaje: "Debés indicar una sucursal" },
+
     // ----- Gasto -----
     GASTO_NO_ENCONTRADO: { status: 404, mensaje: "Gasto no encontrado" },
 
@@ -78,8 +85,6 @@ const ERRORES = {
 // Error propio de la aplicación
 
 class AppError extends Error {
-    // codigo: una clave de ERRORES. mensaje: opcional, pisa el del catálogo
-    // detalles: opcional, información extra (por ejemplo, los campos inválidos)
     constructor(codigo, mensaje, detalles) {
         const existe = Object.prototype.hasOwnProperty.call(ERRORES, codigo);
         const definicion = ERRORES[existe ? codigo : "ERROR_INTERNO"];
@@ -93,21 +98,26 @@ class AppError extends Error {
     }
 }
 
-// Uso: lanzarError("USUARIO_NO_ENCONTRADO");
-const lanzarError = (codigo, mensaje) => {
-    if (!Object.prototype.hasOwnProperty.call(ERRORES, codigo)) {
+// Uso:
+// lanzarError("USUARIO_NO_ENCONTRADO");
+// lanzarError("PRODUCTO_NO_ENCONTRADO", "Texto propio");
+// lanzarError("La mesa ya está ocupada.", 409);
+const lanzarError = (codigo, mensajeOStatus) => {
+    const esDelCatalogo = Object.prototype.hasOwnProperty.call(ERRORES, codigo);
+
+    // Mensaje propio con un status HTTP
+    if (!esDelCatalogo && Number.isInteger(mensajeOStatus)) {
         const error = new AppError("ERROR_INTERNO", codigo);
-
-        error.codigo = "ERROR_NEGOCIO";
-        error.status = typeof mensaje === "number" ? mensaje : 400;
-
+        error.codigo = "ERROR_DE_NEGOCIO";
+        error.status = mensajeOStatus;
         throw error;
     }
 
-    throw new AppError(codigo, mensaje);
+    // Error del catálogo, con mensaje opcional
+    throw new AppError(codigo, mensajeOStatus);
 };
 
-// Convierte un parámetro de la URL en un ID válido (entero positivo) o lanza ID_INCORRECTO
+// Convierte un parámetro de la URL en un ID válido
 const leerId = (valor, codigo = "ID_INCORRECTO") => {
     const id = Number(valor);
 
@@ -118,11 +128,9 @@ const leerId = (valor, codigo = "ID_INCORRECTO") => {
     return id;
 };
 
-// ===========================================================
+// ============================================================
 // Detección automática del error
 
-
-// Cuando falla la base de datos, Prisma tira un error con un código P2xxx
 const DUPLICADOS_POR_MODELO = {
     Reserva: "RESERVA_DUPLICADA",
     ItemProducto: "ITEM_DUPLICADO",
@@ -139,16 +147,18 @@ const esErrorPrisma = (error) =>
 
 const traducirErrorPrisma = (error, req) => {
     switch (error.code) {
-        // Valor repetido en un campo único
         case "P2002":
-            return new AppError(DUPLICADOS_POR_MODELO[error.meta?.modelName] ?? "REGISTRO_DUPLICADO");
+            return new AppError(
+                DUPLICADOS_POR_MODELO[error.meta?.modelName] ?? "REGISTRO_DUPLICADO"
+            );
 
-        // Falla una clave foránea: al crear/modificar apunta a algo que no existe;
-        // al eliminar, todavía hay registros que dependen de este
         case "P2003":
-            return new AppError(req.method === "DELETE" ? "NO_SE_PUEDE_ELIMINAR" : "REFERENCIA_INVALIDA");
+            return new AppError(
+                req.method === "DELETE"
+                    ? "NO_SE_PUEDE_ELIMINAR"
+                    : "REFERENCIA_INVALIDA"
+            );
 
-        // Se intentó modificar o eliminar algo que no existe
         case "P2025":
             return new AppError("REGISTRO_NO_ENCONTRADO");
 
@@ -157,24 +167,23 @@ const traducirErrorPrisma = (error, req) => {
     }
 };
 
-// Convierte CUALQUIER error en un AppError (o null si no lo reconoce)
 const identificarError = (error, req) => {
     if (error instanceof AppError) {
         return error;
     }
 
-    // Zod: datos que no cumplen el schema
     if (error?.name === "ZodError") {
         return new AppError("DATOS_INVALIDOS", undefined, error.issues);
     }
 
-    // express.json(): el cuerpo de la petición no es un JSON válido
     if (error?.type === "entity.parse.failed") {
         return new AppError("JSON_INVALIDO");
     }
 
-    // jsonwebtoken: token vencido o mal firmado
-    if (error?.name === "TokenExpiredError" || error?.name === "JsonWebTokenError") {
+    if (
+        error?.name === "TokenExpiredError" ||
+        error?.name === "JsonWebTokenError"
+    ) {
         return new AppError("TOKEN_INVALIDO");
     }
 
@@ -190,14 +199,12 @@ const identificarError = (error, req) => {
 };
 
 // ============================================================
-// Middlewares de Express (se registran al final de server.js)
+// Middlewares de Express
 
-// Si ninguna ruta respondió, la ruta no existe
 const rutaNoEncontrada = (req, res, next) => {
     next(new AppError("RUTA_NO_ENCONTRADA"));
 };
 
-// Recibe TODOS los errores de la aplicación y arma la respuesta
 const manejarErrores = (error, req, res, next) => {
     if (res.headersSent) {
         return next(error);
@@ -205,7 +212,6 @@ const manejarErrores = (error, req, res, next) => {
 
     let appError = identificarError(error, req);
 
-    // Un error que no reconocemos es un bug nuestro: se muestra en consola
     if (!appError) {
         console.error(error);
         appError = new AppError("ERROR_INTERNO");

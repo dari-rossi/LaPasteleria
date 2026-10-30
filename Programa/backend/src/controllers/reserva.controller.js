@@ -13,7 +13,11 @@ const leerClave = (params) => {
 };
 
 const obtenerReservas = async (req, res) => {
-    const reservas = await reservaService.obtenerReservas(req.usuario, req.query.sucursalId);
+    const sucursalId = req.query.sucursalId
+        ? leerId(req.query.sucursalId)
+        : null;
+
+    const reservas = await reservaService.obtenerReservas(req.usuario, sucursalId);
     res.json(reservas);
 };
 

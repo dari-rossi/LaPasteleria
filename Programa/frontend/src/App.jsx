@@ -21,9 +21,6 @@ import SucursalEmpleadosPage from "./pages/SucursalEmpleadosPage";
 import UsuariosPage from "./pages/UsuariosPage";
 import ClientesPage from "./pages/ClientesPage";
 
-const Pendiente = ({ nombre }) => (
-    <p className="text-muted">{nombre}: pendiente.</p>
-);
 
 // Los que no son dueño ya tienen su sucursal asignada: no pasan por el menú
 // general, entran directo a su pantalla principal
@@ -113,10 +110,6 @@ function App() {
                             <Route path="/sucursal" element={<SucursalPage />} />
                             <Route path="/empleados" element={<SucursalEmpleadosPage />} />
                             <Route path="/gastos" element={<GastosPage />} />
-                            <Route
-                                path="/planilla"
-                                element={<Pendiente nombre="Planilla" />}
-                            />
                         </Route>
 
                         {/* Dueño, gerente y mozo */}
@@ -147,9 +140,9 @@ function App() {
                             />
                         </Route>
 
-                        {/* Solo mozo */}
+                        {/* Dueño, gerente y mozo (el dueño y el gerente solo consultan) */}
                         <Route element={
-                            <RequiereRol roles={["MOZO"]} />
+                            <RequiereRol roles={["DUENIO", "GERENTE", "MOZO"]} />
                         }>
                             <Route path="/reservas" element={<ReservasPage />} />
                         </Route>

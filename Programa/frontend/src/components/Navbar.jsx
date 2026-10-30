@@ -8,6 +8,7 @@ const SECCIONES_POR_ROL = {
         { to: "/empleados", label: "Empleados" },
         { to: "/mesas", label: "Mesas" },
         { to: "/pedidos", label: "Pedidos" },
+        { to: "/reservas", label: "Reservas" },
         { to: "/inventario", label: "Inventario" },
         { to: "/gastos", label: "Gastos" }
     ],
@@ -16,6 +17,7 @@ const SECCIONES_POR_ROL = {
         { to: "/empleados", label: "Empleados" },
         { to: "/mesas", label: "Mesas" },
         { to: "/pedidos", label: "Pedidos" },
+        { to: "/reservas", label: "Reservas" },
         { to: "/inventario", label: "Inventario" },
         { to: "/gastos", label: "Gastos" },
         { to: "/productos", label: "Productos" },
