@@ -15,11 +15,14 @@ const obtenerTodos = async ({ tipoProducto, nombre, sucursalId, popularidad } = 
         where: {
             ...filtroPorTipoProducto(tipoProducto),
             ...filtroPorNombre(nombre)
+        },
+        orderBy: {
+            idProducto: "asc"
         }
     });
 
     if (popularidad !== "desc") {
-        return productos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+        return productos;
     }
 
     const ventas = await prisma.itemProducto.groupBy({
