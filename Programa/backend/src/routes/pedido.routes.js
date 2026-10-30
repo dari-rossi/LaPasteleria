@@ -43,7 +43,7 @@ router.get("/",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), obtenerPe
  *       404:
  *         description: Pedido no encontrado
  */
-router.get("/:id",autenticar, permitirRoles("MOZO"), obtenerPedidoPorId);
+router.get("/:id",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), obtenerPedidoPorId);
 
 /**
  * @swagger

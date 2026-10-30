@@ -3,7 +3,7 @@ const mesaRepository = require("../repositories/mesa.repository");
 const clienteRepository = require("../repositories/cliente.repository");
 const sucursalRepository = require("../repositories/sucursal.repository");
 const productoRepository = require("../repositories/producto.repository");
-const { ESTADO_INICIAL } = require("../config/estadosPedido");
+const { ESTADO_INICIAL, ESTADOS_FINALES } = require("../config/estadosPedido");
 const { lanzarError } = require("../config/errores");
 
 const redondear = (valor) => Math.round(valor * 100) / 100;
@@ -13,8 +13,8 @@ const verificarAccesoPedido = (pedido, usuario) => {
     if (!pedido) {
         lanzarError("PEDIDO_NO_ENCONTRADO");
     }
-
-    if (Number(pedido.sucursalId) !== Number(usuario.sucursalId)) {
+    if (usuario.rol !== "DUENIO" &&
+        Number(pedido.sucursalId) !== Number(usuario.sucursalId)) {
         lanzarError("OTRA_SUCURSAL");
     }
 };
@@ -28,11 +28,19 @@ const buscarPedido = async (id, usuario) => {
     return pedido;
 };
 
-const obtenerPedidos = async (usuario) => {
+const obtenerPedidos = async (usuario, sucursalId) => {
+    if (usuario.rol === "DUENIO" && !sucursalId) {
+        lanzarError("Debés indicar una sucursal", 400);
+    }
+    
+    const sucursalFiltro = usuario.rol === "DUENIO"
+        ? sucursalId
+        : usuario.sucursalId;
+
     const pedidos = await pedidoRepository.obtenerTodos();
 
     return pedidos.filter(pedido =>
-        Number(pedido.sucursalId) === Number(usuario.sucursalId)
+        Number(pedido.sucursalId) === Number(sucursalFiltro)
     );
 };
 

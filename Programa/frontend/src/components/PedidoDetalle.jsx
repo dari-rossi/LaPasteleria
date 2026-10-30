@@ -5,6 +5,7 @@ import { obtenerProductos } from "../services/productoService";
 import { agregarItem, modificarCantidad, quitarItem } from "../services/itemProductoService";
 import { crearPago } from "../services/pagoService";
 import MercadoPago from "./mercadoPago/mercadoPago";
+import { useAuth } from "../context/AuthContext";
 import {
     ESTADOS_EDITABLES,
     METODOS_PAGO,
@@ -19,6 +20,8 @@ import {
 function PedidoDetalle() {
     const { id } = useParams();
     const token = localStorage.getItem("token");
+    const { sesion } = useAuth();
+    const esMozo = sesion?.rol === "MOZO";
     const [pedido, setPedido] = useState(null);
     const [productos, setProductos] = useState([]);
     const [estado, setEstado] = useState("");
@@ -127,8 +130,8 @@ function PedidoDetalle() {
     if (!pedido) {
         return <p>Cargando pedido...</p>;
     }
-
-    const editable = pedidoEditable(pedido);
+    
+    const editable = esMozo && pedidoEditable(pedido);
     const descuento = pedido.cliente?.descuento ?? 0;
     const subtotal = pedido.pago?.precio ?? calcularTotal(pedido);
     const total = pedido.pago?.precioFinal ?? calcularTotalConDescuento(pedido);
