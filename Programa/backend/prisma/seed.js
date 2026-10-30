@@ -151,16 +151,16 @@ async function main() {
     }
 
     const mesas = [
-        { idMesa: 1, estado: "Ocupada", maxComensales: 2, sucursalId: 1 },
-        { idMesa: 2, estado: "Libre", maxComensales: 2, sucursalId: 1 },
-        { idMesa: 3, estado: "Ocupada", maxComensales: 4, sucursalId: 1 },
-        { idMesa: 4, estado: "Libre", maxComensales: 4, sucursalId: 1 },
-        { idMesa: 5, estado: "Libre", maxComensales: 6, sucursalId: 1 },
-        { idMesa: 6, estado: "Libre", maxComensales: 6, sucursalId: 2 },
-        { idMesa: 7, estado: "Ocupada", maxComensales: 2, sucursalId: 2 },
-        { idMesa: 8, estado: "Libre", maxComensales: 4, sucursalId: 2 },
-        { idMesa: 9, estado: "Libre", maxComensales: 4, sucursalId: 2 },
-        { idMesa: 10, estado: "Libre", maxComensales: 6, sucursalId: 2 },
+        { idMesa: 1, numero: 1, fila: 1, columna: 1, estado: "Ocupada", maxComensales: 2, sucursalId: 1 },
+        { idMesa: 2, numero: 2, fila: 1, columna: 2, estado: "Libre",   maxComensales: 2, sucursalId: 1 },
+        { idMesa: 3, numero: 3, fila: 1, columna: 3, estado: "Ocupada", maxComensales: 4, sucursalId: 1 },
+        { idMesa: 4, numero: 4, fila: 2, columna: 1, estado: "Libre",   maxComensales: 4, sucursalId: 1 },
+        { idMesa: 5, numero: 5, fila: 2, columna: 2, estado: "Libre",   maxComensales: 6, sucursalId: 1 },
+        { idMesa: 6, numero: 1, fila: 1, columna: 1, estado: "Libre",   maxComensales: 6, sucursalId: 2 },
+        { idMesa: 7, numero: 2, fila: 1, columna: 2, estado: "Ocupada", maxComensales: 2, sucursalId: 2 },
+        { idMesa: 8, numero: 3, fila: 1, columna: 3, estado: "Libre",   maxComensales: 4, sucursalId: 2 },
+        { idMesa: 9, numero: 4, fila: 2, columna: 1, estado: "Libre",   maxComensales: 4, sucursalId: 2 },
+        { idMesa: 10, numero: 5, fila: 2, columna: 2, estado: "Libre",  maxComensales: 6, sucursalId: 2 }
     ];
 
     for (const mesa of mesas) {

@@ -1,20 +1,19 @@
 const pedidoRepository = require("../repositories/pedido.repository");
 const mesaRepository = require("../repositories/mesa.repository");
 const clienteRepository = require("../repositories/cliente.repository");
-const sucursalRepository = require("../repositories/sucursal.repository");
 const productoRepository = require("../repositories/producto.repository");
-const { ESTADO_INICIAL } = require("../config/estadosPedido");
+const { ESTADO_INICIAL, ESTADOS_FINALES } = require("../config/estadosPedido");
+const { resolverSucursal, puedeAcceder } = require("../config/sucursalActiva");
 const { lanzarError } = require("../config/errores");
 
 const redondear = (valor) => Math.round(valor * 100) / 100;
 
-// El pedido tiene que existir y ser de la sucursal del usuario
 const verificarAccesoPedido = (pedido, usuario) => {
     if (!pedido) {
         lanzarError("PEDIDO_NO_ENCONTRADO");
     }
 
-    if (Number(pedido.sucursalId) !== Number(usuario.sucursalId)) {
+    if (!puedeAcceder(usuario, pedido.sucursalId)) {
         lanzarError("OTRA_SUCURSAL");
     }
 };
@@ -28,12 +27,11 @@ const buscarPedido = async (id, usuario) => {
     return pedido;
 };
 
-const obtenerPedidos = async (usuario) => {
+const obtenerPedidos = async (usuario, sucursalIdElegida) => {
+    const sucursalId = resolverSucursal(usuario, sucursalIdElegida);
     const pedidos = await pedidoRepository.obtenerTodos();
 
-    return pedidos.filter(pedido =>
-        Number(pedido.sucursalId) === Number(usuario.sucursalId)
-    );
+    return pedidos.filter((pedido) => pedido.sucursalId === sucursalId);
 };
 
 const obtenerPedidoPorId = async (id, usuario) => {
@@ -62,17 +60,12 @@ const crearPedido = async (datos, usuario) => {
         lanzarError("CLIENTE_NO_ENCONTRADO");
     }
 
-    const sucursal = await sucursalRepository.obtenerPorId(datos.sucursalId);
-
-    if (!sucursal) {
-        lanzarError("SUCURSAL_NO_ENCONTRADA");
-    }
-
-    if (Number(datos.sucursalId) !== Number(usuario.sucursalId)) {
+    if (!puedeAcceder(usuario, mesa.sucursalId)) {
         lanzarError("OTRA_SUCURSAL");
     }
 
-    // Se arma cada item con su subTotal (cantidad * precio del producto)
+    const sucursalId = mesa.sucursalId;
+
     const items = [];
 
     for (const item of datos.items ?? []) {
@@ -94,7 +87,7 @@ const crearPedido = async (datos, usuario) => {
         comensales: datos.comensales,
         mesaId: datos.mesaId,
         clienteId: datos.clienteId,
-        sucursalId: datos.sucursalId
+        sucursalId: sucursalId
     };
 
     if (items.length > 0) {
@@ -104,9 +97,7 @@ const crearPedido = async (datos, usuario) => {
     return await pedidoRepository.crearOcupandoMesa(nuevoPedidoData);
 };
 
-// Solo se modifican el estado y los comensales; los productos se manejan desde itemProducto.
 const modificarPedido = async (id, datos, usuario) => {
-    await buscarPedido(id, usuario);
     const pedido = await buscarPedido(id, usuario);
     if (ESTADOS_FINALES.includes(pedido.estadoPedido)) {
         lanzarError(`Un pedido ${pedido.estadoPedido.toLowerCase()} no se puede modificar.`, 409);

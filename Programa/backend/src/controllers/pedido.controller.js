@@ -2,7 +2,7 @@ const pedidoService = require("../services/pedido.service");
 const { leerId } = require("../config/errores");
 
 const obtenerPedidos = async (req, res) => {
-    const pedidos = await pedidoService.obtenerPedidos(req.usuario);
+    const pedidos = await pedidoService.obtenerPedidos(req.usuario,req.query.sucursalId);
     res.json(pedidos);
 };
 

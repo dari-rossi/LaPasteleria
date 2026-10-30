@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { obtenerMesas, eliminarMesa } from "../services/mesaService";
 import { obtenerClientes } from "../services/clienteService";
 import { crearPedido } from "../services/pedidoService";
-import { ID_SUCURSAL_ACTUAL } from "../config/sucursal";
+import { useSucursal } from "../context/SucursalContext";
 import MesaForm from "./MesaForm";
 import MesaPanel from "./MesaPanel";
 
@@ -19,8 +19,11 @@ const LEYENDA = [
     { estado: "Reservada", etiqueta: "Reservadas" }
 ];
 
+const COLUMNAS_MINIMAS = 4;
+
 function MesaGrid({ onReservaCreada }) {
     const navigate = useNavigate();
+    const { sucursalId } = useSucursal();
     const [mesas, setMesas] = useState([]);
     const [error, setError] = useState("");
     const [seleccionada, setSeleccionada] = useState(null);
@@ -45,13 +48,14 @@ function MesaGrid({ onReservaCreada }) {
 
         const intervalo = setInterval(refrescarMesas, 30000); // cada 30 segundos
         return () => clearInterval(intervalo);
-    }, []);
+    }, [sucursalId]);
 
     const cargarMesas = async () => {
         try {
             const datos = await obtenerMesas();
             setMesas(datos);
             setSeleccionada(null);
+            setModoFormulario(null);
             setError("");
         } catch (error) {
             setError("No se pudieron cargar las mesas.");
@@ -73,7 +77,7 @@ function MesaGrid({ onReservaCreada }) {
             mesaId: seleccionada.idMesa,
             comensales,
             clienteId,
-            sucursalId: ID_SUCURSAL_ACTUAL
+            sucursalId
         });
 
         navigate(`/pedidos/${pedido.idPedido}`);
@@ -96,7 +100,7 @@ function MesaGrid({ onReservaCreada }) {
 
     const borrarMesa = async () => {
         const confirmar = window.confirm(
-            `¿Está seguro de que desea eliminar la mesa ${seleccionada.idMesa}?`
+            `¿Está seguro de que desea eliminar la mesa ${seleccionada.numero}?`
         );
 
         if (!confirmar) {
@@ -108,10 +112,13 @@ function MesaGrid({ onReservaCreada }) {
 
             setMesas(mesas.filter((mesa) => mesa.idMesa !== seleccionada.idMesa));
             setSeleccionada(null);
+            setModoFormulario(null);
         } catch (error) {
             setError("No se pudo eliminar la mesa.");
         }
     };
+
+    const columnas = Math.max(COLUMNAS_MINIMAS, ...mesas.map((mesa) => mesa.columna ?? 1));
 
     return (
         <div>
@@ -123,7 +130,13 @@ function MesaGrid({ onReservaCreada }) {
                     {mesas.length === 0 && !error ? (
                         <p>No hay mesas registradas.</p>
                     ) : (
-                        <div className="d-flex flex-wrap gap-3">
+                        <div
+                            style={{
+                                display: "grid",
+                                gridTemplateColumns: `repeat(${columnas}, 120px)`,
+                                gap: 16
+                            }}
+                        >
                             {mesas.map((mesa) => {
                                 const estaSeleccionada = seleccionada?.idMesa === mesa.idMesa;
 
@@ -133,7 +146,8 @@ function MesaGrid({ onReservaCreada }) {
                                         onClick={() => setSeleccionada(mesa)}
                                         className="text-white text-center rounded p-3"
                                         style={{
-                                            width: 120,
+                                            gridRow: mesa.fila,
+                                            gridColumn: mesa.columna,
                                             cursor: "pointer",
                                             background: COLORES[mesa.estado] ?? "#9e9e9e",
                                             outline: estaSeleccionada ? "4px solid #757575" : "none",
@@ -141,7 +155,7 @@ function MesaGrid({ onReservaCreada }) {
                                         }}
                                     >
                                         <div style={{ fontSize: "2.2rem", fontWeight: 700, lineHeight: 1.1 }}>
-                                            {mesa.idMesa}
+                                            {mesa.numero}
                                         </div>
                                         <div>👥 {mesa.maxComensales}</div>
                                     </div>
@@ -166,10 +180,10 @@ function MesaGrid({ onReservaCreada }) {
                                 refrescarMesas();
                                 if (onReservaCreada) onReservaCreada();
                             }}
-                            onReservaCancelada={refrescarMesas}
-                            onEditar={() => setModoFormulario("editar")}
-                            onEliminar={borrarMesa}
-                            onCerrar={() => setSeleccionada(null)}
+                            onCerrar={() => {
+                                setSeleccionada(null);
+                                setModoFormulario(null);
+                            }}
                         />
                     </div>
                 )}
@@ -196,9 +210,6 @@ function MesaGrid({ onReservaCreada }) {
                 >
                     Eliminar
                 </button>
-                <button className="btn btn-outline-secondary" onClick={cargarMesas}>
-                    Refrescar
-                </button>
             </div>
 
             {/* Leyenda con la cantidad de mesas por estado */}
@@ -219,7 +230,7 @@ function MesaGrid({ onReservaCreada }) {
                 ))}
             </div>
 
-            {modoFormulario && (
+            {(modoFormulario === "crear" || (modoFormulario === "editar" && seleccionada)) && (
                 <>
                     <MesaForm
                         key={modoFormulario === "editar" ? `editar-${seleccionada.idMesa}` : "crear"}

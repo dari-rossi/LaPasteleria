@@ -34,8 +34,9 @@ const eliminar = async (id) => {
     });
 };
 
-const obtenerTodasConReservaVigente = async (desde, hasta) => {
+const obtenerTodasConReservaVigente = async (desde, hasta, sucursalId) => {
     return await prisma.mesa.findMany({
+        where: { sucursalId },
         orderBy: { idMesa: "asc" },
         include: {
             reservas: {
@@ -49,11 +50,19 @@ const obtenerTodasConReservaVigente = async (desde, hasta) => {
     });
 };
 
+const obtenerOcupacionPlano = async (sucursalId) => {
+    return await prisma.mesa.findMany({
+        where: { sucursalId },
+        select: { numero: true, fila: true, columna: true }
+    });
+};
+
 module.exports = {
     obtenerTodas,
     obtenerPorId,
     crear,
     modificar,
     eliminar,
-    obtenerTodasConReservaVigente
+    obtenerTodasConReservaVigente,
+    obtenerOcupacionPlano
 };

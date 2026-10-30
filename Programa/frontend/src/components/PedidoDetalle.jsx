@@ -217,10 +217,10 @@ function PedidoDetalle() {
                                                             className="btn btn-danger btn-sm"
                                                             onClick={() => ejecutar(
                                                                 () => quitarItem(item.idItemProducto),
-                                                                "Producto quitado."
+                                                                "Producto eliminado."
                                                             )}
                                                         >
-                                                            Quitar
+                                                            Eliminar
                                                         </button>
                                                     </td>
                                                 )}
