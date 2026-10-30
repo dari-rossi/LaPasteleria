@@ -5,27 +5,30 @@ const filtroPorProducto = (productoId) => {
 }
 
 const getStockBajo = async (sucursalId) => {
-    const inventarios = await getAll(sucursalId);
-
-    return inventarios.filter(
-        inventario => inventario.stock <= inventario.stockMin
-    );
+    return await getAll(sucursalId, null, true);
 };
 
-const getAll = async (sucursalId = null, productoId = null) => {
-    return await prisma.inventario.findMany({
+const getAll = async (sucursalId, productoId = null, stockBajo = false) => {
+    const inventarios = await prisma.inventario.findMany({
         where: {
-            ...filtroPorProducto(productoId),
-            ...(sucursalId !== null
-                ? { sucursalId: Number(sucursalId) }
-                : {})
+            sucursalId: Number(sucursalId),
+            ...filtroPorProducto(productoId)
         },
         include: {
             sucursal: true,
             producto: true
         }
     });
+
+    if (!stockBajo) {
+        return inventarios;
+    }
+
+    return inventarios.filter(
+        inventario => inventario.stock <= inventario.producto.stockMinimo
+    );
 };
+
 const getById = async (id) => {
   return await prisma.inventario.findUnique({
     where: { id: parseInt(id) }

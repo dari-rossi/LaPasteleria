@@ -6,8 +6,16 @@ const obtenerMensajeError = (datos) => {
         : datos.error;
 };
 
-export const obtenerProductos = async () => {
-    const response = await apiFetch("/productos");
+export const obtenerProductos = async ({ tipoProducto = "" } = {}) => {
+    const parametros = new URLSearchParams();
+
+    if (tipoProducto) {
+        parametros.append("tipoProducto", tipoProducto);
+    }
+
+    const consulta = parametros.toString();
+    const ruta = consulta ? `/productos?${consulta}` : "/productos";
+    const response = await apiFetch(ruta);
 
     if (!response.ok) {
         throw new Error("No se pudieron obtener los productos");

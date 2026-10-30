@@ -1,9 +1,20 @@
 const prisma = require("../prisma");
 
 const filtroPorTipoProducto = (tipoProducto) => {
-    return tipoProducto
-        ? { tipoProducto: { contains: tipoProducto } }
-        : {};
+    if (!tipoProducto) {
+        return {};
+    }
+
+    if (tipoProducto === "Día" || tipoProducto === "Noche") {
+        return {
+            OR: [
+                { tipoProducto: tipoProducto },
+                { tipoProducto: "Ambos" }
+            ]
+        };
+    }
+
+    return { tipoProducto: { contains: tipoProducto } };
 };
 
 const filtroPorNombre = (nombre) => {

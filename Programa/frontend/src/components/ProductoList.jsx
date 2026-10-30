@@ -57,49 +57,54 @@ function ProductoList() {
     const [productoSeleccionado, setProductoSeleccionado] = useState(null);
     const [tipoProducto, setTipoProducto] = useState("todos");
     const [pagina, setPagina] = useState(1);
+    const [version, setVersion] = useState(0);
 
-    useEffect(() => {
-        cargarProductos();
-    }, []);
+useEffect(() => {
+    let cancelado = false;
 
     const cargarProductos = async () => {
         try {
-            const datos = await obtenerProductos();
+            const datos = await obtenerProductos({
+                tipoProducto: tipoProducto === "todos" ? "" : tipoProducto
+            });
 
-            setProductos(
-                [...datos].sort((a, b) => a.idProducto - b.idProducto)
-            );
+            if (!cancelado) {
+                setProductos(datos);
+                setError("");
+            }
         } catch (error) {
-            setError(error.message);
+            if (!cancelado) {
+                setError(error.message);
+            }
         }
     };
 
-    const agregarProducto = (nuevoProducto) => {
-        setProductos((anteriores) =>
-            [...anteriores, nuevoProducto].sort(
-                (a, b) => a.idProducto - b.idProducto
-            )
-        );
+    cargarProductos();
 
-        setMostrarFormulario(false);
+    return () => {
+        cancelado = true;
     };
+}, [tipoProducto, version]);
+
+const recargar = () => {
+    setVersion((actual) => actual + 1);
+};
+
+    const agregarProducto = () => {
+        setMostrarFormulario(false);
+        recargar();
+    };
+
 
     const editarProducto = (producto) => {
         setProductoEditar(producto);
         setMostrarFormulario(true);
     };
 
-    const actualizarProducto = (productoModificado) => {
-        setProductos((anteriores) =>
-            anteriores.map((producto) =>
-                producto.idProducto === productoModificado.idProducto
-                    ? productoModificado
-                    : producto
-            )
-        );
-
+    const actualizarProducto = () => {
         setProductoEditar(null);
         setMostrarFormulario(false);
+        recargar();
     };
 
     const borrarProducto = async (id) => {
@@ -152,28 +157,20 @@ function ProductoList() {
         setProductoSeleccionado(null);
     };
 
-    const productosFiltrados = productos.filter(
-        (producto) =>
-            tipoProducto === "todos" ||
-            producto.tipoProducto === tipoProducto ||
-            (producto.tipoProducto === "Ambos" &&
-                (tipoProducto === "Día" || tipoProducto === "Noche"))
-    );
-
-    const productoElegido = productosFiltrados.find(
+    const productoElegido = productos.find(
         (producto) => producto.idProducto === productoSeleccionado
     );
 
     const totalPaginas = Math.max(
         1,
-        Math.ceil(productosFiltrados.length / PRODUCTOS_POR_PAGINA)
+        Math.ceil(productos.length / PRODUCTOS_POR_PAGINA)
     );
 
     const paginaActual = Math.min(pagina, totalPaginas);
 
     const inicio = (paginaActual - 1) * PRODUCTOS_POR_PAGINA;
 
-    const productosDePagina = productosFiltrados.slice(
+    const productosDePagina = productos.slice(
         inicio,
         inicio + PRODUCTOS_POR_PAGINA
     );
@@ -208,7 +205,7 @@ function ProductoList() {
                 </div>
             )}
 
-            {productos.length === 0 && !error ? (
+            {productos.length === 0 && tipoProducto === "todos" && !error ? (
                 <p>No hay productos registrados.</p>
             ) : (
                 <>
@@ -238,7 +235,7 @@ function ProductoList() {
                         </div>
                     </div>
 
-                    {productosFiltrados.length === 0 ? (
+                    {productos.length === 0 ? (
                         <p>No hay productos que coincidan con el filtro.</p>
                     ) : (
                         <>

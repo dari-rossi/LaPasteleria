@@ -2,6 +2,7 @@ const inventarioRepository = require("../repositories/inventario.repository");
 const sucursalRepository = require("../repositories/sucursal.repository");
 const productoRepository = require("../repositories/producto.repository");
 const { lanzarError } = require("../config/errores");
+const { resolverSucursal } = require("../config/sucursalActiva");
 
 const verificarAcceso = (inventario, usuario) => {
     if (!inventario) {
@@ -26,12 +27,12 @@ const obtenerStockBajo = async (usuario, sucursalId) => {
     return await inventarioRepository.getStockBajo(usuario.sucursalId);
 };
 
-const obtenerInventarios = async (usuario, productoId) => {
-  if (usuario.rol === "DUENIO") {
-    return await inventarioRepository.getAll(null, productoId);
-  }
-
-  return await inventarioRepository.getAll(usuario.sucursalId, productoId);
+const obtenerInventarios = async (usuario, { sucursalId, productoId, stockBajo } = {}) => {
+    return await inventarioRepository.getAll(
+        resolverSucursal(usuario, sucursalId),
+        productoId,
+        stockBajo
+    );
 };
 
 const crearInventario = async (data, usuario) => {

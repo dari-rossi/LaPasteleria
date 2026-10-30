@@ -6,8 +6,20 @@ const obtenerMensajeError = (datos) => {
         : datos.error;
 };
 
-export const obtenerInventarios = async () => {
-    const response = await apiFetch("/inventario");
+export const obtenerInventarios = async ({ productoId = "", stockBajo = false } = {}) => {
+    const parametros = new URLSearchParams();
+
+    if (productoId) {
+        parametros.append("productoId", productoId);
+    }
+
+    if (stockBajo) {
+        parametros.append("stockBajo", "true");
+    }
+
+    const consulta = parametros.toString();
+    const ruta = consulta ? `/inventario?${consulta}` : "/inventario";
+    const response = await apiFetch(ruta);
 
     if (!response.ok) {
         throw new Error("No se pudo obtener el inventario");

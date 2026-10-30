@@ -28,7 +28,19 @@ const obtenerStockBajo = async (req, res) => {
 };
 
 const getAll = async (req, res) => {
-    const inventarios = await inventarioService.obtenerInventarios(req.usuario);
+    const sucursalId = req.query.sucursalId;
+
+    const productoId = req.query.productoId !== undefined && req.query.productoId !== ""
+        ? leerId(req.query.productoId)
+        : undefined;
+
+    const stockBajo = req.query.stockBajo === "true";
+
+    const inventarios = await inventarioService.obtenerInventarios(
+        req.usuario,
+        { sucursalId, productoId, stockBajo }
+    );
+
     res.json(inventarios);
 };
 

@@ -1,5 +1,6 @@
 const reservaService = require("../services/reserva.service");
 const { leerId, lanzarError } = require("../config/errores");
+const { ESTADOS_RESERVA } = require("../config/reservas");
 
 const leerClave = (params) => {
     const idMesa = leerId(params.idMesa, "RESERVA_CLAVE_INCORRECTA");
@@ -17,7 +18,18 @@ const obtenerReservas = async (req, res) => {
         ? leerId(req.query.sucursalId)
         : null;
 
-    const reservas = await reservaService.obtenerReservas(req.usuario, sucursalId);
+    const estadoReserva = req.query.estadoReserva || undefined;
+
+    if (estadoReserva !== undefined && !ESTADOS_RESERVA.includes(estadoReserva)) {
+        lanzarError("El estado debe ser Activa, En curso, Finalizada o Cancelada", 400);
+    }
+
+    const reservas = await reservaService.obtenerReservas(
+        req.usuario,
+        sucursalId,
+        { estadoReserva }
+    );
+
     res.json(reservas);
 };
 

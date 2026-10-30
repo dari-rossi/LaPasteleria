@@ -68,27 +68,47 @@ function InventarioList({ sucursalId }) {
     const [filtro, setFiltro] = useState("todos");
     const [idProductoFiltro, setIdProductoFiltro] = useState("");
     const [pagina, setPagina] = useState(1);
+    const [version, setVersion] = useState(0);
 
     useEffect(() => {
-        cargarInventarios();
-    }, []);
+        let cancelado = false;
 
-    const cargarInventarios = async () => {
-        try {
-            const datos = await obtenerInventarios();
-            setInventarios(datos);
-            setError("");
-        } catch (error) {
-            setError("No se pudo cargar el inventario.");
-        }
+        const cargarInventarios = async () => {
+            try {
+                const datos = await obtenerInventarios({
+                productoId: idProductoFiltro,
+                stockBajo: filtro === "stock-bajo"
+                });
+
+                if (!cancelado) {
+                    setInventarios(datos);
+                    setError("");
+            }
+        }   catch {
+                if (!cancelado) {
+                    setError("No se pudo cargar el inventario.");
+                }
+            }
+    };
+
+    cargarInventarios();
+
+
+    return () => {
+        cancelado = true;
+    };
+    }, [filtro, idProductoFiltro, sucursalId, version]);
+
+    const recargar = () => {
+        setVersion((actual) => actual + 1);
     };
 
     // Se usa tanto al crear como al modificar: se vuelve a pedir la lista
     // porque el backend no devuelve sucursal ni producto en esas respuestas
     const inventarioGuardado = () => {
-        cargarInventarios();
         setInventarioEditar(null);
         setMostrarFormulario(false);
+        recargar();
     };
 
     const editarInventario = (inventario) => {
@@ -165,38 +185,24 @@ function InventarioList({ sucursalId }) {
         setInventarioSeleccionado(null);
     };
 
-    // Solo el inventario de la sucursal en la que se está trabajando
-    const inventariosDeSucursal = inventarios.filter(
-        (inventario) => inventario.sucursalId === Number(sucursalId)
-    );
+    const hayFiltros = filtro !== "todos" || idProductoFiltro !== "";
 
-    const inventariosFiltrados = inventariosDeSucursal.filter((inventario) => {
-        const coincideStock =
-            filtro === "todos" ||
-            inventario.stock <= inventario.producto.stockMinimo;
-
-        const coincideProducto =
-            idProductoFiltro === "" ||
-            inventario.producto.idProducto === Number(idProductoFiltro);
-
-        return coincideStock && coincideProducto;
-    });
 
     // El registro elegido solo cuenta si sigue visible con los filtros actuales
-    const inventarioElegido = inventariosFiltrados.find(
+    const inventarioElegido = inventarios.find(
         (inventario) => inventario.id === inventarioSeleccionado
     );
 
     const totalPaginas = Math.max(
         1,
-        Math.ceil(inventariosFiltrados.length / INVENTARIOS_POR_PAGINA)
+        Math.ceil(inventarios.length / INVENTARIOS_POR_PAGINA)
     );
 
     // Si al borrar quedan menos páginas, no se pasa del final
     const paginaActual = Math.min(pagina, totalPaginas);
 
     const inicio = (paginaActual - 1) * INVENTARIOS_POR_PAGINA;
-    const inventariosDePagina = inventariosFiltrados.slice(
+    const inventariosDePagina = inventarios.slice(
         inicio,
         inicio + INVENTARIOS_POR_PAGINA
     );
@@ -231,7 +237,7 @@ function InventarioList({ sucursalId }) {
                 </div>
             )}
 
-            {inventariosDeSucursal.length === 0 && !error ? (
+            {inventarios.length === 0 && !hayFiltros && !error ? (
                 <p>No hay registros de inventario.</p>
             ) : (
                 <>
@@ -265,7 +271,7 @@ function InventarioList({ sucursalId }) {
                         </div>
                     </div>
 
-                    {inventariosFiltrados.length === 0 && !error ? (
+                    {inventarios.length === 0 && !error ? (
                         <p>No hay productos que coincidan con los filtros.</p>
                     ) : (
                         <>
