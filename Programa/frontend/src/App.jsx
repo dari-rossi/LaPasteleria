@@ -17,6 +17,7 @@ import GastosPage from "./pages/GastosPage";
 import TiposEmpleadosPage from "./pages/TiposEmpleadosPage";
 import InformesPage from "./pages/InformesPage";
 import UsuariosPage from "./pages/UsuariosPage";
+import ClientesPage from "./pages/ClientesPage";
 
 const Pendiente = ({ nombre }) => (
     <p className="text-muted">{nombre}: pendiente.</p>
@@ -105,6 +106,7 @@ function App() {
                             <RequiereRol roles={["DUENIO", "GERENTE", "MOZO"]} />
                         }>
                             <Route path="/mesas" element={<MesasPage />} />
+                            <Route path="/clientes" element={<ClientesPage />} />
                         </Route>
 
                         {/* Dueño, gerente y ayudante de cocina */}
