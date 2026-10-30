@@ -1,4 +1,4 @@
-export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
 export const apiFetch = async (ruta, opciones = {}) => {
     const sesion = JSON.parse(localStorage.getItem("sesion"));
@@ -6,7 +6,8 @@ export const apiFetch = async (ruta, opciones = {}) => {
 
     const sucursalElegida = localStorage.getItem("sucursalId");
 
-    if (sucursalElegida) {
+    // Solo se agrega si la ruta todavía no trae sucursalId
+    if (sucursalElegida && !/[?&]sucursalId=/.test(ruta)) {
         const separador = ruta.includes("?") ? "&" : "?";
         ruta = `${ruta}${separador}sucursalId=${sucursalElegida}`;
     }
