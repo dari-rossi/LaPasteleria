@@ -68,7 +68,7 @@ describe("modificarCliente", () => {
         jest.clearAllMocks();
     });
 
-    test("debe modificar un cliente existente y actualizar su descuento", async () => {
+    test("debe modificar únicamente el descuento de un cliente existente", async () => {
         clienteRepository.obtenerPorId.mockResolvedValue({
             id: 1,
             tipo: "Jubilado",
@@ -77,19 +77,19 @@ describe("modificarCliente", () => {
 
         clienteRepository.modificar.mockResolvedValue({
             id: 1,
-            tipo: "Estudiante",
+            tipo: "Jubilado",
             descuento: 15
         });
 
         const resultado = await clienteService.modificarCliente(1, {
-            tipo: "Estudiante"
-        });
-
-        expect(clienteRepository.modificar).toHaveBeenCalledWith(1, {
-            tipo: "Estudiante",
             descuento: 15
         });
 
+        expect(clienteRepository.modificar).toHaveBeenCalledWith(1, {
+            descuento: 15
+        });
+
+        expect(resultado.tipo).toBe("Jubilado");
         expect(resultado.descuento).toBe(15);
     });
 
@@ -97,12 +97,13 @@ describe("modificarCliente", () => {
         clienteRepository.obtenerPorId.mockResolvedValue(null);
 
         await expect(
-            clienteService.modificarCliente(99, { tipo: "Estudiante" })
+            clienteService.modificarCliente(99, { descuento: 15 })
         ).rejects.toBeDefined();
 
         expect(clienteRepository.modificar).not.toHaveBeenCalled();
     });
 });
+
 describe("eliminarCliente", () => {
     beforeEach(() => {
         jest.clearAllMocks();
@@ -138,6 +139,7 @@ describe("eliminarCliente", () => {
         expect(clienteRepository.eliminar).not.toHaveBeenCalled();
     });
 });
+
 describe("obtenerClientePorId", () => {
     beforeEach(() => {
         jest.clearAllMocks();

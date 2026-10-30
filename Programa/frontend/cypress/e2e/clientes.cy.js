@@ -3,24 +3,35 @@ describe("Gestión de clientes", () => {
         cy.visit("/login");
 
         cy.env(["usuario", "contrasenia"]).then((env) => {
-            cy.get("#nombreUsuario").type(env.usuario);
+            cy.get("#nombreUsuario").should("be.visible").type(env.usuario);
 
-            cy.get("#contrasenia").type(env.contrasenia, {
+            cy.get("#contrasenia").should("be.visible").type(env.contrasenia, {
                 log: false
             });
+
+            cy.contains("button", "Iniciar sesión").click();
         });
 
-        cy.contains("button", "Iniciar sesión").click();
         cy.location("pathname").should("eq", "/");
 
-        cy.contains(".navbar-nav a", "Clientes").click();
+        cy.contains(".navbar-nav a", "Clientes")
+            .should("be.visible")
+            .click();
+
         cy.location("pathname").should("eq", "/clientes");
 
-        cy.get('select[name="tipo"]').select("Estudiante");
-        cy.contains("button", "Crear cliente").click();
+        cy.get('select[name="tipo"]')
+            .should("be.visible")
+            .select("Estudiante");
+
+        cy.contains("button", "Crear cliente")
+            .should("be.enabled")
+            .click();
 
         cy.contains("tbody tr", "Estudiante")
             .should("be.visible")
-            .and("contain", "15%");
+            .within(() => {
+                cy.contains("15%").should("be.visible");
+            });
     });
 });
