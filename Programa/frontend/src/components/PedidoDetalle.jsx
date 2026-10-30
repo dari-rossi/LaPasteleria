@@ -6,7 +6,6 @@ import { agregarItem, modificarCantidad, quitarItem } from "../services/itemProd
 import { crearPago } from "../services/pagoService";
 import { useAuth } from "../context/AuthContext";
 import MercadoPago from "./mercadoPago/mercadoPago";
-import { useAuth } from "../context/AuthContext";
 import {
     ESTADOS_EDITABLES,
     METODOS_PAGO,
