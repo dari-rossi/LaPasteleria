@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
+import RequiereLogin from "./components/RequiereLogin";
 import RequiereSucursal from "./components/RequiereSucursal";
 import RequiereRol from "./components/RequiereRol";
 import LoginPage from "./pages/LoginPage";
@@ -16,6 +17,7 @@ import ReservasPage from "./pages/ReservasPage";
 import GastosPage from "./pages/GastosPage";
 import TiposEmpleadosPage from "./pages/TiposEmpleadosPage";
 import InformesPage from "./pages/InformesPage";
+import SucursalEmpleadosPage from "./pages/SucursalEmpleadosPage";
 import UsuariosPage from "./pages/UsuariosPage";
 import ClientesPage from "./pages/ClientesPage";
 
@@ -23,12 +25,27 @@ const Pendiente = ({ nombre }) => (
     <p className="text-muted">{nombre}: pendiente.</p>
 );
 
-function RequiereLogin({ children }) {
-    const { autenticado } = useAuth();
+// Los que no son dueño ya tienen su sucursal asignada: no pasan por el menú
+// general, entran directo a su pantalla principal
+const INICIO_POR_ROL = {
+    GERENTE: "/sucursal",
+    MOZO: "/mesas",
+    AYUDANTE_COCINA: "/inventario"
+};
 
-    return autenticado
-        ? children
-        : <Navigate to="/login" replace />;
+function Inicio() {
+    const { sesion } = useAuth();
+
+    // Solo el dueño ve el menú general y elige sucursal
+    if (sesion?.rol === "DUENIO") {
+        return <MenuGeneralPage />;
+    }
+
+    const destino = INICIO_POR_ROL[sesion?.rol];
+
+    return destino
+        ? <Navigate to={destino} replace />
+        : <p className="text-muted">Tu rol no tiene una pantalla asignada.</p>;
 }
 
 function App() {
@@ -53,12 +70,12 @@ function App() {
                         path="/"
                         element={
                             <RequiereLogin>
-                                <MenuGeneralPage />
+                                <Inicio />
                             </RequiereLogin>
                         }
                     />
 
-                    {/* Opciones del dueño */}
+                    {/* Menú general: solo el dueño (común a todas las sucursales) */}
                     <Route element={
                         <RequiereRol roles={["DUENIO"]} />
                     }>
@@ -94,6 +111,7 @@ function App() {
                             <RequiereRol roles={["DUENIO", "GERENTE"]} />
                         }>
                             <Route path="/sucursal" element={<SucursalPage />} />
+                            <Route path="/empleados" element={<SucursalEmpleadosPage />} />
                             <Route path="/gastos" element={<GastosPage />} />
                             <Route
                                 path="/planilla"

@@ -48,7 +48,7 @@ const ESTILO_CONTENEDOR_TABLA = {
 
 function ProductoList() {
     const { sesion } = useAuth();
-    const esDuenio = sesion?.rol === "DUENIO";
+    const puedeModificar = sesion?.rol === "DUENIO";
 
     const [productos, setProductos] = useState([]);
     const [error, setError] = useState("");
@@ -70,7 +70,7 @@ function ProductoList() {
                 [...datos].sort((a, b) => a.idProducto - b.idProducto)
             );
         } catch (error) {
-            setError("No se pudieron cargar los productos.");
+            setError(error.message);
         }
     };
 
@@ -111,6 +111,8 @@ function ProductoList() {
             return;
         }
 
+        setError("");
+
         try {
             await eliminarProducto(id);
 
@@ -120,7 +122,7 @@ function ProductoList() {
 
             setProductoSeleccionado(null);
         } catch (error) {
-            setError("No se pudo eliminar el producto.");
+            setError(error.message);
         }
     };
 
@@ -135,6 +137,10 @@ function ProductoList() {
     };
 
     const seleccionarProducto = (id) => {
+        if (!puedeModificar) {
+            return;
+        }
+
         setProductoSeleccionado(
             productoSeleccionado === id ? null : id
         );
@@ -177,7 +183,7 @@ function ProductoList() {
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h2 className="mb-0">Productos</h2>
 
-                {esDuenio && (
+                {puedeModificar && (
                     <button
                         className="btn btn-primary"
                         onClick={alternarFormulario}
@@ -187,7 +193,7 @@ function ProductoList() {
                 )}
             </div>
 
-            {esDuenio && mostrarFormulario && (
+            {puedeModificar && mostrarFormulario && (
                 <ProductoForm
                     productoEditar={productoEditar}
                     onProductoCreado={agregarProducto}
@@ -236,16 +242,14 @@ function ProductoList() {
                         <p>No hay productos que coincidan con el filtro.</p>
                     ) : (
                         <>
-                            <div className="d-flex align-items-center mb-3">
-                                <span className="flex-grow-1 text-truncate me-3">
-                                    {productoElegido
-                                        ? `Seleccionado: ${productoElegido.nombre}`
-                                        : esDuenio
-                                            ? "Seleccioná una fila para editar o eliminar"
-                                            : "Seleccioná una fila para consultar"}
-                                </span>
+                            {puedeModificar && (
+                                <div className="d-flex align-items-center mb-3">
+                                    <span className="flex-grow-1 text-truncate me-3">
+                                        {productoElegido
+                                            ? `Seleccionado: ${productoElegido.nombre}`
+                                            : "Seleccioná una fila para editar o eliminar"}
+                                    </span>
 
-                                {esDuenio && (
                                     <div className={`flex-shrink-0 ${productoElegido ? "" : "invisible"}`}>
                                         <button
                                             className="btn btn-warning btn-sm me-2"
@@ -267,8 +271,8 @@ function ProductoList() {
                                             Eliminar
                                         </button>
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
 
                             <div
                                 className="table-responsive"
@@ -292,8 +296,9 @@ function ProductoList() {
                                             <tr
                                                 key={producto.idProducto}
                                                 style={{
-                                                    cursor: "pointer",
-                                                    ...(productoSeleccionado === producto.idProducto
+                                                    cursor: puedeModificar ? "pointer" : "default",
+                                                    ...(puedeModificar &&
+                                                        productoSeleccionado === producto.idProducto
                                                         ? ESTILO_FILA_SELECCIONADA
                                                         : {})
                                                 }}

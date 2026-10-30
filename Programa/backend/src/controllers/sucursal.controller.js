@@ -8,7 +8,7 @@ const obtenerSucursales = async (req, res) => {
 
 const obtenerSucursalPorId = async (req, res) => {
     const id = leerId(req.params.id);
-    const sucursal = await sucursalService.obtenerSucursalPorId(id);
+    const sucursal = await sucursalService.obtenerSucursalPorId(id, req.usuario);
     res.json(sucursal);
 };
 

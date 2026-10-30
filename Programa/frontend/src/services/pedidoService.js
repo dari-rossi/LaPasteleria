@@ -6,8 +6,12 @@ const obtenerMensajeError = (datos) => {
         : datos.error;
 };
 
-export const obtenerPedidos = async () => {
-    const response = await apiFetch("/pedidos");
+export const obtenerPedidos = async ({ sucursalId } = {}) => {
+    const ruta = sucursalId
+        ? `/pedidos?sucursalId=${sucursalId}`
+        : "/pedidos";
+
+    const response = await apiFetch(ruta);
 
     if (!response.ok) {
         throw new Error("No se pudieron obtener los pedidos");

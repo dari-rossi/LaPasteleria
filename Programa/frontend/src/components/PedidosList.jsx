@@ -2,18 +2,21 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { obtenerPedidos, eliminarPedido } from "../services/pedidoService";
 import { COLORES_ESTADO_PEDIDO, calcularTotalConDescuento, formatearPrecio } from "../models/Pedido";
+import { useAuth } from "../context/AuthContext";
 
-function PedidosList() {
+function PedidosList({ sucursalId }) {
+    const { sesion } = useAuth();
+    const puedeEliminar = sesion?.rol === "MOZO";
     const [pedidos, setPedidos] = useState([]);
     const [error, setError] = useState("");
 
     useEffect(() => {
         cargarPedidos();
-    }, []);
+    }, [sucursalId]);
 
     const cargarPedidos = async () => {
         try {
-            setPedidos(await obtenerPedidos());
+            setPedidos(await obtenerPedidos({ sucursalId }));
             setError("");
         } catch (error) {
             setError("No se pudieron cargar los pedidos.");
@@ -84,12 +87,14 @@ function PedidosList() {
                                         >
                                             Ver
                                         </Link>
-                                        <button
-                                            className="btn btn-danger btn-sm"
-                                            onClick={() => borrarPedido(pedido.idPedido)}
-                                        >
-                                            Eliminar
-                                        </button>
+                                        {puedeEliminar && (
+                                            <button
+                                                className="btn btn-danger btn-sm"
+                                                onClick={() => borrarPedido(pedido.idPedido)}
+                                            >
+                                                Eliminar
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

@@ -5,6 +5,15 @@ import { useAuth } from "../context/AuthContext";
 const SECCIONES_POR_ROL = {
     DUENIO: [
         { to: "/sucursal", label: "Sucursal" },
+        { to: "/empleados", label: "Empleados" },
+        { to: "/mesas", label: "Mesas" },
+        { to: "/pedidos", label: "Pedidos" },
+        { to: "/inventario", label: "Inventario" },
+        { to: "/gastos", label: "Gastos" }
+    ],
+    GERENTE: [
+        { to: "/sucursal", label: "Sucursal" },
+        { to: "/empleados", label: "Empleados" },
         { to: "/mesas", label: "Mesas" },
         { to: "/pedidos", label: "Pedidos" },
         { to: "/inventario", label: "Inventario" },
@@ -35,6 +44,8 @@ const SECCIONES_POR_ROL = {
     ]
 };
 
+const RUTAS_GENERALES = ["/", "/sucursales", "/informes", "/tipos-empleado"];
+
 function Navbar() {
     const { sucursalId, puedeElegir, cambiarSucursal } = useSucursal();
     const { sesion, cerrarSesion } = useAuth();
@@ -43,6 +54,9 @@ function Navbar() {
 
     const rol = sesion?.rol;
     const secciones = SECCIONES_POR_ROL[rol] ?? [];
+
+    const enSucursal = sucursalId !== null &&
+        !(puedeElegir && RUTAS_GENERALES.includes(pathname));
 
     const irAlMenuGeneral = () => {
         if (puedeElegir) {
@@ -65,23 +79,25 @@ function Navbar() {
                 La Pastelería
             </NavLink>
 
-            <div className="navbar-nav flex-wrap">
-                {sucursalId !== null && secciones.map((seccion) => (
-                    <NavLink
-                        key={seccion.to}
-                        className="nav-link"
-                        to={seccion.to}
-                    >
-                        {seccion.label}
-                    </NavLink>
-                ))}
+            {enSucursal && (
+                <>
+                    <span className="navbar-text text-light small me-3">
+                        Sucursal {String(sucursalId).padStart(4, "0")}
+                    </span>
 
-                {rol === "DUENIO" && (
-                    <NavLink className="nav-link" to="/usuarios">
-                        Usuarios
-                    </NavLink>
-                )}
-            </div>
+                    <div className="navbar-nav flex-wrap">
+                        {secciones.map((seccion) => (
+                            <NavLink
+                                key={seccion.to}
+                                className="nav-link"
+                                to={seccion.to}
+                            >
+                                {seccion.label}
+                            </NavLink>
+                        ))}
+                    </div>
+                </>
+            )}
 
             {mostrarMenuGeneral && (
                 <button

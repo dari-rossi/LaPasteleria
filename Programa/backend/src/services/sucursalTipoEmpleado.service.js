@@ -27,11 +27,13 @@ const verificarSucursal = async (sucursalId) => {
     }
 };
 
+
 // Busca la asignación sucursal + tipo de empleado o lanza 404
 const buscarAsignacion = async (sucursalId, tipoEmpleadoId) => {
     const asignacion = await sucursalTipoEmpleadoRepository.obtenerPorId(sucursalId, tipoEmpleadoId);
 
-    if (!asignacion) {
+    // El dueño no forma parte de los empleados de una sucursal: no se gestiona desde acá
+    if (!asignacion || esDuenio(asignacion.tipoEmpleado.rol)) {
         lanzarError("ASIGNACION_NO_ENCONTRADA");
     }
 
@@ -42,7 +44,11 @@ const obtenerTiposEmpleadoDeSucursal = async (sucursalId, usuario) => {
     verificarPermisoSucursal(sucursalId, usuario);
     await verificarSucursal(sucursalId);
 
-    return await sucursalTipoEmpleadoRepository.obtenerPorSucursal(sucursalId);
+    const asignaciones = await sucursalTipoEmpleadoRepository.obtenerPorSucursal(sucursalId);
+
+    return asignaciones.filter(
+        (asignacion) => !esDuenio(asignacion.tipoEmpleado.rol)
+    );
 };
 
 const asignarTipoEmpleado = async (sucursalId, datos, usuario) => {

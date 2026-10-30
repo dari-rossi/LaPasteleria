@@ -4,14 +4,15 @@ import {
     eliminarInventario
 } from "../services/inventarioService";
 import InventarioForm from "./InventarioForm";
+import { useAuth } from "../context/AuthContext";
 
 const INVENTARIOS_POR_PAGINA = 10;
 
-// precioFinal puede venir en null
 const formatearPrecio = (valor) => {
     if (valor === null || valor === undefined) {
         return "—";
     }
+
     return `$ ${valor.toLocaleString("es-AR", { minimumFractionDigits: 2 })}`;
 };
 
@@ -38,7 +39,6 @@ const ESTILO_BOTON_ELIMINAR = {
     "--bs-btn-hover-color": "#fff"
 };
 
-
 const ESTILO_FILA_SELECCIONADA = {
     outline: "4px solid #757575",
     outlineOffset: "2px"
@@ -52,21 +52,21 @@ const ESTILO_CONTENEDOR_TABLA = {
 // sucursalId llega desde afuera: la sucursal se elige al iniciar el sistema,
 // y esta tabla siempre muestra el inventario de esa sucursal
 function InventarioList({ sucursalId }) {
+    const { sesion } = useAuth();
+    const rol = sesion?.rol;
+
+    const puedeCrear = rol === "DUENIO";
+    const puedeEditar = rol === "DUENIO" || rol === "AYUDANTE_COCINA";
+    const puedeEliminar = rol === "DUENIO";
+    const puedeSeleccionar = puedeEditar || puedeEliminar;
+
     const [inventarios, setInventarios] = useState([]);
     const [error, setError] = useState("");
     const [inventarioEditar, setInventarioEditar] = useState(null);
-
-    // El panel para crear o editar un inventario está oculto hasta que se lo pide
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
-
-    // Fila seleccionada (id del inventario): al elegirla aparecen Editar y Eliminar
     const [inventarioSeleccionado, setInventarioSeleccionado] = useState(null);
-
-    // Filtros: "todos" o "stock-bajo", y el id del producto (vacío = sin filtrar)
     const [filtro, setFiltro] = useState("todos");
     const [idProductoFiltro, setIdProductoFiltro] = useState("");
-
-    // Paginación
     const [pagina, setPagina] = useState(1);
 
     useEffect(() => {
@@ -92,11 +92,19 @@ function InventarioList({ sucursalId }) {
     };
 
     const editarInventario = (inventario) => {
+        if (!puedeEditar) {
+            return;
+        }
+
         setInventarioEditar(inventario);
         setMostrarFormulario(true);
     };
 
     const borrarInventario = async (id) => {
+        if (!puedeEliminar) {
+            return;
+        }
+
         const confirmar = window.confirm(
             "¿Está seguro de que desea eliminar este registro de inventario?"
         );
@@ -108,9 +116,10 @@ function InventarioList({ sucursalId }) {
         try {
             await eliminarInventario(id);
 
-            setInventarios(
-                inventarios.filter((inventario) => inventario.id !== id)
+            setInventarios((anteriores) =>
+                anteriores.filter((inventario) => inventario.id !== id)
             );
+
             setInventarioSeleccionado(null);
         } catch (error) {
             setError("No se pudo eliminar el registro de inventario.");
@@ -124,24 +133,36 @@ function InventarioList({ sucursalId }) {
 
     // El botón abre el panel para crear un inventario, o lo cierra si ya está abierto
     const alternarFormulario = () => {
+        if (!puedeCrear) {
+            return;
+        }
+
         setInventarioEditar(null);
         setMostrarFormulario(!mostrarFormulario);
     };
 
-    // Un clic selecciona la fila y otro clic sobre la misma la deselecciona
+    // Solo los roles autorizados pueden seleccionar una fila
     const seleccionarInventario = (id) => {
-        setInventarioSeleccionado(inventarioSeleccionado === id ? null : id);
+        if (!puedeSeleccionar) {
+            return;
+        }
+
+        setInventarioSeleccionado(
+            inventarioSeleccionado === id ? null : id
+        );
     };
 
     // Al cambiar un filtro se vuelve a la primera página
     const cambiarFiltro = (e) => {
         setFiltro(e.target.value);
         setPagina(1);
+        setInventarioSeleccionado(null);
     };
 
     const cambiarIdProductoFiltro = (e) => {
         setIdProductoFiltro(e.target.value);
         setPagina(1);
+        setInventarioSeleccionado(null);
     };
 
     // Solo el inventario de la sucursal en la que se está trabajando
@@ -150,7 +171,6 @@ function InventarioList({ sucursalId }) {
     );
 
     const inventariosFiltrados = inventariosDeSucursal.filter((inventario) => {
-        // Stock bajo: el stock llegó al stock mínimo del producto o está por debajo
         const coincideStock =
             filtro === "todos" ||
             inventario.stock <= inventario.producto.stockMinimo;
@@ -186,15 +206,17 @@ function InventarioList({ sucursalId }) {
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h2 className="mb-0">Inventario</h2>
 
-                <button
-                    className="btn btn-primary"
-                    onClick={alternarFormulario}
-                >
-                    {mostrarFormulario ? "Cerrar" : "+ Crear inventario"}
-                </button>
+                {puedeCrear && (
+                    <button
+                        className="btn btn-primary"
+                        onClick={alternarFormulario}
+                    >
+                        {mostrarFormulario ? "Cerrar" : "+ Crear inventario"}
+                    </button>
+                )}
             </div>
 
-            {mostrarFormulario && (
+            {puedeEditar && mostrarFormulario && (
                 <InventarioForm
                     sucursalId={sucursalId}
                     inventarioEditar={inventarioEditar}
@@ -247,34 +269,41 @@ function InventarioList({ sucursalId }) {
                         <p>No hay productos que coincidan con los filtros.</p>
                     ) : (
                         <>
-                            {}
-                            <div className="d-flex align-items-center mb-3">
-                                <span className="flex-grow-1 text-truncate me-3">
-                                    {inventarioElegido
-                                        ? `Seleccionado: ${inventarioElegido.producto.nombre}`
-                                        : "Seleccioná una fila para editar o eliminar"}
-                                </span>
+                            {puedeSeleccionar && (
+                                <div className="d-flex align-items-center mb-3">
+                                    <span className="flex-grow-1 text-truncate me-3">
+                                        {inventarioElegido
+                                            ? `Seleccionado: ${inventarioElegido.producto.nombre}`
+                                            : puedeEliminar
+                                                ? "Seleccioná una fila para editar o eliminar"
+                                                : "Seleccioná una fila para editar el stock"}
+                                    </span>
 
-                                <div className={`flex-shrink-0 ${inventarioElegido ? "" : "invisible"}`}>
-                                    <button
-                                        className="btn btn-warning btn-sm me-2"
-                                        style={ESTILO_BOTON_EDITAR}
-                                        onClick={() => editarInventario(inventarioElegido)}
-                                    >
-                                        Editar
-                                    </button>
+                                    <div className={`flex-shrink-0 ${inventarioElegido ? "" : "invisible"}`}>
+                                        {puedeEditar && (
+                                            <button
+                                                className="btn btn-warning btn-sm me-2"
+                                                style={ESTILO_BOTON_EDITAR}
+                                                disabled={!inventarioElegido}
+                                                onClick={() => editarInventario(inventarioElegido)}
+                                            >
+                                                Editar
+                                            </button>
+                                        )}
 
-                                    <button
-                                        className="btn btn-danger btn-sm"
-                                        style={ESTILO_BOTON_ELIMINAR}
-                                        onClick={() =>
-                                            borrarInventario(inventarioElegido.id)
-                                        }
-                                    >
-                                        Eliminar
-                                    </button>
+                                        {puedeEliminar && (
+                                            <button
+                                                className="btn btn-danger btn-sm"
+                                                style={ESTILO_BOTON_ELIMINAR}
+                                                disabled={!inventarioElegido}
+                                                onClick={() => borrarInventario(inventarioElegido.id)}
+                                            >
+                                                Eliminar
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             <div className="table-responsive" style={ESTILO_CONTENEDOR_TABLA}>
                                 <table className="table table-bordered">
@@ -294,11 +323,12 @@ function InventarioList({ sucursalId }) {
                                             <tr
                                                 key={inventario.id}
                                                 style={{
-                                                    cursor: "pointer",
+                                                    cursor: puedeSeleccionar ? "pointer" : "default",
                                                     ...(inventario.stock < inventario.producto.stockMinimo
                                                         ? ESTILO_STOCK_BAJO
                                                         : {}),
-                                                    ...(inventarioSeleccionado === inventario.id
+                                                    ...(puedeSeleccionar &&
+                                                        inventarioSeleccionado === inventario.id
                                                         ? ESTILO_FILA_SELECCIONADA
                                                         : {})
                                                 }}

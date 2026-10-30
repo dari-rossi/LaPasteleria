@@ -43,7 +43,7 @@ router.get("/",autenticar, permitirRoles("DUENIO"), obtenerSucursales);
  *       404:
  *         description: Sucursal no encontrada
  */
-router.get("/:id",autenticar, permitirRoles("DUENIO"), obtenerSucursalPorId);
+router.get("/:id",autenticar, permitirRoles("DUENIO", "GERENTE"), obtenerSucursalPorId);
 
 /**
  * @swagger
