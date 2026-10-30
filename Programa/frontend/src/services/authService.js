@@ -1,8 +1,7 @@
-const API_URL = "http://localhost:3000/auth";
-import { apiFetch } from "./api";
+import { API_URL } from "./api";
 
 export const iniciarSesion = async (nombreUsuario, contrasenia) => {
-    const respuesta = await fetch(`${API_URL}/login`, {
+    const respuesta = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

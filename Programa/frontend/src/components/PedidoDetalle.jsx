@@ -4,6 +4,7 @@ import { obtenerPedidoPorId, modificarPedido } from "../services/pedidoService";
 import { obtenerProductos } from "../services/productoService";
 import { agregarItem, modificarCantidad, quitarItem } from "../services/itemProductoService";
 import { crearPago } from "../services/pagoService";
+import { useAuth } from "../context/AuthContext";
 import MercadoPago from "./mercadoPago/mercadoPago";
 import {
     ESTADOS_EDITABLES,
@@ -18,7 +19,8 @@ import {
 
 function PedidoDetalle() {
     const { id } = useParams();
-    const token = localStorage.getItem("token");
+    const { sesion } = useAuth();
+    const token = sesion?.token;
     const [pedido, setPedido] = useState(null);
     const [productos, setProductos] = useState([]);
     const [estado, setEstado] = useState("");
