@@ -158,8 +158,8 @@ function SucursalDetalle() {
                     )}
                 </div>
             </form>
-            {/* Las planillas las ve solo el gerente, debajo de los datos de la sucursal */}
-            {sesion?.rol === "GERENTE" && <PlanillasSucursal />}
+             {/* Las planillas las ven el gerente y el dueño, debajo de los datos de la sucursal */}
+            {(sesion?.rol === "GERENTE" || sesion?.rol === "DUENIO") && <PlanillasSucursal />}
         </div>
     );
 }

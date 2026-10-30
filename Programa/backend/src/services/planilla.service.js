@@ -1,7 +1,22 @@
 const planillaRepository = require("../repositories/planilla.repository");
 const { hoy, mesActual, rangoDelDia, rangoDelMes } = require("../config/fechas");
-
+const { lanzarError } = require("../config/errores");
 const redondear = (valor) => Math.round((valor + Number.EPSILON) * 100) / 100;
+
+
+const resolverSucursal = (sucursalIdPedida, usuario) => {
+    if (usuario.rol !== "DUENIO") {
+        return usuario.sucursalId;
+    }
+
+    const sucursalId = Number(sucursalIdPedida);
+
+    if (!Number.isInteger(sucursalId) || sucursalId <= 0) {
+        lanzarError("SUCURSAL_REQUERIDA");
+    }
+
+    return sucursalId;
+};
 
 // Elige el elemento con mayor valor en "campo"; si empatan, el de menor ID
 const elegirMayor = (elementos, campo, campoId) => {
@@ -54,24 +69,26 @@ const calcularResumen = (pagos) => {
     };
 };
 
-// Planilla de un día (AAAA-MM-DD) de la sucursal del usuario. Sin fecha, es la de hoy
-const obtenerPlanillaDiaria = async (fecha, usuario) => {
+// Planilla de un día (AAAA-MM-DD) de una sucursal. Sin fecha, es la de hoy
+const obtenerPlanillaDiaria = async (fecha, usuario, sucursalIdPedida) => {
     const dia = fecha ?? hoy();
     const { desde, hasta } = rangoDelDia(dia);
+    const sucursalId = resolverSucursal(sucursalIdPedida, usuario);
 
-    const pagos = await planillaRepository.obtenerPagosDelPeriodo(desde, hasta, usuario.sucursalId);
+    const pagos = await planillaRepository.obtenerPagosDelPeriodo(desde, hasta, sucursalId);
 
-    return { fecha: dia, sucursalId: usuario.sucursalId, ...calcularResumen(pagos) };
+    return { fecha: dia, sucursalId, ...calcularResumen(pagos) };
 };
 
-// Planilla de un mes (AAAA-MM) de la sucursal del usuario. Sin mes, es la del mes actual
-const obtenerPlanillaMensual = async (mes, usuario) => {
+// Planilla de un mes (AAAA-MM) de una sucursal. Sin mes, es la del mes actual
+const obtenerPlanillaMensual = async (mes, usuario, sucursalIdPedida) => {
     const periodo = mes ?? mesActual();
     const { desde, hasta } = rangoDelMes(periodo);
+    const sucursalId = resolverSucursal(sucursalIdPedida, usuario);
 
-    const pagos = await planillaRepository.obtenerPagosDelPeriodo(desde, hasta, usuario.sucursalId);
+    const pagos = await planillaRepository.obtenerPagosDelPeriodo(desde, hasta, sucursalId);
 
-    return { mes: periodo, sucursalId: usuario.sucursalId, ...calcularResumen(pagos) };
+    return { mes: periodo, sucursalId, ...calcularResumen(pagos) };
 };
 
 // Planilla general del mes actual, sumando todas las sucursales

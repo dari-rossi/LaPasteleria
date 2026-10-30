@@ -11,11 +11,11 @@ const pedir = async (ruta) => {
     return datos;
 };
 
-export const obtenerPlanillaDiaria = (fecha) =>
-    pedir(`/planillas/diaria?fecha=${fecha}`);
+export const obtenerPlanillaDiaria = (fecha, sucursalId) =>
+    pedir(`/planillas/diaria?fecha=${fecha}&sucursalId=${sucursalId}`);
 
-export const obtenerPlanillaMensual = (mes) =>
-    pedir(`/planillas/mensual?mes=${mes}`);
+export const obtenerPlanillaMensual = (mes, sucursalId) =>
+    pedir(`/planillas/mensual?mes=${mes}&sucursalId=${sucursalId}`);
 
 export const obtenerPlanillaGeneral = () =>
     pedir("/planillas/general");

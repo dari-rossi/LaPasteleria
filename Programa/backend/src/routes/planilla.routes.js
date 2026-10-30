@@ -29,7 +29,7 @@ const router = express.Router();
  *       400:
  *         description: Fecha inválida o futura
  */
-router.get("/diaria", autenticar, permitirRoles("GERENTE"), obtenerPlanillaDiaria);
+router.get("/diaria", autenticar, permitirRoles("GERENTE", "DUENIO"), obtenerPlanillaDiaria);
 
 /**
  * @swagger
@@ -51,7 +51,7 @@ router.get("/diaria", autenticar, permitirRoles("GERENTE"), obtenerPlanillaDiari
  *       400:
  *         description: Mes inválido o futuro
  */
-router.get("/mensual", autenticar, permitirRoles("GERENTE"), obtenerPlanillaMensual);
+router.get("/mensual", autenticar, permitirRoles("GERENTE", "DUENIO"), obtenerPlanillaMensual);
 
 /**
  * @swagger

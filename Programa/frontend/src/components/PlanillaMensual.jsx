@@ -2,14 +2,16 @@ import { useEffect, useState } from "react";
 import { obtenerPlanillaMensual } from "../services/planillaService";
 import { mesActualArgentina, formatearMonto, formatearId } from "../models/Planilla";
 import PlanillaCampo from "./PlanillaCampo";
+import { useSucursal } from "../context/SucursalContext";
 
 function PlanillaMensual() {
+    const { sucursalId } = useSucursal();
     const [mes, setMes] = useState(mesActualArgentina());
     const [planilla, setPlanilla] = useState(null);
     const [error, setError] = useState("");
 
     useEffect(() => {
-        if (!mes) {
+        if (!mes || !sucursalId) {
             setPlanilla(null);
             return;
         }
@@ -18,7 +20,7 @@ function PlanillaMensual() {
 
         const cargar = async () => {
             try {
-                const datos = await obtenerPlanillaMensual(mes);
+                const datos = await obtenerPlanillaMensual(mes, sucursalId);
 
                 if (vigente) {
                     setPlanilla(datos);
@@ -37,7 +39,7 @@ function PlanillaMensual() {
         return () => {
             vigente = false;
         };
-    }, [mes]);
+    }, [mes, sucursalId]);
 
     const estrella = planilla?.productoEstrella;
 

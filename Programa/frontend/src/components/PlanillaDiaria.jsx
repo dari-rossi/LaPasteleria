@@ -2,14 +2,16 @@ import { useEffect, useState } from "react";
 import { obtenerPlanillaDiaria } from "../services/planillaService";
 import { hoyArgentina, formatearMonto, formatearId } from "../models/Planilla";
 import PlanillaCampo from "./PlanillaCampo";
+import { useSucursal } from "../context/SucursalContext";
 
 function PlanillaDiaria() {
+    const { sucursalId } = useSucursal();
     const [fecha, setFecha] = useState(hoyArgentina());
     const [planilla, setPlanilla] = useState(null);
     const [error, setError] = useState("");
 
     useEffect(() => {
-        if (!fecha) {
+        if (!fecha || !sucursalId) { 
             setPlanilla(null);
             return;
         }
@@ -18,7 +20,7 @@ function PlanillaDiaria() {
 
         const cargar = async () => {
             try {
-                const datos = await obtenerPlanillaDiaria(fecha);
+                const datos = await obtenerPlanillaDiaria(fecha, sucursalId);
 
                 if (vigente) {
                     setPlanilla(datos);
@@ -37,7 +39,7 @@ function PlanillaDiaria() {
         return () => {
             vigente = false;
         };
-    }, [fecha]);
+    }, [fecha, sucursalId]);
 
     const estrella = planilla?.productoEstrella;
 
