@@ -85,6 +85,9 @@ enum EstadoMesa {
 
 model Mesa {
   idMesa        Int        @id @default(autoincrement())
+  numero        Int        
+  fila          Int        
+  columna       Int
   estado        EstadoMesa
   maxComensales Int
 
@@ -92,9 +95,10 @@ model Mesa {
   sucursal      Sucursal @relation(fields: [sucursalId], references: [id])
 
   reservas      Reserva[]
-
-  // Para relacionar Mesa y Pedido
   pedidos       Pedido[]
+
+  @@unique([sucursalId, numero])
+  @@unique([sucursalId, fila, columna])
 }
 
 model Cliente {

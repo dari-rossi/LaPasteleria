@@ -2,29 +2,43 @@ const reservaRepository = require("../repositories/reserva.repository");
 const mesaRepository = require("../repositories/mesa.repository");
 const { MARGEN_RESERVA_MS } = require("../config/reservas");
 const { lanzarError } = require("../config/errores");
+const { resolverSucursal, puedeAcceder } = require("../config/sucursalActiva");
 
-// Busca una reserva por su clave compuesta (mesa + fecha y hora) o lanza 404
-const buscarReserva = async (idMesa, fechaHora) => {
+const buscarReserva = async (idMesa, fechaHora, usuario) => {
     const reserva = await reservaRepository.obtenerPorId(idMesa, fechaHora);
 
     if (!reserva) {
         lanzarError("RESERVA_NO_ENCONTRADA");
     }
 
+    const mesa = await mesaRepository.obtenerPorId(idMesa);
+
+    if (!puedeAcceder(usuario, mesa.sucursalId)) {
+        lanzarError("OTRA_SUCURSAL");
+    }
+
     return reserva;
 };
 
-const obtenerReservas = async () => {
-    return await reservaRepository.obtenerTodos();
+const obtenerReservas = async (usuario, sucursalIdElegida) => {
+    return await reservaRepository.obtenerTodos(resolverSucursal(usuario, sucursalIdElegida));
 };
 
-const obtenerReservaPorId = async (idMesa, fechaHora) => {
-    return await buscarReserva(idMesa, fechaHora);
+const obtenerReservaPorId = async (idMesa, fechaHora, usuario) => {
+    return await buscarReserva(idMesa, fechaHora, usuario);
 };
 
-// Más adelante se puede validar acá que no haya solapamiento o que cantComensales no supere maxComensales
-const crearReserva = async (datos) => {
+const crearReserva = async (datos, usuario) => {
     const mesa = await mesaRepository.obtenerPorId(datos.idMesa);
+
+    if (!mesa) {
+        lanzarError("MESA_NO_ENCONTRADA");
+    }
+
+    if (!puedeAcceder(usuario, mesa.sucursalId)) {
+        lanzarError("OTRA_SUCURSAL");
+    }
+
     const existente = await reservaRepository.obtenerPorId(
         datos.idMesa,
         new Date(datos.fechaHoraReservada)
@@ -38,23 +52,17 @@ const crearReserva = async (datos) => {
         });
     }
 
-    if (!mesa) {
-        lanzarError("MESA_NO_ENCONTRADA");
-    }
-
-    // Si ya hay una reserva para esa mesa y hora, Prisma avisa (P2002) y se traduce a RESERVA_DUPLICADA
     return await reservaRepository.crear(datos);
 };
 
-// La clave idMesa + fechaHora no se modifica
-const modificarReserva = async (idMesa, fechaHora, datos) => {
-    await buscarReserva(idMesa, fechaHora);
+const modificarReserva = async (idMesa, fechaHora, datos, usuario) => {
+    await buscarReserva(idMesa, fechaHora, usuario);
 
     return await reservaRepository.modificar(idMesa, fechaHora, datos);
 };
 
-const eliminarReserva = async (idMesa, fechaHora) => {
-    await buscarReserva(idMesa, fechaHora);
+const eliminarReserva = async (idMesa, fechaHora, usuario) => {
+    await buscarReserva(idMesa, fechaHora, usuario);
 
     return await reservaRepository.eliminar(idMesa, fechaHora);
 };

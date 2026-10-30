@@ -2,22 +2,20 @@ const itemProductoRepository = require("../repositories/itemProducto.repository"
 const pedidoRepository = require("../repositories/pedido.repository");
 const productoRepository = require("../repositories/producto.repository");
 const { lanzarError } = require("../config/errores");
-
-const redondear = (valor) => Math.round(valor * 100) / 100;
+const { puedeAcceder } = require("../config/sucursalActiva");
 const { productoDisponibleAhora, mensajeHorario } = require("../config/horarios");
 
-// El pedido tiene que existir y ser de la sucursal del usuario
+// El pedido tiene que existir y el usuario tiene que poder acceder a su sucursal
 const verificarAccesoPedido = (pedido, usuario) => {
     if (!pedido) {
         lanzarError("PEDIDO_NO_ENCONTRADO");
     }
 
-    if (Number(pedido.sucursalId) !== Number(usuario.sucursalId)) {
+    if (!puedeAcceder(usuario, pedido.sucursalId)) {
         lanzarError("OTRA_SUCURSAL");
     }
 };
 
-// Busca un item o lanza 404
 const buscarItem = async (id) => {
     const item = await itemProductoRepository.obtenerPorId(id);
 
@@ -28,12 +26,20 @@ const buscarItem = async (id) => {
     return item;
 };
 
+// Busca un item y controla que su pedido sea de una sucursal a la que el usuario accede
+const buscarItemConAcceso = async (id, usuario) => {
+    const item = await buscarItem(id);
+    const pedido = await pedidoRepository.obtenerPorId(item.pedidoId);
+
+    verificarAccesoPedido(pedido, usuario);
+
+    return item;
+};
+
 const obtenerItemProductos = async (usuario) => {
     const items = await itemProductoRepository.obtenerTodos();
 
-    return items.filter(item =>
-        Number(item.pedido.sucursalId) === Number(usuario.sucursalId)
-    );
+    return items.filter((item) => puedeAcceder(usuario, item.pedido.sucursalId));
 };
 
 const obtenerItemProductosPorIdPedido = async (pedidoId, usuario) => {
@@ -44,12 +50,7 @@ const obtenerItemProductosPorIdPedido = async (pedidoId, usuario) => {
 };
 
 const obtenerItemProductoPorId = async (id, usuario) => {
-    const item = await buscarItem(id);
-
-    const pedido = await pedidoRepository.obtenerPorId(item.pedidoId);
-    verificarAccesoPedido(pedido, usuario);
-
-    return item;
+    return await buscarItemConAcceso(id, usuario);
 };
 
 const crearItemProducto = async (datos, usuario) => {
@@ -66,19 +67,12 @@ const crearItemProducto = async (datos, usuario) => {
         lanzarError(mensajeHorario(producto.tipoProducto), 409);
     }
 
-    // Si el producto ya está en el pedido, Prisma avisa (P2002) y se traduce a ITEM_DUPLICADO
-    return await itemProductoRepository.crear({ ...datos, subTotal });
+    // El estado del pedido, el stock y el subtotal se resuelven dentro de la transacción
+    return await itemProductoRepository.agregar(datos.pedidoId, producto, datos.cantidad);
 };
 
 const modificarItemProducto = async (id, datos, usuario) => {
-    const item = await itemProductoRepository.obtenerPorId(id);
-
-    if (!item) {
-        lanzarError("Item no encontrado.", 404);
-    }
-
-    const pedido = await pedidoRepository.obtenerPorId(item.pedidoId);
-    verificarAccesoPedido(pedido, usuario);
+    const item = await buscarItemConAcceso(id, usuario);
 
     if (datos.cantidad > item.cantidad &&
         !productoDisponibleAhora(item.producto.tipoProducto)) {
@@ -89,10 +83,7 @@ const modificarItemProducto = async (id, datos, usuario) => {
 };
 
 const eliminarItemProducto = async (id, usuario) => {
-    const item = await buscarItem(id);
-
-    const pedido = await pedidoRepository.obtenerPorId(item.pedidoId);
-    verificarAccesoPedido(pedido, usuario);
+    await buscarItemConAcceso(id, usuario);
 
     return await itemProductoRepository.quitar(id);
 };

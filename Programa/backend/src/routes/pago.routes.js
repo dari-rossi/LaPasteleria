@@ -12,6 +12,7 @@ const {
 const validate = require("../middlewares/validate");
 const { pagoSchema } = require("../schemas/pago.schema");
 const router = express.Router();
+const ROLES = ["DUENIO", "GERENTE", "MOZO"];
 
 /**
  * @swagger
@@ -78,7 +79,7 @@ router.get("/:idPedido",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), 
  *       409:
  *         description: El pedido ya tiene un pago registrado
  */
-router.post("/",autenticar, permitirRoles("MOZO"), validate(pagoSchema), crearPago);
+router.post("/",autenticar, permitirRoles(...ROLES), validate(pagoSchema), crearPago);
 
 
 /**
@@ -104,7 +105,7 @@ router.post("/",autenticar, permitirRoles("MOZO"), validate(pagoSchema), crearPa
 router.post(
     "/mercadopago/:idPedido/qr",
     autenticar,
-    permitirRoles("MOZO"),
+    permitirRoles(...ROLES),
     crearQrMercadoPago
 );
 
@@ -127,7 +128,7 @@ router.post(
 router.get(
     "/mercadopago/:idPedido/estado",
     autenticar,
-    permitirRoles("MOZO"),
+    permitirRoles(...ROLES),
     verificarPagoMercadoPago
 );
 

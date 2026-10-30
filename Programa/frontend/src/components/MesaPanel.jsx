@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import ReservaMesaForm from "./ReservaMesaForm";
 import { formatearFechaHora } from "../models/Reserva";
 
-function MesaPanel({ mesa, clientes, onEmpezarPedido, onReservaCreada, onEditar, onEliminar, onCerrar }) {    
+function MesaPanel({ mesa, clientes, onEmpezarPedido, onReservaCreada, onCerrar }) {    
     const [clienteId, setClienteId] = useState("");
     const [comensales, setComensales] = useState("");
     const [error, setError] = useState("");
@@ -126,7 +126,7 @@ function MesaPanel({ mesa, clientes, onEmpezarPedido, onReservaCreada, onEditar,
                 />
 
                 <button
-                    className="btn btn-success w-100 mb-2"
+                    className={`btn w-100 mb-2 ${ocupada ? "btn-secondary" : "btn-success"}`}
                     onClick={empezar}
                     disabled={ocupada || sinClientes}
                 >
@@ -142,14 +142,6 @@ function MesaPanel({ mesa, clientes, onEmpezarPedido, onReservaCreada, onEditar,
                     }}
                 >
                     Reservar
-                </button>
-
-                <button className="btn btn-outline-primary w-100 mb-2" onClick={onEditar}>
-                    Editar
-                </button>
-
-                <button className="btn btn-outline-danger w-100" onClick={onEliminar}>
-                    Eliminar
                 </button>
             </div>
         </div>

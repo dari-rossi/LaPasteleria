@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { obtenerPedidos, eliminarPedido } from "../services/pedidoService";
 import { COLORES_ESTADO_PEDIDO, calcularTotalConDescuento, formatearPrecio } from "../models/Pedido";
 import { useAuth } from "../context/AuthContext";
 
-function PedidosList({ sucursalId }) {
-    const { sesion } = useAuth();
-    const puedeEliminar = sesion?.rol === "MOZO";
+function PedidosList() {
+    const navigate = useNavigate();
     const [pedidos, setPedidos] = useState([]);
     const [error, setError] = useState("");
+    const [seleccionado, setSeleccionado] = useState(null);
 
     useEffect(() => {
         cargarPedidos();
@@ -23,16 +23,19 @@ function PedidosList({ sucursalId }) {
         }
     };
 
-    const borrarPedido = async (id) => {
-        const confirmar = window.confirm(`¿Está seguro de que desea eliminar el pedido ${id}?`);
+    const borrarPedido = async () => {
+        const confirmar = window.confirm(
+            `¿Está seguro de que desea eliminar el pedido ${seleccionado}?`
+        );
 
         if (!confirmar) {
             return;
         }
 
         try {
-            await eliminarPedido(id);
-            setPedidos(pedidos.filter((pedido) => pedido.idPedido !== id));
+            await eliminarPedido(seleccionado);
+            setPedidos(pedidos.filter((pedido) => pedido.idPedido !== seleccionado));
+            setSeleccionado(null);
         } catch (error) {
             setError(error.message);
         }
@@ -44,11 +47,28 @@ function PedidosList({ sucursalId }) {
 
             {error && <div className="alert alert-danger">{error}</div>}
 
+            <div className="mb-3">
+                <button
+                    className="btn btn-primary me-2"
+                    disabled={!seleccionado}
+                    onClick={() => navigate(`/pedidos/${seleccionado}`)}
+                >
+                    Ver
+                </button>
+                <button
+                    className="btn btn-outline-danger"
+                    disabled={!seleccionado}
+                    onClick={borrarPedido}
+                >
+                    Eliminar
+                </button>
+            </div>
+
             {pedidos.length === 0 && !error ? (
                 <p>No hay pedidos registrados.</p>
             ) : (
                 <div className="table-responsive">
-                    <table className="table table-striped table-bordered align-middle">
+                    <table className="table table-bordered table-hover align-middle">
                         <thead>
                             <tr>
                                 <th>N°</th>
@@ -57,15 +77,20 @@ function PedidosList({ sucursalId }) {
                                 <th>Comensales</th>
                                 <th>Estado</th>
                                 <th>Total</th>
-                                <th>Acciones</th>
                             </tr>
                         </thead>
 
                         <tbody>
                             {pedidos.map((pedido) => (
-                                <tr key={pedido.idPedido}>
+                                <tr
+                                    key={pedido.idPedido}
+                                    onClick={() => setSeleccionado(pedido.idPedido)}
+                                    onDoubleClick={() => navigate(`/pedidos/${pedido.idPedido}`)}
+                                    className={seleccionado === pedido.idPedido ? "table-active" : ""}
+                                    style={{ cursor: "pointer" }}
+                                >
                                     <td>{pedido.idPedido}</td>
-                                    <td>{pedido.mesa?.idMesa}</td>
+                                    <td>{pedido.mesa?.numero}</td>
                                     <td>
                                         #{pedido.cliente?.id} · {pedido.cliente?.tipo}
                                     </td>
@@ -78,22 +103,6 @@ function PedidosList({ sucursalId }) {
                                     <td>
                                         {formatearPrecio(
                                             pedido.pago?.precioFinal ?? calcularTotalConDescuento(pedido)
-                                        )}
-                                    </td>
-                                    <td>
-                                        <Link
-                                            to={`/pedidos/${pedido.idPedido}`}
-                                            className="btn btn-primary btn-sm me-2"
-                                        >
-                                            Ver
-                                        </Link>
-                                        {puedeEliminar && (
-                                            <button
-                                                className="btn btn-danger btn-sm"
-                                                onClick={() => borrarPedido(pedido.idPedido)}
-                                            >
-                                                Eliminar
-                                            </button>
                                         )}
                                     </td>
                                 </tr>
