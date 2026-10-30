@@ -4,6 +4,7 @@ import {
     eliminarTipoEmpleado
 } from "../services/tipoEmpleadoService";
 import { ETIQUETA_ROL } from "../config/roles";
+import { useAuth } from "../context/AuthContext";
 import TipoEmpleadoForm from "./TipoEmpleadoForm";
 
 // El sueldo puede llegar como número o como texto, por eso se convierte antes de formatear
@@ -40,26 +41,22 @@ const ESTILO_FILA_SELECCIONADA = {
 };
 
 // Deja un margen alrededor de la tabla para que el borde de la fila seleccionada no se corte
-// (el margen negativo compensa el relleno, así la tabla queda alineada igual que antes)
 const ESTILO_CONTENEDOR_TABLA = {
     padding: 8,
     margin: -8
 };
 
-// asignacionesVersion: cambia cuando se modifican las asignaciones por sucursal (hay que volver a pedir la cantidad asignada)
+// asignacionesVersion: cambia cuando se modifican las asignaciones por sucursal
 // onTiposCambiados: avisa al padre que se creó, modificó o eliminó un tipo
 function TipoEmpleadoList({ asignacionesVersion = 0, onTiposCambiados }) {
+    const { sesion } = useAuth();
+    const puedeModificar = sesion?.rol === "DUENIO";
+
     const [tipos, setTipos] = useState([]);
     const [error, setError] = useState("");
     const [tipoEditar, setTipoEditar] = useState(null);
-
-    // El panel para crear o editar un tipo está oculto hasta que se lo pide
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
-
-    // Fila seleccionada (idTipoEmpleado): al elegirla aparecen Editar y Eliminar
     const [tipoSeleccionado, setTipoSeleccionado] = useState(null);
-
-    // Cada vez que cambia este número se vuelve a pedir la lista
     const [version, setVersion] = useState(0);
 
     useEffect(() => {
@@ -82,14 +79,11 @@ function TipoEmpleadoList({ asignacionesVersion = 0, onTiposCambiados }) {
 
         cargarTipos();
 
-        // Si llegan dos recargas seguidas, la respuesta vieja no pisa a la nueva
         return () => {
             cancelado = true;
         };
     }, [version, asignacionesVersion]);
 
-    // Se usa al crear, modificar y eliminar: se vuelve a pedir la lista
-    // porque la cantidad asignada la calcula el backend
     const recargar = () => {
         setVersion((actual) => actual + 1);
     };
@@ -108,11 +102,19 @@ function TipoEmpleadoList({ asignacionesVersion = 0, onTiposCambiados }) {
     };
 
     const editarTipo = (tipo) => {
+        if (!puedeModificar) {
+            return;
+        }
+
         setTipoEditar(tipo);
         setMostrarFormulario(true);
     };
 
     const borrarTipo = async (tipo) => {
+        if (!puedeModificar) {
+            return;
+        }
+
         const confirmar = window.confirm(
             `¿Está seguro de que desea eliminar el tipo "${ETIQUETA_ROL[tipo.rol] ?? tipo.rol}"? También se va a quitar de las sucursales donde esté asignado.`
         );
@@ -126,7 +128,6 @@ function TipoEmpleadoList({ asignacionesVersion = 0, onTiposCambiados }) {
         try {
             await eliminarTipoEmpleado(tipo.idTipoEmpleado);
 
-            // Si justo se estaba editando el tipo borrado, se cierra el panel
             if (tipoEditar && tipoEditar.idTipoEmpleado === tipo.idTipoEmpleado) {
                 setTipoEditar(null);
                 setMostrarFormulario(false);
@@ -136,7 +137,6 @@ function TipoEmpleadoList({ asignacionesVersion = 0, onTiposCambiados }) {
             recargar();
             avisarCambio();
         } catch (error) {
-            // Ej: "No se puede eliminar: hay usuarios que tienen este rol"
             setError(error.message);
         }
     };
@@ -146,33 +146,43 @@ function TipoEmpleadoList({ asignacionesVersion = 0, onTiposCambiados }) {
         setMostrarFormulario(false);
     };
 
-    // El botón abre el panel para crear un tipo, o lo cierra si ya está abierto
     const alternarFormulario = () => {
+        if (!puedeModificar) {
+            return;
+        }
+
         setTipoEditar(null);
         setMostrarFormulario(!mostrarFormulario);
     };
 
-    // Un clic selecciona la fila y otro clic sobre la misma la deselecciona
     const seleccionarTipo = (id) => {
-        setTipoSeleccionado(tipoSeleccionado === id ? null : id);
+        if (!puedeModificar) {
+            return;
+        }
+
+        setTipoSeleccionado((actual) => actual === id ? null : id);
     };
 
-    const tipoElegido = tipos.find((tipo) => tipo.idTipoEmpleado === tipoSeleccionado);
+    const tipoElegido = tipos.find(
+        (tipo) => tipo.idTipoEmpleado === tipoSeleccionado
+    );
 
     return (
         <div>
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h2 className="mb-0">Tipos de empleado</h2>
 
-                <button
-                    className="btn btn-primary"
-                    onClick={alternarFormulario}
-                >
-                    {mostrarFormulario ? "Cerrar" : "+ Crear tipo de empleado"}
-                </button>
+                {puedeModificar && (
+                    <button
+                        className="btn btn-primary"
+                        onClick={alternarFormulario}
+                    >
+                        {mostrarFormulario ? "Cerrar" : "+ Crear tipo de empleado"}
+                    </button>
+                )}
             </div>
 
-            {mostrarFormulario && (
+            {puedeModificar && mostrarFormulario && (
                 <TipoEmpleadoForm
                     tipoEditar={tipoEditar}
                     onTipoGuardado={tipoGuardado}
@@ -190,31 +200,34 @@ function TipoEmpleadoList({ asignacionesVersion = 0, onTiposCambiados }) {
                 <p>No hay tipos de empleado registrados.</p>
             ) : (
                 <>
-                    {/* Siempre ocupa el mismo lugar, así la tabla no se mueve al seleccionar */}
                     <div className="d-flex align-items-center mb-3">
                         <span className="flex-grow-1 text-truncate me-3">
-                            {tipoElegido
-                                ? `Seleccionado: ${ETIQUETA_ROL[tipoElegido.rol] ?? tipoElegido.rol}`
-                                : "Seleccioná una fila para editar o eliminar"}
+                            {puedeModificar
+                                ? tipoElegido
+                                    ? `Seleccionado: ${ETIQUETA_ROL[tipoElegido.rol] ?? tipoElegido.rol}`
+                                    : "Seleccioná una fila para editar o eliminar"
+                                : ""}
                         </span>
 
-                        <div className={`flex-shrink-0 ${tipoElegido ? "" : "invisible"}`}>
-                            <button
-                                className="btn btn-warning btn-sm me-2"
-                                style={ESTILO_BOTON_EDITAR}
-                                onClick={() => editarTipo(tipoElegido)}
-                            >
-                                Editar
-                            </button>
+                        {puedeModificar && (
+                            <div className={`flex-shrink-0 ${tipoElegido ? "" : "invisible"}`}>
+                                <button
+                                    className="btn btn-warning btn-sm me-2"
+                                    style={ESTILO_BOTON_EDITAR}
+                                    onClick={() => editarTipo(tipoElegido)}
+                                >
+                                    Editar
+                                </button>
 
-                            <button
-                                className="btn btn-danger btn-sm"
-                                style={ESTILO_BOTON_ELIMINAR}
-                                onClick={() => borrarTipo(tipoElegido)}
-                            >
-                                Eliminar
-                            </button>
-                        </div>
+                                <button
+                                    className="btn btn-danger btn-sm"
+                                    style={ESTILO_BOTON_ELIMINAR}
+                                    onClick={() => borrarTipo(tipoElegido)}
+                                >
+                                    Eliminar
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <div className="table-responsive" style={ESTILO_CONTENEDOR_TABLA}>
@@ -235,8 +248,9 @@ function TipoEmpleadoList({ asignacionesVersion = 0, onTiposCambiados }) {
                                     <tr
                                         key={tipo.idTipoEmpleado}
                                         style={{
-                                            cursor: "pointer",
-                                            ...(tipoSeleccionado === tipo.idTipoEmpleado
+                                            cursor: puedeModificar ? "pointer" : "default",
+                                            ...(puedeModificar &&
+                                                tipoSeleccionado === tipo.idTipoEmpleado
                                                 ? ESTILO_FILA_SELECCIONADA
                                                 : {})
                                         }}
