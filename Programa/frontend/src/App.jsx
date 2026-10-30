@@ -18,6 +18,7 @@ import GastosPage from "./pages/GastosPage";
 import TiposEmpleadosPage from "./pages/TiposEmpleadosPage";
 import InformesPage from "./pages/InformesPage";
 import SucursalEmpleadosPage from "./pages/SucursalEmpleadosPage";
+import UsuariosPage from "./pages/UsuariosPage";
 
 const Pendiente = ({ nombre }) => (
     <p className="text-muted">{nombre}: pendiente.</p>
@@ -79,6 +80,13 @@ function App() {
                     }>
                         <Route path="/sucursales" element={<SucursalesPage />} />
                         <Route path="/informes" element={<InformesPage />} />
+                        <Route path="/usuarios" element={<UsuariosPage />} />
+                    </Route>
+
+                    {/* Dueño y gerente */}
+                    <Route element={
+                        <RequiereRol roles={["DUENIO", "GERENTE"]} />
+                    }>
                         <Route path="/tipos-empleado" element={<TiposEmpleadosPage />} />
                     </Route>
 
