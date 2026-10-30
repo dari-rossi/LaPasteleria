@@ -11,7 +11,8 @@ const OPCIONES_POR_ROL = {
         { to: "/mesas", titulo: "Mesas" },
         { to: "/pedidos", titulo: "Pedidos" },
         { to: "/inventario", titulo: "Inventario" },
-        { to: "/gastos", titulo: "Gastos" }
+        { to: "/gastos", titulo: "Gastos" },
+        { to: "/usuarios", titulo: "Usuarios" }
     ],
     GERENTE: [
         { to: "/sucursal", titulo: "Mi sucursal" },

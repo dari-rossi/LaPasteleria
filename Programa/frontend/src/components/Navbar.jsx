@@ -62,19 +62,23 @@ function Navbar() {
                 La Pastelería
             </NavLink>
 
-            {sucursalId !== null && (
-                <div className="navbar-nav flex-wrap">
-                    {secciones.map((seccion) => (
-                        <NavLink
-                            key={seccion.to}
-                            className="nav-link"
-                            to={seccion.to}
-                        >
-                            {seccion.label}
-                        </NavLink>
-                    ))}
-                </div>
-            )}
+            <div className="navbar-nav flex-wrap">
+                {sucursalId !== null && secciones.map((seccion) => (
+                    <NavLink
+                        key={seccion.to}
+                        className="nav-link"
+                        to={seccion.to}
+                    >
+                        {seccion.label}
+                    </NavLink>
+                ))}
+
+                {rol === "DUENIO" && (
+                    <NavLink className="nav-link" to="/usuarios">
+                        Usuarios
+                    </NavLink>
+                )}
+            </div>
 
             {mostrarMenuGeneral && (
                 <button
