@@ -1,7 +1,9 @@
 const prisma = require("../prisma");
 
-const obtenerTodos = async () => {
-    return await prisma.reserva.findMany();
+const obtenerTodos = async (sucursalId) => {
+    return await prisma.reserva.findMany({
+        where: { mesa: { sucursalId } }
+    });
 };
 
 const obtenerPorId = async (idMesa, fechaHora) => {

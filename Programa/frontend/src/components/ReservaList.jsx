@@ -1,19 +1,25 @@
 import { useEffect, useState } from "react";
 import { obtenerReservas, modificarReserva } from "../services/reservaService";
+import { useSucursal } from "../context/SucursalContext";
+import { useAuth } from "../context/AuthContext";
 import { ESTADOS_RESERVA, COLORES_ESTADO_RESERVA, formatearFechaHora } from "../models/Reserva";
 
 function ReservaList() {
+    const { sucursalId } = useSucursal();
+    const { sesion } = useAuth();
+    const soloLectura = sesion?.rol !== "MOZO";
+
     const [reservas, setReservas] = useState([]);
     const [error, setError] = useState("");
     const [filtroEstado, setFiltroEstado] = useState("");
 
     useEffect(() => {
         cargarReservas();
-    }, []);
+    }, [sucursalId]);
 
     const cargarReservas = async () => {
         try {
-            setReservas(await obtenerReservas());
+            setReservas(await obtenerReservas(sucursalId));
             setError("");
         } catch (error) {
             setError("No se pudieron cargar las reservas.");
@@ -21,21 +27,21 @@ function ReservaList() {
     };
 
     const cancelarReserva = async (reserva) => {
-    if (!window.confirm("¿Cancelar esta reserva? El horario queda libre.")) {
-        return;
-    }
+        if (!window.confirm("¿Cancelar esta reserva? El horario queda libre.")) {
+            return;
+        }
 
-    try {
-        await modificarReserva(reserva.idMesa, reserva.fechaHoraReservada, {
-            cantComensales: reserva.cantComensales,
-            estadoReserva: "Cancelada",
-            dni: reserva.dni
-        });
-        await cargarReservas();
-    } catch (error) {
-        setError(error.message || "No se pudo cancelar la reserva.");
-    }
-};
+        try {
+            await modificarReserva(reserva.idMesa, reserva.fechaHoraReservada, {
+                cantComensales: reserva.cantComensales,
+                estadoReserva: "Cancelada",
+                dni: reserva.dni
+            });
+            await cargarReservas();
+        } catch (error) {
+            setError(error.message || "No se pudo cancelar la reserva.");
+        }
+    };
 
     const reservasVisibles = reservas
         .filter((reserva) => !filtroEstado || reserva.estadoReserva === filtroEstado)
@@ -80,7 +86,7 @@ function ReservaList() {
                                 <th>Comensales</th>
                                 <th>Estado</th>
                                 <th>DNI</th>
-                                <th>Acciones</th>
+                                {!soloLectura && <th>Acciones</th>}
                             </tr>
                         </thead>
 
@@ -96,16 +102,18 @@ function ReservaList() {
                                         </span>
                                     </td>
                                     <td>{reserva.dni}</td>
-                                    <td>
-                                        {reserva.estadoReserva === "Activa" && (
-                                            <button
-                                                className="btn btn-outline-danger btn-sm"
-                                                onClick={() => cancelarReserva(reserva)}
-                                            >
-                                                Cancelar
-                                            </button>
-                                        )}
-                                    </td>
+                                    {!soloLectura && (
+                                        <td>
+                                            {reserva.estadoReserva === "Activa" && (
+                                                <button
+                                                    className="btn btn-outline-danger btn-sm"
+                                                    onClick={() => cancelarReserva(reserva)}
+                                                >
+                                                    Cancelar
+                                                </button>
+                                            )}
+                                        </td>
+                                    )}
                                 </tr>
                             ))}
                         </tbody>

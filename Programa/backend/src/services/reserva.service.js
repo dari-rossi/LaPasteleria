@@ -14,8 +14,16 @@ const buscarReserva = async (idMesa, fechaHora) => {
     return reserva;
 };
 
-const obtenerReservas = async () => {
-    return await reservaRepository.obtenerTodos();
+const obtenerReservas = async (usuario, sucursalId) => {
+    if (usuario.rol === "DUENIO") {
+        if (!Number.isInteger(sucursalId) || sucursalId <= 0) {
+            lanzarError("SUCURSAL_REQUERIDA");
+        }
+
+        return await reservaRepository.obtenerTodos(sucursalId);
+    }
+
+    return await reservaRepository.obtenerTodos(usuario.sucursalId);
 };
 
 const obtenerReservaPorId = async (idMesa, fechaHora) => {

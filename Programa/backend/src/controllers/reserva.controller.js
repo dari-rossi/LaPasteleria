@@ -14,7 +14,8 @@ const leerClave = (params) => {
 };
 
 const obtenerReservas = async (req, res) => {
-    const reservas = await reservaService.obtenerReservas();
+    const sucursalId = req.query.sucursalId ? Number(req.query.sucursalId) : null;
+    const reservas = await reservaService.obtenerReservas(req.usuario, sucursalId);
     res.json(reservas);
 };
 

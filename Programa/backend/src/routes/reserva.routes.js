@@ -24,7 +24,7 @@ const router = express.Router();
  *       200:
  *         description: Lista de reservas
  */
-router.get("/",autenticar, permitirRoles("MOZO"), obtenerReservas);
+router.get("/",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), obtenerReservas);
 
 /**
  * @swagger

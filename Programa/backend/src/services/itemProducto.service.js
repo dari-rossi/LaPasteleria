@@ -66,8 +66,7 @@ const crearItemProducto = async (datos, usuario) => {
         lanzarError(mensajeHorario(producto.tipoProducto), 409);
     }
 
-    // Si el producto ya está en el pedido, Prisma avisa (P2002) y se traduce a ITEM_DUPLICADO
-    return await itemProductoRepository.crear({ ...datos, subTotal });
+    return await itemProductoRepository.agregar(datos.pedidoId, producto, datos.cantidad);
 };
 
 const modificarItemProducto = async (id, datos, usuario) => {

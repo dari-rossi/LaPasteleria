@@ -50,6 +50,15 @@ const ERRORES = {
     PAGO_DUPLICADO: { status: 409, mensaje: "El pedido ya tiene un pago registrado" },
     PAGO_PEDIDO_SIN_PRODUCTOS: { status: 400, mensaje: "No se puede registrar el pago de un pedido sin productos" },
 
+
+    // ----- Planillas y reservas por sucursal -----
+    FECHA_INVALIDA: { status: 400, mensaje: "La fecha es inválida. Usá el formato AAAA-MM-DD" },
+    FECHA_FUTURA: { status: 400, mensaje: "La fecha no puede ser futura" },
+    MES_INVALIDO: { status: 400, mensaje: "El mes es inválido. Usá el formato AAAA-MM" },
+    MES_FUTURO: { status: 400, mensaje: "El mes no puede ser futuro" },
+    SUCURSAL_REQUERIDA: { status: 400, mensaje: "Debés indicar una sucursal" },
+
+    
     // ----- Gasto -----
     GASTO_NO_ENCONTRADO: { status: 404, mensaje: "Gasto no encontrado" },
 
@@ -92,9 +101,21 @@ class AppError extends Error {
     }
 }
 
-// Uso: lanzarError("USUARIO_NO_ENCONTRADO");
-const lanzarError = (codigo, mensaje) => {
-    throw new AppError(codigo, mensaje);
+//   lanzarError("USUARIO_NO_ENCONTRADO");                    -> error del catálogo
+//   lanzarError("PRODUCTO_NO_ENCONTRADO", "Texto propio");   -> error del catálogo con otro mensaje
+//   lanzarError("La mesa ya está ocupada.", 409);            -> mensaje propio con su status HTTP
+const lanzarError = (codigo, mensajeOStatus) => {
+    const esDelCatalogo = Object.prototype.hasOwnProperty.call(ERRORES, codigo);
+
+    // Caso: lanzarError("Mensaje propio", 409)
+    if (!esDelCatalogo && Number.isInteger(mensajeOStatus)) {
+        const error = new AppError("ERROR_INTERNO", codigo);
+        error.codigo = "ERROR_DE_NEGOCIO";
+        error.status = mensajeOStatus;
+        throw error;
+    }
+
+    throw new AppError(codigo, mensajeOStatus);
 };
 
 // Convierte un parámetro de la URL en un ID válido (entero positivo) o lanza ID_INCORRECTO

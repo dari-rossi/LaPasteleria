@@ -114,7 +114,6 @@ const crearPedido = async (datos, usuario) => {
 
 // Solo se modifican el estado y los comensales; los productos se manejan desde itemProducto.
 const modificarPedido = async (id, datos, usuario) => {
-    await buscarPedido(id, usuario);
     const pedido = await buscarPedido(id, usuario);
     if (ESTADOS_FINALES.includes(pedido.estadoPedido)) {
         lanzarError(`Un pedido ${pedido.estadoPedido.toLowerCase()} no se puede modificar.`, 409);

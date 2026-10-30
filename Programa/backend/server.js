@@ -18,6 +18,7 @@ const authRoutes = require("./src/routes/auth.routes");
 const usuarioRoutes = require("./src/routes/usuario.routes");
 const reservaService = require("./src/services/reserva.service"); // Corregir
 const { rutaNoEncontrada, manejarErrores } = require("./src/config/errores");
+const planillaRoutes = require("./src/routes/planilla.routes");
 
 
 const app = express();
@@ -58,6 +59,7 @@ app.use("/sucursales", sucursalTipoEmpleadoRoutes);
 app.use("/gastos", gastoRoutes);
 app.use("/itemProducto", itemProductoRoutes);
 app.use("/pedidos", pedidoRoutes);
+app.use("/planillas", planillaRoutes);
 app.use("/usuarios", usuarioRoutes);
 app.use(rutaNoEncontrada);
 app.use(manejarErrores);
