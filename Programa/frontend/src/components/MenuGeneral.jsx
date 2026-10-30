@@ -6,6 +6,7 @@ const OPCIONES = [
     { to: "/sucursales", titulo: "Sucursales" },
     { to: "/productos", titulo: "Productos" },
     { to: "/tipos-empleado", titulo: "Tipos de empleado" },
+    { to: "/usuarios", titulo: "Usuarios" },
     { to: "/clientes", titulo: "Clientes" },
     { to: "/informes", titulo: "Informes" }
 ];

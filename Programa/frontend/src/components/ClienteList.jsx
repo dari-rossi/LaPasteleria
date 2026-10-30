@@ -9,14 +9,17 @@ import { useAuth } from "../context/AuthContext";
 function ClienteList() {
     const { sesion } = useAuth();
     const esDuenio = sesion?.rol === "DUENIO";
+    const esMozo = sesion?.rol === "MOZO";
 
     const [clientes, setClientes] = useState([]);
     const [error, setError] = useState("");
     const [clienteEditar, setClienteEditar] = useState(null);
 
     useEffect(() => {
-        cargarClientes();
-    }, []);
+        if (!esMozo) {
+            cargarClientes();
+        }
+    }, [esMozo]);
 
     const cargarClientes = async () => {
         try {
@@ -27,6 +30,10 @@ function ClienteList() {
             setError("No se pudieron cargar las categorías de clientes.");
         }
     };
+
+    if (esMozo) {
+        return null;
+    }
 
     const agregarCliente = (nuevoCliente) => {
         setClientes((anteriores) => [...anteriores, nuevoCliente]);
@@ -116,11 +123,7 @@ function ClienteList() {
                             {clientes.map((cliente) => (
                                 <tr
                                     key={cliente.id}
-                                    onClick={() => {
-                                        if (esDuenio) {
-                                            editarCliente(cliente);
-                                        }
-                                    }}
+                                    onClick={() => editarCliente(cliente)}
                                     style={{
                                         cursor: esDuenio ? "pointer" : "default"
                                     }}

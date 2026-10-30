@@ -15,17 +15,6 @@ const SECCIONES_POR_ROL = {
     ],
     GERENTE: [
         { to: "/sucursal", label: "Sucursal" },
-        { to: "/empleados", label: "Empleados" },
-        { to: "/mesas", label: "Mesas" },
-        { to: "/pedidos", label: "Pedidos" },
-        { to: "/reservas", label: "Reservas" },
-        { to: "/inventario", label: "Inventario" },
-        { to: "/gastos", label: "Gastos" },
-        { to: "/productos", label: "Productos" },
-        { to: "/clientes", label: "Clientes" }
-    ],
-    GERENTE: [
-        { to: "/sucursal", label: "Sucursal" },
         { to: "/mesas", label: "Mesas" },
         { to: "/pedidos", label: "Pedidos" },
         { to: "/inventario", label: "Inventario" },
@@ -38,8 +27,7 @@ const SECCIONES_POR_ROL = {
         { to: "/mesas", label: "Mesas" },
         { to: "/pedidos", label: "Pedidos" },
         { to: "/reservas", label: "Reservas" },
-        { to: "/productos", label: "Productos" },
-        { to: "/clientes", label: "Clientes" }
+        { to: "/productos", label: "Productos" }
     ],
     AYUDANTE_COCINA: [
         { to: "/inventario", label: "Inventario" },

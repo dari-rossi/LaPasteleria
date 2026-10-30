@@ -21,8 +21,6 @@ import SucursalEmpleadosPage from "./pages/SucursalEmpleadosPage";
 import UsuariosPage from "./pages/UsuariosPage";
 import ClientesPage from "./pages/ClientesPage";
 
-// Los que no son dueño ya tienen su sucursal asignada: no pasan por el menú
-// general, entran directo a su pantalla principal
 const INICIO_POR_ROL = {
     GERENTE: "/sucursal",
     MOZO: "/mesas",
@@ -77,7 +75,6 @@ function App() {
                         <Route path="/sucursales" element={<SucursalesPage />} />
                         <Route path="/informes" element={<InformesPage />} />
                         <Route path="/usuarios" element={<UsuariosPage />} />
-                        <Route path="/clientes" element={<ClientesPage />} />
                     </Route>
 
                     {/* Dueño y gerente */}
@@ -85,6 +82,7 @@ function App() {
                         <RequiereRol roles={["DUENIO", "GERENTE"]} />
                     }>
                         <Route path="/tipos-empleado" element={<TiposEmpleadosPage />} />
+                        <Route path="/clientes" element={<ClientesPage />} />
                     </Route>
 
                     {/* Productos: todos pueden consultar */}
@@ -116,6 +114,9 @@ function App() {
                             <RequiereRol roles={["DUENIO", "GERENTE", "MOZO"]} />
                         }>
                             <Route path="/mesas" element={<MesasPage />} />
+                            <Route path="/pedidos" element={<PedidosPage />} />
+                            <Route path="/pedidos/:id" element={<PedidoDetallePage />} />
+                            <Route path="/reservas" element={<ReservasPage />} />
                         </Route>
 
                         {/* Dueño, gerente y ayudante de cocina */}
@@ -125,18 +126,6 @@ function App() {
                             />
                         }>
                             <Route path="/inventario" element={<InventarioPage />} />
-                        </Route>
-
-                        {/* Dueño, gerente y mozo */}
-                        <Route element={
-                            <RequiereRol roles={["DUENIO", "GERENTE", "MOZO"]} />
-                        }>
-                            <Route path="/pedidos" element={<PedidosPage />} />
-                            <Route
-                                path="/pedidos/:id"
-                                element={<PedidoDetallePage />}
-                            />
-                            <Route path="/reservas" element={<ReservasPage />} />
                         </Route>
                     </Route>
 

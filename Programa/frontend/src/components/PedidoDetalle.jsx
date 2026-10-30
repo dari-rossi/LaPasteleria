@@ -4,7 +4,7 @@ import { obtenerPedidoPorId, modificarPedido } from "../services/pedidoService";
 import { obtenerProductos } from "../services/productoService";
 import { agregarItem, modificarCantidad, quitarItem } from "../services/itemProductoService";
 import { crearPago } from "../services/pagoService";
-import MercadoPago from "./mercadoPago/mercadoPago";
+import MercadoPago from "./mercadoPago/MercadoPago";
 import { useAuth } from "../context/AuthContext";
 import {
     ESTADOS_EDITABLES,
@@ -19,9 +19,9 @@ import {
 
 function PedidoDetalle() {
     const { id } = useParams();
-    const token = localStorage.getItem("token");
     const { sesion } = useAuth();
     const esMozo = sesion?.rol === "MOZO";
+
     const [pedido, setPedido] = useState(null);
     const [productos, setProductos] = useState([]);
     const [estado, setEstado] = useState("");
@@ -130,7 +130,7 @@ function PedidoDetalle() {
     if (!pedido) {
         return <p>Cargando pedido...</p>;
     }
-    
+
     const editable = esMozo && pedidoEditable(pedido);
     const descuento = pedido.cliente?.descuento ?? 0;
     const subtotal = pedido.pago?.precio ?? calcularTotal(pedido);
@@ -145,6 +145,7 @@ function PedidoDetalle() {
                         {pedido.estadoPedido}
                     </span>
                 </h2>
+
                 <Link to="/pedidos" className="btn btn-outline-secondary">
                     Volver al listado
                 </Link>
@@ -177,10 +178,12 @@ function PedidoDetalle() {
                                             {editable && <th></th>}
                                         </tr>
                                     </thead>
+
                                     <tbody>
                                         {pedido.items.map((item) => (
                                             <tr key={item.idItemProducto}>
                                                 <td>{item.producto?.nombre}</td>
+
                                                 <td>
                                                     {editable && (
                                                         <button
@@ -197,7 +200,9 @@ function PedidoDetalle() {
                                                             −
                                                         </button>
                                                     )}
+
                                                     {item.cantidad}
+
                                                     {editable && (
                                                         <button
                                                             className="btn btn-outline-secondary btn-sm ms-2"
@@ -213,7 +218,9 @@ function PedidoDetalle() {
                                                         </button>
                                                     )}
                                                 </td>
+
                                                 <td>{formatearPrecio(item.subTotal)}</td>
+
                                                 {editable && (
                                                     <td>
                                                         <button
@@ -242,6 +249,7 @@ function PedidoDetalle() {
                                             onChange={(e) => setProductoId(e.target.value)}
                                         >
                                             <option value="">Seleccione un producto</option>
+
                                             {productos.map((producto) => (
                                                 <option
                                                     key={producto.idProducto}
@@ -254,6 +262,7 @@ function PedidoDetalle() {
                                             ))}
                                         </select>
                                     </div>
+
                                     <div className="col-2">
                                         <input
                                             type="number"
@@ -263,6 +272,7 @@ function PedidoDetalle() {
                                             onChange={(e) => setCantidad(e.target.value)}
                                         />
                                     </div>
+
                                     <div className="col-3">
                                         <button
                                             className="btn btn-primary w-100"
@@ -275,13 +285,16 @@ function PedidoDetalle() {
                             )}
 
                             <hr />
+
                             <p className="mb-1">
                                 Subtotal (sin descuento): {formatearPrecio(subtotal)}
                             </p>
+
                             <p className="mb-1">
                                 Descuento del cliente ({pedido.pago?.tipoDescuento ?? pedido.cliente?.tipo} · {descuento}%):{" "}
                                 -{formatearPrecio(subtotal - total)}
                             </p>
+
                             <p className="fw-bold fs-5 mb-0">
                                 Total (con descuento): {formatearPrecio(total)}
                             </p>
@@ -306,6 +319,7 @@ function PedidoDetalle() {
                                             }}
                                         >
                                             <option value="">Método de pago</option>
+
                                             {METODOS_PAGO.map((metodo) => (
                                                 <option key={metodo} value={metodo}>
                                                     {metodo}
@@ -313,6 +327,7 @@ function PedidoDetalle() {
                                             ))}
                                         </select>
                                     </div>
+
                                     <div className="col-md-6">
                                         <button
                                             className="btn btn-success w-100"
@@ -329,9 +344,9 @@ function PedidoDetalle() {
                                 {mostrarQR && metodoPago === "MercadoPago" && (
                                     <div className="mt-4">
                                         <hr />
+
                                         <MercadoPago
                                             pedidoId={Number(id)}
-                                            token={token}
                                             onPagoConfirmado={async () => {
                                                 await recargar();
                                                 setMostrarQR(false);
@@ -348,9 +363,11 @@ function PedidoDetalle() {
                         <div className="card">
                             <div className="card-body">
                                 <h5 className="card-title">Pago</h5>
+
                                 <p className="mb-1">
                                     Método: {pedido.pago.metodoPago}
                                 </p>
+
                                 <p className="mb-0">
                                     Fecha: {new Date(pedido.pago.fechaHora).toLocaleString("es-AR")}
                                 </p>
@@ -365,9 +382,11 @@ function PedidoDetalle() {
                             <p className="mb-1">
                                 <strong>Mesa:</strong> {pedido.mesa?.idMesa}
                             </p>
+
                             <p className="mb-1">
                                 <strong>Cliente:</strong> #{pedido.cliente?.id} · {pedido.cliente?.tipo}
                             </p>
+
                             <p className="mb-3">
                                 <strong>Sucursal:</strong> {pedido.sucursal?.direccion}
                             </p>
@@ -375,6 +394,7 @@ function PedidoDetalle() {
                             {editable ? (
                                 <>
                                     <label className="form-label">Estado</label>
+
                                     <select
                                         className="form-select mb-2"
                                         value={estado}
@@ -388,6 +408,7 @@ function PedidoDetalle() {
                                     </select>
 
                                     <label className="form-label">Comensales</label>
+
                                     <input
                                         type="number"
                                         min="1"

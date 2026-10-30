@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
+import { apiFetch } from "../../services/api";
 import "./MercadoPago.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-
-const MercadoPago = ({ pedidoId, token, onPagoConfirmado }) => {
+const MercadoPago = ({ pedidoId, onPagoConfirmado }) => {
     const [orden, setOrden] = useState(null);
     const [estado, setEstado] = useState("");
     const [cargando, setCargando] = useState(false);
@@ -18,19 +17,14 @@ const MercadoPago = ({ pedidoId, token, onPagoConfirmado }) => {
         callbackRef.current = onPagoConfirmado;
     }, [onPagoConfirmado]);
 
-    const headers = {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {})
-    };
-
     const generarQR = async () => {
         setCargando(true);
         setError("");
 
         try {
-            const respuesta = await fetch(
-                `${API_URL}/pagos/mercadopago/${pedidoId}/qr`,
-                { method: "POST", headers }
+            const respuesta = await apiFetch(
+                `/pagos/mercadopago/${pedidoId}/qr`,
+                { method: "POST" }
             );
 
             const datos = await respuesta.json();
@@ -41,6 +35,7 @@ const MercadoPago = ({ pedidoId, token, onPagoConfirmado }) => {
 
             setOrden(datos);
             setEstado("created");
+            confirmacionProcesada.current = false;
         } catch (error) {
             setError(error.message);
         } finally {
@@ -61,9 +56,8 @@ const MercadoPago = ({ pedidoId, token, onPagoConfirmado }) => {
         }
 
         try {
-            const respuesta = await fetch(
-                `${API_URL}/pagos/mercadopago/${pedidoId}/estado`,
-                { method: "GET", headers }
+            const respuesta = await apiFetch(
+                `/pagos/mercadopago/${pedidoId}/estado`
             );
 
             const datos = await respuesta.json();
@@ -112,7 +106,7 @@ const MercadoPago = ({ pedidoId, token, onPagoConfirmado }) => {
         }, 5000);
 
         return () => clearInterval(intervalo);
-    }, [orden, estado, pedidoId, token]);
+    }, [orden, estado, pedidoId]);
 
     const formatoPrecio = (precio) =>
         new Intl.NumberFormat("es-AR", {
