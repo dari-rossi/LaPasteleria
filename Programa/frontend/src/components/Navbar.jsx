@@ -10,7 +10,8 @@ const SECCIONES_POR_ROL = {
         { to: "/pedidos", label: "Pedidos" },
         { to: "/reservas", label: "Reservas" },
         { to: "/inventario", label: "Inventario" },
-        { to: "/gastos", label: "Gastos" }
+        { to: "/gastos", label: "Gastos" },
+        { to: "/clientes", label: "Clientes" }
     ],
     GERENTE: [
         { to: "/sucursal", label: "Sucursal" },

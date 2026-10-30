@@ -26,7 +26,7 @@ const modificarCliente = async (req, res) => {
 const eliminarCliente = async (req, res) => {
     const id = leerId(req.params.id);
     await clienteService.eliminarCliente(id);
-    res.json({ mensaje: "Cliente eliminado" });
+    res.json({ mensaje: "Categoría de cliente eliminada" });
 };
 
 module.exports = {

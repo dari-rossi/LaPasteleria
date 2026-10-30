@@ -3,7 +3,8 @@ import { crearCliente, modificarCliente } from "../services/clienteService";
 
 function ClienteForm({ clienteEditar, onClienteCreado, onClienteModificado, onCancelarEdicion }) {
     const [formulario, setFormulario] = useState({
-        tipo: ""
+        tipo: "",
+        descuento: 0
     });
 
     const [error, setError] = useState("");
@@ -11,15 +12,20 @@ function ClienteForm({ clienteEditar, onClienteCreado, onClienteModificado, onCa
     useEffect(() => {
         if (clienteEditar) {
             setFormulario({
-                tipo: clienteEditar.tipo
+                tipo: clienteEditar.tipo,
+                descuento: clienteEditar.descuento
+            });
+        } else {
+            setFormulario({
+                tipo: "",
+                descuento: 0
             });
         }
+
+        setError("");
     }, [clienteEditar]);
 
     const manejarCambio = (e) => {
-        console.log("VALOR SELECCIONADO:", e.target.value);
-        console.log("NOMBRE DEL CAMPO:", e.target.name);
-
         setFormulario({
             ...formulario,
             [e.target.name]: e.target.value
@@ -30,42 +36,40 @@ function ClienteForm({ clienteEditar, onClienteCreado, onClienteModificado, onCa
         e.preventDefault();
         setError("");
 
-        console.log("FORMULARIO:", formulario);
-
         try {
+            const datos = {
+                tipo: formulario.tipo,
+                descuento: Number(formulario.descuento)
+            };
+
             if (clienteEditar) {
                 const clienteModificado = await modificarCliente(
                     clienteEditar.id,
-                    formulario
+                    datos
                 );
 
                 onClienteModificado(clienteModificado);
             } else {
-                const nuevoCliente = await crearCliente(formulario);
-
+                const nuevoCliente = await crearCliente(datos);
                 onClienteCreado(nuevoCliente);
             }
 
             setFormulario({
-                tipo: ""
+                tipo: "",
+                descuento: 0
             });
         } catch (error) {
-            console.error("ERROR:", error);
-
-            setError(
-                error.message ||
-                (clienteEditar
-                    ? "No se pudo modificar el cliente."
-                    : "No se pudo crear el cliente.")
-            );
+            setError(error.message || "No se pudo guardar la categoría.");
         }
     };
 
     const cancelarEdicion = () => {
         setFormulario({
-            tipo: ""
+            tipo: "",
+            descuento: 0
         });
 
+        setError("");
         onCancelarEdicion();
     };
 
@@ -73,7 +77,7 @@ function ClienteForm({ clienteEditar, onClienteCreado, onClienteModificado, onCa
         <div className="card mb-4">
             <div className="card-body">
                 <h3 className="card-title">
-                    {clienteEditar ? "Editar cliente" : "Nuevo cliente"}
+                    {clienteEditar ? "Editar categoría" : "Nueva categoría"}
                 </h3>
 
                 {error && (
@@ -85,22 +89,35 @@ function ClienteForm({ clienteEditar, onClienteCreado, onClienteModificado, onCa
                 <form onSubmit={manejarEnvio}>
                     <div className="mb-3">
                         <label className="form-label">Tipo de cliente</label>
-
-                        <select
+                        <input
+                            type="text"
                             name="tipo"
-                            className="form-select"
+                            className="form-control"
+                            placeholder="Ejemplo: Docente"
                             value={formulario.tipo}
                             onChange={manejarCambio}
-                        >
-                            <option value="">Seleccione un tipo</option>
-                            <option value="Jubilado">Jubilado</option>
-                            <option value="Estudiante">Estudiante</option>
-                            <option value="General">General</option>
-                        </select>
+                            maxLength="50"
+                            required
+                        />
+                    </div>
+
+                    <div className="mb-3">
+                        <label className="form-label">Descuento (%)</label>
+                        <input
+                            type="number"
+                            name="descuento"
+                            className="form-control"
+                            value={formulario.descuento}
+                            onChange={manejarCambio}
+                            min="0"
+                            max="100"
+                            step="1"
+                            required
+                        />
                     </div>
 
                     <button type="submit" className="btn btn-primary me-2">
-                        {clienteEditar ? "Guardar cambios" : "Crear cliente"}
+                        {clienteEditar ? "Guardar cambios" : "Crear categoría"}
                     </button>
 
                     {clienteEditar && (

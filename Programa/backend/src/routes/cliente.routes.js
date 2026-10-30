@@ -11,25 +11,28 @@ const {
 
 const validate = require("../middlewares/validate");
 const { clienteSchema } = require("../schemas/cliente.schema");
+
 const router = express.Router();
+
+const TODOS_LOS_ROLES = ["DUENIO", "GERENTE", "MOZO", "AYUDANTE_COCINA"];
 
 /**
  * @swagger
  * /clientes:
  *   get:
- *     summary: Obtener todos los clientes
+ *     summary: Obtener todas las categorías de clientes
  *     tags: [Cliente]
  *     responses:
  *       200:
- *         description: Lista de clientes
+ *         description: Lista de categorías y descuentos
  */
-router.get("/",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), obtenerClientes);
+router.get("/", autenticar, permitirRoles(...TODOS_LOS_ROLES), obtenerClientes);
 
 /**
  * @swagger
  * /clientes/{id}:
  *   get:
- *     summary: Obtener un cliente por ID
+ *     summary: Obtener una categoría por ID
  *     tags: [Cliente]
  *     parameters:
  *       - in: path
@@ -39,17 +42,17 @@ router.get("/",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), obtenerCl
  *           type: integer
  *     responses:
  *       200:
- *         description: Cliente encontrado
+ *         description: Categoría encontrada
  *       404:
- *         description: Cliente no encontrado
+ *         description: Categoría no encontrada
  */
-router.get("/:id",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), obtenerClientePorId);
+router.get("/:id", autenticar, permitirRoles(...TODOS_LOS_ROLES), obtenerClientePorId);
 
- /**
+/**
  * @swagger
  * /clientes:
  *   post:
- *     summary: Crear un cliente
+ *     summary: Crear una categoría de cliente
  *     tags: [Cliente]
  *     requestBody:
  *       required: true
@@ -59,25 +62,29 @@ router.get("/:id",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), obtene
  *             type: object
  *             required:
  *               - tipo
+ *               - descuento
  *             properties:
  *               tipo:
  *                 type: string
- *                 enum: [General, Jubilado, Estudiante]
+ *                 example: Docente
+ *               descuento:
+ *                 type: integer
+ *                 example: 25
  *     responses:
  *       201:
- *         description: Cliente creado
+ *         description: Categoría creada
  *       400:
  *         description: Datos inválidos
+ *       409:
+ *         description: Ya existe una categoría con ese nombre
  */
-router.post("/",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), validate(clienteSchema), crearCliente);
+router.post("/", autenticar, permitirRoles("DUENIO"), validate(clienteSchema), crearCliente);
 
-/**
- * @swagger
 /**
  * @swagger
  * /clientes/{id}:
  *   put:
- *     summary: Modificar un cliente
+ *     summary: Modificar una categoría de cliente
  *     tags: [Cliente]
  *     parameters:
  *       - in: path
@@ -93,23 +100,27 @@ router.post("/",autenticar, permitirRoles("DUENIO", "GERENTE", "MOZO"), validate
  *             type: object
  *             required:
  *               - tipo
+ *               - descuento
  *             properties:
  *               tipo:
  *                 type: string
- *                 enum: [General, Jubilado, Estudiante]
+ *               descuento:
+ *                 type: integer
  *     responses:
  *       200:
- *         description: Cliente modificado
+ *         description: Categoría modificada
  *       404:
- *         description: Cliente no encontrado
+ *         description: Categoría no encontrada
+ *       409:
+ *         description: Ya existe una categoría con ese nombre
  */
-router.put("/:id",autenticar, permitirRoles("DUENIO", "GERENTE"), validate(clienteSchema), modificarCliente);
+router.put("/:id", autenticar, permitirRoles("DUENIO"), validate(clienteSchema), modificarCliente);
 
 /**
  * @swagger
  * /clientes/{id}:
  *   delete:
- *     summary: Eliminar un cliente
+ *     summary: Eliminar una categoría de cliente
  *     tags: [Cliente]
  *     parameters:
  *       - in: path
@@ -119,10 +130,10 @@ router.put("/:id",autenticar, permitirRoles("DUENIO", "GERENTE"), validate(clien
  *           type: integer
  *     responses:
  *       200:
- *         description: Cliente eliminado
+ *         description: Categoría eliminada
  *       404:
- *         description: Cliente no encontrado
+ *         description: Categoría no encontrada
  */
-router.delete("/:id", autenticar, permitirRoles("DUENIO", "GERENTE"), eliminarCliente);
+router.delete("/:id", autenticar, permitirRoles("DUENIO"), eliminarCliente);
 
 module.exports = router;

@@ -87,7 +87,6 @@ async function main() {
         { sucursalId: 2, productoId: 15, stock: 15 }
     ];
 
-
     for (const inventario of inventarios) {
         await prisma.inventario.upsert({
             where: {
@@ -134,9 +133,7 @@ async function main() {
     const clientes = [
         { id: 1, tipo: "General", descuento: 0 },
         { id: 2, tipo: "Estudiante", descuento: 15 },
-        { id: 3, tipo: "Jubilado", descuento: 20 },
-        { id: 4, tipo: "General", descuento: 0 },
-        { id: 5, tipo: "Estudiante", descuento: 15 }
+        { id: 3, tipo: "Jubilado", descuento: 20 }
     ];
 
     for (const cliente of clientes) {
@@ -152,15 +149,15 @@ async function main() {
 
     const mesas = [
         { idMesa: 1, numero: 1, fila: 1, columna: 1, estado: "Ocupada", maxComensales: 2, sucursalId: 1 },
-        { idMesa: 2, numero: 2, fila: 1, columna: 2, estado: "Libre",   maxComensales: 2, sucursalId: 1 },
+        { idMesa: 2, numero: 2, fila: 1, columna: 2, estado: "Libre", maxComensales: 2, sucursalId: 1 },
         { idMesa: 3, numero: 3, fila: 1, columna: 3, estado: "Ocupada", maxComensales: 4, sucursalId: 1 },
-        { idMesa: 4, numero: 4, fila: 2, columna: 1, estado: "Libre",   maxComensales: 4, sucursalId: 1 },
-        { idMesa: 5, numero: 5, fila: 2, columna: 2, estado: "Libre",   maxComensales: 6, sucursalId: 1 },
-        { idMesa: 6, numero: 1, fila: 1, columna: 1, estado: "Libre",   maxComensales: 6, sucursalId: 2 },
+        { idMesa: 4, numero: 4, fila: 2, columna: 1, estado: "Libre", maxComensales: 4, sucursalId: 1 },
+        { idMesa: 5, numero: 5, fila: 2, columna: 2, estado: "Libre", maxComensales: 6, sucursalId: 1 },
+        { idMesa: 6, numero: 1, fila: 1, columna: 1, estado: "Libre", maxComensales: 6, sucursalId: 2 },
         { idMesa: 7, numero: 2, fila: 1, columna: 2, estado: "Ocupada", maxComensales: 2, sucursalId: 2 },
-        { idMesa: 8, numero: 3, fila: 1, columna: 3, estado: "Libre",   maxComensales: 4, sucursalId: 2 },
-        { idMesa: 9, numero: 4, fila: 2, columna: 1, estado: "Libre",   maxComensales: 4, sucursalId: 2 },
-        { idMesa: 10, numero: 5, fila: 2, columna: 2, estado: "Libre",  maxComensales: 6, sucursalId: 2 }
+        { idMesa: 8, numero: 3, fila: 1, columna: 3, estado: "Libre", maxComensales: 4, sucursalId: 2 },
+        { idMesa: 9, numero: 4, fila: 2, columna: 1, estado: "Libre", maxComensales: 4, sucursalId: 2 },
+        { idMesa: 10, numero: 5, fila: 2, columna: 2, estado: "Libre", maxComensales: 6, sucursalId: 2 }
     ];
 
     for (const mesa of mesas) {
@@ -261,7 +258,7 @@ async function main() {
             estadoPedido: "Pendiente",
             comensales: 3,
             mesaId: 9,
-            clienteId: 4,
+            clienteId: 1,
             sucursalId: 2,
             items: [
                 { productoId: 15, cantidad: 2, subTotal: 28000 },

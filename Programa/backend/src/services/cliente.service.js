@@ -1,19 +1,12 @@
 const clienteRepository = require("../repositories/cliente.repository");
 const { lanzarError } = require("../config/errores");
 
-const obtenerDescuento = (tipo) => {
-    if (tipo === "Jubilado") {
-        return 20;
-    }
+const normalizarTipo = (tipo) => {
+    const texto = tipo.trim().toLowerCase();
 
-    if (tipo === "Estudiante") {
-        return 15;
-    }
-
-    return 0;
+    return texto.charAt(0).toUpperCase() + texto.slice(1);
 };
 
-// Busca un cliente o lanza 404
 const buscarCliente = async (id) => {
     const cliente = await clienteRepository.obtenerPorId(id);
 
@@ -22,6 +15,14 @@ const buscarCliente = async (id) => {
     }
 
     return cliente;
+};
+
+const verificarTipoDisponible = async (tipo, idExcluir = null) => {
+    const clienteExistente = await clienteRepository.obtenerPorTipo(tipo);
+
+    if (clienteExistente && clienteExistente.id !== idExcluir) {
+        lanzarError("Ya existe una categoría de cliente con ese nombre.", 409);
+    }
 };
 
 const obtenerClientes = async () => {
@@ -33,19 +34,27 @@ const obtenerClientePorId = async (id) => {
 };
 
 const crearCliente = async (datos) => {
-    const descuentoCalculado = obtenerDescuento(datos.tipo);
-    const nuevoClienteData = { tipo: datos.tipo, descuento: descuentoCalculado };
+    const tipo = normalizarTipo(datos.tipo);
 
-    return await clienteRepository.crear(nuevoClienteData);
+    await verificarTipoDisponible(tipo);
+
+    return await clienteRepository.crear({
+        tipo,
+        descuento: datos.descuento
+    });
 };
 
 const modificarCliente = async (id, datos) => {
     await buscarCliente(id);
 
-    const descuentoCalculado = obtenerDescuento(datos.tipo);
-    const clienteActualizarData = { tipo: datos.tipo, descuento: descuentoCalculado };
+    const tipo = normalizarTipo(datos.tipo);
 
-    return await clienteRepository.modificar(id, clienteActualizarData);
+    await verificarTipoDisponible(tipo, id);
+
+    return await clienteRepository.modificar(id, {
+        tipo,
+        descuento: datos.descuento
+    });
 };
 
 const eliminarCliente = async (id) => {

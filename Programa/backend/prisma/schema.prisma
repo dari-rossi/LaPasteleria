@@ -103,7 +103,7 @@ model Mesa {
 
 model Cliente {
   id           Int        @id @default(autoincrement())
-  tipo         String
+  tipo         String     @unique
   descuento    Int
 
   // Para relacionar Cliente y Pedido
