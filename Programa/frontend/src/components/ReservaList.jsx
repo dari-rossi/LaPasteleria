@@ -21,21 +21,21 @@ function ReservaList() {
     };
 
     const cancelarReserva = async (reserva) => {
-    if (!window.confirm("¿Cancelar esta reserva? El horario queda libre.")) {
-        return;
-    }
+        if (!window.confirm("¿Cancelar esta reserva? El horario queda libre.")) {
+            return;
+        }
 
-    try {
-        await modificarReserva(reserva.idMesa, reserva.fechaHoraReservada, {
-            cantComensales: reserva.cantComensales,
-            estadoReserva: "Cancelada",
-            dni: reserva.dni
-        });
-        await cargarReservas();
-    } catch (error) {
-        setError(error.message || "No se pudo cancelar la reserva.");
-    }
-};
+        try {
+            await modificarReserva(reserva.idMesa, reserva.fechaHoraReservada, {
+                cantComensales: reserva.cantComensales,
+                estadoReserva: "Cancelada",
+                dni: reserva.dni
+            });
+            await cargarReservas();
+        } catch (error) {
+            setError(error.message || "No se pudo cancelar la reserva.");
+        }
+    };
 
     const reservasVisibles = reservas
         .filter((reserva) => !filtroEstado || reserva.estadoReserva === filtroEstado)

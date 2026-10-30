@@ -36,6 +36,7 @@ const ERRORES = {
 
     // ----- Mesa, cliente y reserva -----
     MESA_NO_ENCONTRADA: { status: 404, mensaje: "Mesa no encontrada" },
+    MESA_DUPLICADA: { status: 409, mensaje: "Ya hay una mesa en esa posición" },
     CLIENTE_NO_ENCONTRADO: { status: 404, mensaje: "Cliente no encontrado" },
     RESERVA_NO_ENCONTRADA: { status: 404, mensaje: "Reserva no encontrada" },
     RESERVA_CLAVE_INCORRECTA: { status: 400, mensaje: "Mesa o fecha y hora incorrectas" },
@@ -94,6 +95,15 @@ class AppError extends Error {
 
 // Uso: lanzarError("USUARIO_NO_ENCONTRADO");
 const lanzarError = (codigo, mensaje) => {
+    if (!Object.prototype.hasOwnProperty.call(ERRORES, codigo)) {
+        const error = new AppError("ERROR_INTERNO", codigo);
+
+        error.codigo = "ERROR_NEGOCIO";
+        error.status = typeof mensaje === "number" ? mensaje : 400;
+
+        throw error;
+    }
+
     throw new AppError(codigo, mensaje);
 };
 
@@ -119,7 +129,9 @@ const DUPLICADOS_POR_MODELO = {
     Inventario: "INVENTARIO_DUPLICADO",
     Usuario: "USUARIO_DUPLICADO",
     TipoEmpleado: "TIPO_EMPLEADO_DUPLICADO",
-    SucursalTipoEmpleado: "ASIGNACION_DUPLICADA"
+    SucursalTipoEmpleado: "ASIGNACION_DUPLICADA",
+    Pago: "PAGO_DUPLICADO",
+    Mesa: "MESA_DUPLICADA"
 };
 
 const esErrorPrisma = (error) =>

@@ -9,8 +9,7 @@ const pedidoSchema = z.object({
     comensales: z.number().int("La cantidad de comensales debe ser un entero").positive("La cantidad de comensales debe ser positiva"),
     mesaId: z.number().int("La mesa es obligatoria").positive("La mesa es obligatoria"),
     clienteId: z.number().int("El cliente es obligatorio").positive("El cliente es obligatorio"),
-    sucursalId: z.number().int("La sucursal es obligatoria").positive("La sucursal es obligatoria"),
-    // Los productos son opcionales: el pedido puede nacer sin items y cargarse después desde /itemProducto
+    sucursalId: z.number().int("La sucursal es obligatoria").positive("La sucursal es obligatoria").optional(),
     items: z.array(itemDelPedidoSchema)
         .refine(
             (items) => new Set(items.map((item) => item.productoId)).size === items.length,

@@ -1,5 +1,5 @@
-const { autenticar, permitirRoles } = require("../middlewares/auth.middleware");
 const express = require("express");
+const { autenticar, permitirRoles } = require("../middlewares/auth.middleware");
 
 const {
     obtenerReservas,
@@ -14,17 +14,19 @@ const { reservaSchema, reservaModificarSchema } = require("../schemas/reserva.sc
 
 const router = express.Router();
 
+const ROLES = ["DUENIO", "GERENTE", "MOZO"];
+
 /**
  * @swagger
  * /reservas:
  *   get:
- *     summary: Obtener todas las reservas
+ *     summary: Obtener las reservas de la sucursal
  *     tags: [Reserva]
  *     responses:
  *       200:
  *         description: Lista de reservas
  */
-router.get("/",autenticar, permitirRoles("MOZO"), obtenerReservas);
+router.get("/", autenticar, permitirRoles(...ROLES), obtenerReservas);
 
 /**
  * @swagger
@@ -53,7 +55,7 @@ router.get("/",autenticar, permitirRoles("MOZO"), obtenerReservas);
  *       404:
  *         description: Reserva no encontrada
  */
-router.get("/:idMesa/:fechaHora",autenticar, permitirRoles("MOZO"), obtenerReservaPorId);
+router.get("/:idMesa/:fechaHora", autenticar, permitirRoles(...ROLES), obtenerReservaPorId);
 
 /**
  * @swagger
@@ -94,7 +96,7 @@ router.get("/:idMesa/:fechaHora",autenticar, permitirRoles("MOZO"), obtenerReser
  *       409:
  *         description: Ya existe una reserva para esa mesa en esa fecha y hora
  */
-router.post("/",autenticar, permitirRoles("MOZO"), validate(reservaSchema), crearReserva);
+router.post("/", autenticar, permitirRoles(...ROLES), validate(reservaSchema), crearReserva);
 
 /**
  * @swagger
@@ -141,7 +143,7 @@ router.post("/",autenticar, permitirRoles("MOZO"), validate(reservaSchema), crea
  *       404:
  *         description: Reserva no encontrada
  */
-router.put("/:idMesa/:fechaHora",autenticar, permitirRoles("MOZO"), validate(reservaModificarSchema), modificarReserva);
+router.put("/:idMesa/:fechaHora", autenticar, permitirRoles(...ROLES), validate(reservaModificarSchema), modificarReserva);
 
 /**
  * @swagger
@@ -168,6 +170,6 @@ router.put("/:idMesa/:fechaHora",autenticar, permitirRoles("MOZO"), validate(res
  *       404:
  *         description: Reserva no encontrada
  */
-router.delete("/:idMesa/:fechaHora",autenticar, permitirRoles("MOZO"), eliminarReserva);
+router.delete("/:idMesa/:fechaHora", autenticar, permitirRoles(...ROLES), eliminarReserva);
 
 module.exports = router;

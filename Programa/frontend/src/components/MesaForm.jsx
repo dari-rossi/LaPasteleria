@@ -4,7 +4,9 @@ import { ESTADOS_MESA } from "../models/Mesa";
 
 const FORMULARIO_VACIO = {
     estado: "Libre",
-    maxComensales: ""
+    maxComensales: "",
+    fila: "",
+    columna: ""
 };
 
 function MesaForm({ mesaEditar, onMesaCreada, onMesaModificada, onCancelarEdicion }) {
@@ -16,7 +18,9 @@ function MesaForm({ mesaEditar, onMesaCreada, onMesaModificada, onCancelarEdicio
         if (mesaEditar) {
             setFormulario({
                 estado: mesaEditar.estado,
-                maxComensales: String(mesaEditar.maxComensales)
+                maxComensales: String(mesaEditar.maxComensales),
+                fila: String(mesaEditar.fila ?? ""),
+                columna: String(mesaEditar.columna ?? "")
             });
         }
     }, [mesaEditar]);
@@ -32,10 +36,14 @@ function MesaForm({ mesaEditar, onMesaCreada, onMesaModificada, onCancelarEdicio
         e.preventDefault();
         setError("");
 
-        // El input devuelve texto, pero el backend espera que maxComensales sea un número
+        // Los inputs devuelven texto: el backend espera números.
+        // La posición solo se manda si está completa; si no, el backend asigna la primera celda libre
         const datos = {
-            ...formulario,
-            maxComensales: Number(formulario.maxComensales)
+            estado: formulario.estado,
+            maxComensales: Number(formulario.maxComensales),
+            ...(formulario.fila && formulario.columna
+                ? { fila: Number(formulario.fila), columna: Number(formulario.columna) }
+                : {})
         };
 
         try {
@@ -112,6 +120,35 @@ function MesaForm({ mesaEditar, onMesaCreada, onMesaModificada, onCancelarEdicio
                             onChange={manejarCambio}
                             required
                         />
+                    </div>
+
+                    <div className="row mb-3">
+                        <div className="col">
+                            <label className="form-label">Fila</label>
+                            <input
+                                type="number"
+                                step="1"
+                                min="1"
+                                name="fila"
+                                className="form-control"
+                                placeholder="Automática"
+                                value={formulario.fila}
+                                onChange={manejarCambio}
+                            />
+                        </div>
+                        <div className="col">
+                            <label className="form-label">Columna</label>
+                            <input
+                                type="number"
+                                step="1"
+                                min="1"
+                                name="columna"
+                                className="form-control"
+                                placeholder="Automática"
+                                value={formulario.columna}
+                                onChange={manejarCambio}
+                            />
+                        </div>
                     </div>
 
                     <button type="submit" className="btn btn-primary me-2">
