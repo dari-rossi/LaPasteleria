@@ -89,7 +89,7 @@ router.get("/:idMesa/:fechaHora", autenticar, permitirRoles(...ROLES), obtenerRe
  *       409:
  *         description: Ya existe una reserva para esa mesa en esa fecha y hora
  */
-router.post("/", autenticar, permitirRoles(...ROLES), validate(reservaSchema), crearReserva);
+router.post("/", autenticar, permitirRoles("MOZO"), validate(reservaSchema), crearReserva);
 
 /**
  * @swagger
@@ -136,7 +136,7 @@ router.post("/", autenticar, permitirRoles(...ROLES), validate(reservaSchema), c
  *       404:
  *         description: Reserva no encontrada
  */
-router.put("/:idMesa/:fechaHora", autenticar, permitirRoles(...ROLES), validate(reservaModificarSchema), modificarReserva);
+router.put("/:idMesa/:fechaHora", autenticar, permitirRoles("MOZO"), validate(reservaModificarSchema), modificarReserva);
 
 /**
  * @swagger
@@ -163,6 +163,6 @@ router.put("/:idMesa/:fechaHora", autenticar, permitirRoles(...ROLES), validate(
  *       404:
  *         description: Reserva no encontrada
  */
-router.delete("/:idMesa/:fechaHora", autenticar, permitirRoles(...ROLES), eliminarReserva);
+router.delete("/:idMesa/:fechaHora", autenticar, permitirRoles("MOZO"), eliminarReserva);
 
 module.exports = router;

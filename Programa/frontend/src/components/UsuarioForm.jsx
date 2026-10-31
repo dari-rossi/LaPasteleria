@@ -128,7 +128,7 @@ function UsuarioForm({
                             onChange={manejarCambio}
                             minLength="3"
                             maxLength="30"
-                            pattern="[a-zA-Z0-9._-]+"
+                            pattern="[a-zA-Z0-9._\-]+"
                             title="Usá entre 3 y 30 caracteres: letras, números, punto, guion o guion bajo."
                             autoComplete="off"
                             required

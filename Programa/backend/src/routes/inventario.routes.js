@@ -142,6 +142,6 @@ router.put('/:id', autenticar, permitirRoles("DUENIO", "AYUDANTE_COCINA"), valid
  *       204:
  *         description: Inventario eliminado.
  */
-router.delete('/:id',autenticar, permitirRoles("DUENIO", "GERENTE"), inventarioController.remove);
+router.delete('/:id',autenticar, permitirRoles("DUENIO"), inventarioController.remove);
 
 module.exports = router;

@@ -29,11 +29,8 @@ const buscarPedido = async (id, usuario) => {
 
 const obtenerPedidos = async (usuario, sucursalIdElegida) => {
     const sucursalId = resolverSucursal(usuario, sucursalIdElegida);
-    const pedidos = await pedidoRepository.obtenerTodos();
 
-    return pedidos.filter(
-        (pedido) => Number(pedido.sucursalId) === Number(sucursalId)
-    );
+    return await pedidoRepository.obtenerTodos(sucursalId);
 };
 
 const obtenerPedidoPorId = async (id, usuario) => {

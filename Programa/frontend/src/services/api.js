@@ -5,7 +5,7 @@ export const apiFetch = async (ruta, opciones = {}) => {
     const token = sesion?.token;
     const sucursalElegida = localStorage.getItem("sucursalId");
 
-    if (sucursalElegida) {
+    if (sucursalElegida && !ruta.includes("sucursalId")) {
         const separador = ruta.includes("?") ? "&" : "?";
         ruta = `${ruta}${separador}sucursalId=${sucursalElegida}`;
     }

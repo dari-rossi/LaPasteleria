@@ -11,8 +11,9 @@ const incluir = {
     items: { include: { producto: true } }
 };
 
-const obtenerTodos = async () => {
+const obtenerTodos = async (sucursalId) => {
     return await prisma.pedido.findMany({
+        where: { sucursalId: Number(sucursalId) },
         include: incluir,
         orderBy: { idPedido: "desc" }
     });
