@@ -12,27 +12,14 @@ const obtenerTipoEmpleadoPorId = async (req, res) => {
     res.json(tipo);
 };
 
-const crearTipoEmpleado = async (req, res) => {
-    const tipo = await tipoEmpleadoService.crearTipoEmpleado(req.body);
-    res.status(201).json(tipo);
-};
-
 const modificarTipoEmpleado = async (req, res) => {
     const id = leerId(req.params.id);
     const tipo = await tipoEmpleadoService.modificarTipoEmpleado(id, req.body);
     res.json(tipo);
 };
 
-const eliminarTipoEmpleado = async (req, res) => {
-    const id = leerId(req.params.id);
-    await tipoEmpleadoService.eliminarTipoEmpleado(id);
-    res.json({ mensaje: "Tipo de empleado eliminado" });
-};
-
 module.exports = {
     obtenerTiposEmpleado,
     obtenerTipoEmpleadoPorId,
-    crearTipoEmpleado,
-    modificarTipoEmpleado,
-    eliminarTipoEmpleado
+    modificarTipoEmpleado
 };

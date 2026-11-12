@@ -4,6 +4,7 @@ import { obtenerMesas, eliminarMesa } from "../services/mesaService";
 import { obtenerClientes } from "../services/clienteService";
 import { crearPedido } from "../services/pedidoService";
 import { useSucursal } from "../context/SucursalContext";
+import { useAuth } from "../context/AuthContext";
 import MesaForm from "./MesaForm";
 import MesaPanel from "./MesaPanel";
 
@@ -24,6 +25,11 @@ const COLUMNAS_MINIMAS = 4;
 function MesaGrid({ onReservaCreada }) {
     const navigate = useNavigate();
     const { sucursalId } = useSucursal();
+    const { sesion } = useAuth();
+
+    const puedeGestionarMesas =
+        sesion?.rol === "DUENIO" || sesion?.rol === "GERENTE";
+
     const [mesas, setMesas] = useState([]);
     const [error, setError] = useState("");
     const [seleccionada, setSeleccionada] = useState(null);
@@ -35,7 +41,9 @@ function MesaGrid({ onReservaCreada }) {
             const datos = await obtenerMesas();
             setMesas(datos);
             setSeleccionada((actual) =>
-                actual ? datos.find((mesa) => mesa.idMesa === actual.idMesa) ?? null : null
+                actual
+                    ? datos.find((mesa) => mesa.idMesa === actual.idMesa) ?? null
+                    : null
             );
         } catch (error) {
             // Si falla un refresco automático no se muestra error
@@ -70,7 +78,8 @@ function MesaGrid({ onReservaCreada }) {
         }
     };
 
-    const contar = (estado) => mesas.filter((mesa) => mesa.estado === estado).length;
+    const contar = (estado) =>
+        mesas.filter((mesa) => mesa.estado === estado).length;
 
     const empezarPedido = async (comensales, clienteId) => {
         const pedido = await crearPedido({
@@ -110,7 +119,9 @@ function MesaGrid({ onReservaCreada }) {
         try {
             await eliminarMesa(seleccionada.idMesa);
 
-            setMesas(mesas.filter((mesa) => mesa.idMesa !== seleccionada.idMesa));
+            setMesas(
+                mesas.filter((mesa) => mesa.idMesa !== seleccionada.idMesa)
+            );
             setSeleccionada(null);
             setModoFormulario(null);
         } catch (error) {
@@ -118,7 +129,10 @@ function MesaGrid({ onReservaCreada }) {
         }
     };
 
-    const columnas = Math.max(COLUMNAS_MINIMAS, ...mesas.map((mesa) => mesa.columna ?? 1));
+    const columnas = Math.max(
+        COLUMNAS_MINIMAS,
+        ...mesas.map((mesa) => mesa.columna ?? 1)
+    );
 
     return (
         <div>
@@ -138,7 +152,8 @@ function MesaGrid({ onReservaCreada }) {
                             }}
                         >
                             {mesas.map((mesa) => {
-                                const estaSeleccionada = seleccionada?.idMesa === mesa.idMesa;
+                                const estaSeleccionada =
+                                    seleccionada?.idMesa === mesa.idMesa;
 
                                 return (
                                     <div
@@ -150,11 +165,19 @@ function MesaGrid({ onReservaCreada }) {
                                             gridColumn: mesa.columna,
                                             cursor: "pointer",
                                             background: COLORES[mesa.estado] ?? "#9e9e9e",
-                                            outline: estaSeleccionada ? "4px solid #757575" : "none",
+                                            outline: estaSeleccionada
+                                                ? "4px solid #757575"
+                                                : "none",
                                             outlineOffset: 2
                                         }}
                                     >
-                                        <div style={{ fontSize: "2.2rem", fontWeight: 700, lineHeight: 1.1 }}>
+                                        <div
+                                            style={{
+                                                fontSize: "2.2rem",
+                                                fontWeight: 700,
+                                                lineHeight: 1.1
+                                            }}
+                                        >
                                             {mesa.numero}
                                         </div>
                                         <div>👥 {mesa.maxComensales}</div>
@@ -165,7 +188,9 @@ function MesaGrid({ onReservaCreada }) {
                     )}
 
                     <p className="text-muted mt-3">
-                        Hacé clic en una mesa para seleccionarla y poder editarla o eliminarla.
+                        {puedeGestionarMesas
+                            ? "Hacé clic en una mesa para seleccionarla y poder editarla o eliminarla."
+                            : "Hacé clic en una mesa para empezar un pedido o reservarla."}
                     </p>
                 </div>
 
@@ -189,33 +214,40 @@ function MesaGrid({ onReservaCreada }) {
                 )}
             </div>
 
-            <div className="my-3">
-                <button
-                    className="btn btn-primary me-2"
-                    onClick={() => setModoFormulario("crear")}
-                >
-                    Agregar
-                </button>
-                <button
-                    className="btn btn-outline-primary me-2"
-                    disabled={!seleccionada}
-                    onClick={() => setModoFormulario("editar")}
-                >
-                    Editar
-                </button>
-                <button
-                    className="btn btn-outline-danger me-2"
-                    disabled={!seleccionada}
-                    onClick={borrarMesa}
-                >
-                    Eliminar
-                </button>
-            </div>
+            {puedeGestionarMesas && (
+                <div className="my-3">
+                    <button
+                        className="btn btn-primary me-2"
+                        onClick={() => setModoFormulario("crear")}
+                    >
+                        Agregar
+                    </button>
+
+                    <button
+                        className="btn btn-outline-primary me-2"
+                        disabled={!seleccionada}
+                        onClick={() => setModoFormulario("editar")}
+                    >
+                        Editar
+                    </button>
+
+                    <button
+                        className="btn btn-outline-danger me-2"
+                        disabled={!seleccionada}
+                        onClick={borrarMesa}
+                    >
+                        Eliminar
+                    </button>
+                </div>
+            )}
 
             {/* Leyenda con la cantidad de mesas por estado */}
             <div className="mb-4">
                 {LEYENDA.map((item) => (
-                    <span key={item.estado} className="d-inline-flex align-items-center me-4">
+                    <span
+                        key={item.estado}
+                        className="d-inline-flex align-items-center me-4"
+                    >
                         <span
                             className="me-2"
                             style={{
@@ -230,26 +262,34 @@ function MesaGrid({ onReservaCreada }) {
                 ))}
             </div>
 
-            {(modoFormulario === "crear" || (modoFormulario === "editar" && seleccionada)) && (
-                <>
-                    <MesaForm
-                        key={modoFormulario === "editar" ? `editar-${seleccionada.idMesa}` : "crear"}
-                        mesaEditar={modoFormulario === "editar" ? seleccionada : null}
-                        onMesaCreada={agregarMesa}
-                        onMesaModificada={actualizarMesa}
-                        onCancelarEdicion={() => setModoFormulario(null)}
-                    />
+            {puedeGestionarMesas &&
+                (modoFormulario === "crear" ||
+                    (modoFormulario === "editar" && seleccionada)) && (
+                    <>
+                        <MesaForm
+                            key={
+                                modoFormulario === "editar"
+                                    ? `editar-${seleccionada.idMesa}`
+                                    : "crear"
+                            }
+                            mesaEditar={
+                                modoFormulario === "editar" ? seleccionada : null
+                            }
+                            onMesaCreada={agregarMesa}
+                            onMesaModificada={actualizarMesa}
+                            onCancelarEdicion={() => setModoFormulario(null)}
+                        />
 
-                    {modoFormulario === "crear" && (
-                        <button
-                            className="btn btn-link mb-3 p-0"
-                            onClick={() => setModoFormulario(null)}
-                        >
-                            Cerrar formulario
-                        </button>
-                    )}
-                </>
-            )}
+                        {modoFormulario === "crear" && (
+                            <button
+                                className="btn btn-link mb-3 p-0"
+                                onClick={() => setModoFormulario(null)}
+                            >
+                                Cerrar formulario
+                            </button>
+                        )}
+                    </>
+                )}
 
             {error && (
                 <div className="alert alert-danger">

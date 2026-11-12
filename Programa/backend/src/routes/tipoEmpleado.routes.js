@@ -4,13 +4,12 @@ const express = require("express");
 const {
     obtenerTiposEmpleado,
     obtenerTipoEmpleadoPorId,
-    crearTipoEmpleado,
-    modificarTipoEmpleado,
-    eliminarTipoEmpleado
+    modificarTipoEmpleado
 } = require("../controllers/tipoEmpleado.controller");
 
 const validate = require("../middlewares/validate");
-const { crearTipoEmpleadoSchema, modificarTipoEmpleadoSchema } = require("../schemas/tipoEmpleado.schema");
+const { modificarTipoEmpleadoSchema } = require("../schemas/tipoEmpleado.schema");
+
 const router = express.Router();
 
 /**
@@ -49,45 +48,10 @@ router.get("/", autenticar, permitirRoles("DUENIO", "GERENTE"), obtenerTiposEmpl
  *     responses:
  *       200:
  *         description: Tipo de empleado encontrado
- *       400:
- *         description: ID incorrecto
  *       404:
  *         description: Tipo de empleado no encontrado
  */
 router.get("/:id", autenticar, permitirRoles("DUENIO", "GERENTE"), obtenerTipoEmpleadoPorId);
-
-/**
- * @swagger
- * /tipos-empleado:
- *   post:
- *     summary: Crear un tipo de empleado
- *     tags: [Tipo Empleado]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - rol
- *               - sueldo
- *             properties:
- *               rol:
- *                 type: string
- *                 enum: [DUENIO, GERENTE, MOZO, AYUDANTE_COCINA]
- *                 example: MOZO
- *               sueldo:
- *                 type: number
- *                 example: 500000
- *     responses:
- *       201:
- *         description: Tipo de empleado creado
- *       400:
- *         description: Datos inválidos
- *       409:
- *         description: El rol ya es parte del sistema
- */
-router.post("/", autenticar, permitirRoles("DUENIO"), validate(crearTipoEmpleadoSchema), crearTipoEmpleado);
 
 /**
  * @swagger
@@ -114,34 +78,12 @@ router.post("/", autenticar, permitirRoles("DUENIO"), validate(crearTipoEmpleado
  *                 type: number
  *     responses:
  *       200:
- *         description: Tipo de empleado modificado
+ *         description: Sueldo modificado
  *       400:
  *         description: Datos inválidos
  *       404:
  *         description: Tipo de empleado no encontrado
  */
 router.put("/:id", autenticar, permitirRoles("DUENIO"), validate(modificarTipoEmpleadoSchema), modificarTipoEmpleado);
-
-/**
- * @swagger
- * /tipos-empleado/{id}:
- *   delete:
- *     summary: Eliminar un tipo de empleado
- *     tags: [Tipo Empleado]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Tipo de empleado eliminado
- *       404:
- *         description: Tipo de empleado no encontrado
- *       409:
- *         description: Hay usuarios que tienen este rol
- */
-router.delete("/:id", autenticar, permitirRoles("DUENIO"), eliminarTipoEmpleado);
 
 module.exports = router;

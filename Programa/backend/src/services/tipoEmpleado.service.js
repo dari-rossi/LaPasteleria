@@ -39,45 +39,16 @@ const obtenerTipoEmpleadoPorId = async (id) => {
     return await buscarTipo(id);
 };
 
-const crearTipoEmpleado = async (datos) => {
-    if (esDuenio(datos.rol)) {
-        lanzarError("ROL_DUENIO_PREDEFINIDO");
-    }
-
-    const existente = await tipoEmpleadoRepository.obtenerPorRol(datos.rol);
-
-    if (existente) {
-        lanzarError("TIPO_EMPLEADO_DUPLICADO");
-    }
-
-    return await tipoEmpleadoRepository.crear({
-        rol: datos.rol,
-        sueldo: datos.sueldo
-    });
-};
-
 const modificarTipoEmpleado = async (id, datos) => {
     await buscarTipo(id);
 
-    return await tipoEmpleadoRepository.modificar(id, { sueldo: datos.sueldo });
-};
-
-const eliminarTipoEmpleado = async (id) => {
-    await buscarTipo(id);
-
-    const usuarios = await tipoEmpleadoRepository.contarUsuarios(id);
-
-    if (usuarios > 0) {
-        lanzarError("TIPO_EMPLEADO_CON_USUARIOS");
-    }
-
-    return await tipoEmpleadoRepository.eliminar(id);
+    return await tipoEmpleadoRepository.modificar(id, {
+        sueldo: datos.sueldo
+    });
 };
 
 module.exports = {
     obtenerTiposEmpleado,
     obtenerTipoEmpleadoPorId,
-    crearTipoEmpleado,
-    modificarTipoEmpleado,
-    eliminarTipoEmpleado
+    modificarTipoEmpleado
 };

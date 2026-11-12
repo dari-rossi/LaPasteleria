@@ -52,9 +52,12 @@ export const eliminarCliente = async (id) => {
         method: "DELETE"
     });
 
+    const datos = await response.json();
+
     if (!response.ok) {
-        throw new Error("No se pudo eliminar el cliente");
+        throw new Error(obtenerMensajeError(datos) || "No se pudo eliminar el cliente");
     }
 
+    return datos;
     return await response.json();
 };

@@ -6,14 +6,10 @@ const normalizarTipo = (tipo) => {
     return texto.charAt(0).toUpperCase() + texto.slice(1);
 };
 
-const obtenerDescuento = (tipo) => {
-    const descuentos = {
-        Jubilado: 20,
-        Estudiante: 15,
-        General: 0
-    };
-
-    return descuentos[tipo];
+const DESCUENTOS_PREDEFINIDOS = {
+    Jubilado: 20,
+    Estudiante: 15,
+    General: 0
 };
 
 const obtenerClientes = async () => {
@@ -32,15 +28,21 @@ const obtenerClientePorId = async (id) => {
 
 const crearCliente = async (datos) => {
     const tipo = normalizarTipo(datos.tipo);
-    const descuento = obtenerDescuento(tipo);
+    const descuento = datos.descuento ?? DESCUENTOS_PREDEFINIDOS[tipo];
 
-    if (descuento === undefined) {
-        lanzarError("El tipo de cliente no es válido.", 400);
+    if (descuento === undefined || descuento === null) {
+        lanzarError("Debe indicar el descuento.", 400);
+    }
+
+    const existente = await clienteRepository.obtenerPorTipo(tipo);
+
+    if (existente) {
+        lanzarError("Ya existe un cliente con ese tipo.", 409);
     }
 
     return await clienteRepository.crear({
         tipo,
-        descuento
+        descuento: Number(descuento)
     });
 };
 
@@ -76,4 +78,4 @@ module.exports = {
     crearCliente,
     modificarCliente,
     eliminarCliente
-};
+}

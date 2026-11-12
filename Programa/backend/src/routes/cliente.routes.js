@@ -10,7 +10,7 @@ const {
 } = require("../controllers/cliente.controller");
 
 const validate = require("../middlewares/validate");
-const { clienteSchema } = require("../schemas/cliente.schema");
+const { crearClienteSchema, modificarClienteSchema } = require("../schemas/cliente.schema");
 
 const router = express.Router();
 
@@ -78,8 +78,7 @@ router.get("/:id", autenticar, permitirRoles(...TODOS_LOS_ROLES), obtenerCliente
  *       409:
  *         description: Ya existe una categoría con ese nombre
  */
-router.post("/", autenticar, permitirRoles("DUENIO"), validate(clienteSchema), crearCliente);
-
+router.post("/", autenticar, permitirRoles("DUENIO"), validate(crearClienteSchema), crearCliente);
 /**
  * @swagger
  * /clientes/{id}:
@@ -114,8 +113,7 @@ router.post("/", autenticar, permitirRoles("DUENIO"), validate(clienteSchema), c
  *       409:
  *         description: Ya existe una categoría con ese nombre
  */
-router.put("/:id", autenticar, permitirRoles("DUENIO"), validate(clienteSchema), modificarCliente);
-
+router.put("/:id", autenticar, permitirRoles("DUENIO"), validate(modificarClienteSchema), modificarCliente);
 /**
  * @swagger
  * /clientes/{id}:

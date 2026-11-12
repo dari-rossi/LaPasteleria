@@ -1,72 +1,44 @@
 import { useEffect, useState } from "react";
-import { crearTipoEmpleado, modificarTipoEmpleado } from "../services/tipoEmpleadoService";
-import { ETIQUETA_ROL, ROLES_CREABLES } from "../config/roles";
-
-const FORMULARIO_VACIO = {
-    rol: "",
-    sueldo: ""
-};
+import { modificarTipoEmpleado } from "../services/tipoEmpleadoService";
+import { ETIQUETA_ROL } from "../config/roles";
 
 function TipoEmpleadoForm({ tipoEditar, onTipoGuardado, onCancelarEdicion }) {
-    const [formulario, setFormulario] = useState(FORMULARIO_VACIO);
+    const [sueldo, setSueldo] = useState("");
     const [error, setError] = useState("");
 
     useEffect(() => {
         if (tipoEditar) {
-            setFormulario({
-                rol: tipoEditar.rol,
-                sueldo: String(tipoEditar.sueldo)
-            });
+            setSueldo(String(tipoEditar.sueldo));
         }
     }, [tipoEditar]);
-
-    const manejarCambio = (e) => {
-        setFormulario({
-            ...formulario,
-            [e.target.name]: e.target.value
-        });
-    };
 
     const manejarEnvio = async (e) => {
         e.preventDefault();
         setError("");
 
-        // El backend espera un número, pero el input devuelve texto
-        const sueldo = Number(formulario.sueldo);
+        const sueldoNumerico = Number(sueldo);
+
+        if (!Number.isFinite(sueldoNumerico) || sueldoNumerico <= 0) {
+            setError("El sueldo debe ser un número mayor a 0.");
+            return;
+        }
 
         try {
-            if (tipoEditar) {
-                // El rol no se puede modificar: solo se manda el sueldo
-                await modificarTipoEmpleado(tipoEditar.idTipoEmpleado, { sueldo });
-            } else {
-                await crearTipoEmpleado({ rol: formulario.rol, sueldo });
-            }
+            await modificarTipoEmpleado(
+                tipoEditar.idTipoEmpleado,
+                { sueldo: sueldoNumerico }
+            );
 
-            setFormulario(FORMULARIO_VACIO);
             onTipoGuardado();
         } catch (error) {
-            setError(
-                error.message ||
-                (tipoEditar
-                    ? "No se pudo modificar el tipo de empleado."
-                    : "No se pudo crear el tipo de empleado.")
-            );
+            setError(error.message || "No se pudo modificar el sueldo.");
         }
-    };
-
-    const cancelarEdicion = () => {
-        setFormulario(FORMULARIO_VACIO);
-        setError("");
-
-        onCancelarEdicion();
     };
 
     return (
         <div className="card mb-4">
             <div className="card-body">
-                <h3 className="card-title">
-                    {tipoEditar ? "Editar tipo de empleado" : "Nuevo tipo de empleado"}
-                </h3>
+                <h3 className="card-title">Modificar sueldo</h3>
 
                 {error && (
                     <div className="alert alert-danger">
@@ -77,21 +49,12 @@ function TipoEmpleadoForm({ tipoEditar, onTipoGuardado, onCancelarEdicion }) {
                 <form onSubmit={manejarEnvio}>
                     <div className="mb-3">
                         <label className="form-label">Puesto</label>
-                        <select
-                            name="rol"
-                            className="form-select"
-                            value={formulario.rol}
-                            onChange={manejarCambio}
-                            disabled={Boolean(tipoEditar)}
-                            required
-                        >
-                            <option value="">Seleccioná un puesto</option>
-                            {ROLES_CREABLES.map((rol) => (
-                                <option key={rol} value={rol}>
-                                    {ETIQUETA_ROL[rol]}
-                                </option>
-                            ))}
-                        </select>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={ETIQUETA_ROL[tipoEditar.rol] ?? tipoEditar.rol}
+                            disabled
+                        />
                     </div>
 
                     <div className="mb-3">
@@ -100,27 +63,24 @@ function TipoEmpleadoForm({ tipoEditar, onTipoGuardado, onCancelarEdicion }) {
                             type="number"
                             step="0.01"
                             min="0.01"
-                            name="sueldo"
                             className="form-control"
-                            value={formulario.sueldo}
-                            onChange={manejarCambio}
+                            value={sueldo}
+                            onChange={(e) => setSueldo(e.target.value)}
                             required
                         />
                     </div>
 
                     <button type="submit" className="btn btn-primary me-2">
-                        {tipoEditar ? "Guardar cambios" : "Crear tipo de empleado"}
+                        Guardar cambios
                     </button>
 
-                    {tipoEditar && (
-                        <button
-                            type="button"
-                            className="btn btn-secondary"
-                            onClick={cancelarEdicion}
-                        >
-                            Cancelar
-                        </button>
-                    )}
+                    <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={onCancelarEdicion}
+                    >
+                        Cancelar
+                    </button>
                 </form>
             </div>
         </div>

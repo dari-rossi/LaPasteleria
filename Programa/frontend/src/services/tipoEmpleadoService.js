@@ -6,7 +6,6 @@ const obtenerMensajeError = (datos) => {
         : datos.error;
 };
 
-// POST, PUT y DELETE comparten la misma forma de pedir y de leer los errores
 const enviar = async (ruta, metodo, cuerpo) => {
     const response = await apiFetch(ruta, {
         method: metodo,
@@ -36,11 +35,5 @@ export const obtenerTiposEmpleado = async (rol = "") => {
     return await response.json();
 };
 
-export const crearTipoEmpleado = (tipo) =>
-    enviar("/tipos-empleado", "POST", tipo);
-
 export const modificarTipoEmpleado = (id, tipo) =>
     enviar(`/tipos-empleado/${id}`, "PUT", tipo);
-
-export const eliminarTipoEmpleado = (id) =>
-    enviar(`/tipos-empleado/${id}`, "DELETE");
