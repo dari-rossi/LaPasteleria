@@ -1,7 +1,6 @@
 const sucursalRepository = require("../repositories/sucursal.repository");
 const { lanzarError } = require("../config/errores");
 
-// Busca una sucursal o lanza 404
 const buscarSucursal = async (id) => {
     const sucursal = await sucursalRepository.obtenerPorId(id);
 
@@ -12,7 +11,6 @@ const buscarSucursal = async (id) => {
     return sucursal;
 };
 
-// idActual: id de la sucursal que se está modificando (para no chocar consigo misma)
 const verificarDuplicados = async (datos, idActual) => {
     const sucursales = await sucursalRepository.obtenerTodas();
     const otras = sucursales.filter((sucursal) => sucursal.id !== idActual);

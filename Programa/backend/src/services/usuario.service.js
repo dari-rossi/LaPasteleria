@@ -5,7 +5,6 @@ const sucursalRepository = require("../repositories/sucursal.repository");
 const { esDuenio } = require("../config/tiposEmpleado");
 const { lanzarError } = require("../config/errores");
 
-// Busca un usuario o lanza 404
 const buscarUsuario = async (id) => {
     const usuario = await usuarioRepository.obtenerPorId(id);
 
@@ -16,7 +15,6 @@ const buscarUsuario = async (id) => {
     return usuario;
 };
 
-// idActual: id del usuario que se está modificando (para no chocar consigo mismo)
 const validarReglas = async (datos, idActual) => {
     const tipo = await tipoEmpleadoRepository.obtenerPorId(datos.idTipoEmpleado);
 
@@ -42,7 +40,6 @@ const validarReglas = async (datos, idActual) => {
         }
     }
 
-    // Una sola cuenta por rol en cada sucursal (y un solo Dueño)
     const duplicado = await usuarioRepository.obtenerPorTipoYSucursal(datos.idTipoEmpleado, sucursalId);
 
     if (duplicado && duplicado.idUsuario !== idActual) {

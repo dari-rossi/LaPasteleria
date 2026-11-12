@@ -22,9 +22,9 @@ const enviar = async (ruta, metodo, cuerpo) => {
     return datos;
 };
 
-export const obtenerTiposEmpleado = async (tipoEmpleado = "") => {
-    const ruta = tipoEmpleado
-        ? `/tipos-empleado?tipoEmpleado=${encodeURIComponent(tipoEmpleado)}`
+export const obtenerTiposEmpleado = async (rol = "") => {
+    const ruta = rol
+        ? `/tipos-empleado?rol=${encodeURIComponent(rol)}`
         : "/tipos-empleado";
 
     const response = await apiFetch(ruta);

@@ -39,7 +39,20 @@ const obtenerMesas = async (usuario, sucursalIdElegida) => {
 
 const obtenerMesaPorId = async (id, usuario) => buscarMesa(id, usuario);
 
-// La sucursal nunca se toma del body: sale del usuario o de la elegida por el dueño
+const COLUMNAS_PLANO = 4;
+
+const primeraCeldaLibre = (ocupadas) => {
+    const usadas = new Set(ocupadas.map(({ fila, columna }) => `${fila}-${columna}`));
+
+    for (let fila = 1; ; fila++) {
+        for (let columna = 1; columna <= COLUMNAS_PLANO; columna++) {
+            if (!usadas.has(`${fila}-${columna}`)) {
+                return { fila, columna };
+            }
+        }
+    }
+};
+
 const crearMesa = async (datos, usuario, sucursalIdElegida) => {
     const sucursalId = resolverSucursal(usuario, sucursalIdElegida);
     const sucursal = await sucursalRepository.obtenerPorId(sucursalId);
@@ -48,7 +61,18 @@ const crearMesa = async (datos, usuario, sucursalIdElegida) => {
         lanzarError("SUCURSAL_NO_ENCONTRADA");
     }
 
-    return await mesaRepository.crear({ ...datos, sucursalId });
+    if ((datos.fila === undefined) !== (datos.columna === undefined)) {
+        lanzarError("Indicá la fila y la columna juntas, o ninguna de las dos.", 400);
+    }
+
+    const ocupadas = await mesaRepository.obtenerOcupacionPlano(sucursalId);
+    const numero = ocupadas.reduce((maximo, mesa) => Math.max(maximo, mesa.numero), 0) + 1;
+
+    const posicion = datos.fila !== undefined
+        ? { fila: datos.fila, columna: datos.columna }
+        : primeraCeldaLibre(ocupadas);
+
+    return await mesaRepository.crear({ ...datos, ...posicion, numero, sucursalId });
 };
 
 const modificarMesa = async (id, datos, usuario) => {

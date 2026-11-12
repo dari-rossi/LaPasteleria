@@ -1,7 +1,5 @@
 const prisma = require("../prisma");
 
-// Obtiene los pagos registrados entre dos fechas.
-// Si se indica una sucursal, solo devuelve sus pagos.
 const obtenerPagosDelPeriodo = async (desde, hasta, sucursalId = null) => {
     return await prisma.pago.findMany({
         where: {

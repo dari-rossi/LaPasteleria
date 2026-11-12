@@ -1,10 +1,5 @@
 const clienteRepository = require("../repositories/cliente.repository");
-
-const lanzarError = (mensaje, status) => {
-    const error = new Error(mensaje);
-    error.status = status;
-    throw error;
-};
+const { lanzarError } = require("../config/errores");
 
 const normalizarTipo = (tipo) => {
     const texto = tipo.trim().toLowerCase();

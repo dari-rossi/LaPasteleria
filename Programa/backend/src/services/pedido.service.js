@@ -4,6 +4,7 @@ const clienteRepository = require("../repositories/cliente.repository");
 const productoRepository = require("../repositories/producto.repository");
 const { ESTADO_INICIAL, ESTADOS_FINALES } = require("../config/estadosPedido");
 const { resolverSucursal, puedeAcceder } = require("../config/sucursalActiva");
+const { productoDisponibleAhora, mensajeHorario } = require("../config/horarios");
 const { lanzarError } = require("../config/errores");
 
 const redondear = (valor) => Math.round(valor * 100) / 100;
@@ -72,6 +73,10 @@ const crearPedido = async (datos, usuario) => {
 
         if (!producto) {
             lanzarError("PRODUCTO_NO_ENCONTRADO", `El producto ${item.productoId} no existe`);
+        }
+
+        if (!productoDisponibleAhora(producto.tipoProducto)) {
+            lanzarError(mensajeHorario(producto.tipoProducto), 409);
         }
 
         items.push({

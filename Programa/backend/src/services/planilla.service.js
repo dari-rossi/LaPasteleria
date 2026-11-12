@@ -10,7 +10,6 @@ const { lanzarError } = require("../config/errores");
 const redondear = (valor) =>
     Math.round((valor + Number.EPSILON) * 100) / 100;
 
-// Determina qué sucursal puede consultar el usuario.
 const resolverSucursal = (sucursalIdPedida, usuario) => {
     const sucursalId = usuario.rol === "DUENIO"
         ? Number(sucursalIdPedida)
@@ -23,8 +22,6 @@ const resolverSucursal = (sucursalIdPedida, usuario) => {
     return sucursalId;
 };
 
-// Elige el elemento con mayor valor.
-// Si hay empate, se elige el de menor ID.
 const elegirMayor = (elementos, campo, campoId) => {
     let elegido = null;
 
@@ -44,7 +41,6 @@ const elegirMayor = (elementos, campo, campoId) => {
     return elegido;
 };
 
-// Calcula el producto más vendido por cantidad de unidades.
 const calcularProductoEstrella = (pagos) => {
     const unidades = new Map();
 
@@ -64,7 +60,6 @@ const calcularProductoEstrella = (pagos) => {
     return elegirMayor(unidades.values(), "cantidad", "idProducto");
 };
 
-// Calcula los datos compartidos por la planilla diaria y mensual.
 const calcularResumen = (pagos) => {
     const ventas = pagos.length;
 
@@ -91,7 +86,6 @@ const calcularResumen = (pagos) => {
     };
 };
 
-// Obtiene la planilla diaria de una sucursal.
 const obtenerPlanillaDiaria = async (fecha, usuario, sucursalIdPedida) => {
     const dia = fecha ?? hoy();
     const { desde, hasta } = rangoDelDia(dia);
@@ -110,7 +104,6 @@ const obtenerPlanillaDiaria = async (fecha, usuario, sucursalIdPedida) => {
     };
 };
 
-// Obtiene la planilla mensual de una sucursal.
 const obtenerPlanillaMensual = async (mes, usuario, sucursalIdPedida) => {
     const periodo = mes ?? mesActual();
     const { desde, hasta } = rangoDelMes(periodo);
@@ -129,7 +122,6 @@ const obtenerPlanillaMensual = async (mes, usuario, sucursalIdPedida) => {
     };
 };
 
-// Obtiene la planilla general del mes actual, considerando todas las sucursales.
 const obtenerPlanillaGeneral = async () => {
     const mes = mesActual();
     const { desde, hasta } = rangoDelMes(mes);

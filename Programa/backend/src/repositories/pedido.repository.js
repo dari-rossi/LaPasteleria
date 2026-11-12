@@ -26,7 +26,6 @@ const obtenerPorId = async (id) => {
     });
 };
 
-// Crea el pedido y sus items en una sola operación (si algo falla, no se guarda nada)
 const crear = async (datos) => {
     return await prisma.pedido.create({
         data: datos,
@@ -39,23 +38,40 @@ const crearOcupandoMesa = async (datos) => {
     const desde = new Date(ahora.getTime() - MARGEN_RESERVA_MS);
     const hasta = new Date(ahora.getTime() + MARGEN_RESERVA_MS);
 
-    const [pedido] = await prisma.$transaction([
-        prisma.pedido.create({ data: datos, include: incluir }),
-        prisma.mesa.update({
+    return await prisma.$transaction(async (tx) => {
+        for (const item of datos.items?.create ?? []) {
+            const resultado = await tx.inventario.updateMany({
+                where: {
+                    sucursalId: datos.sucursalId,
+                    productoId: item.productoId,
+                    stock: { gte: item.cantidad }
+                },
+                data: { stock: { decrement: item.cantidad } }
+            });
+
+            if (resultado.count === 0) {
+                lanzarError("No hay stock suficiente de ese producto en la sucursal.", 409);
+            }
+        }
+
+        const pedido = await tx.pedido.create({ data: datos, include: incluir });
+
+        await tx.mesa.update({
             where: { idMesa: datos.mesaId },
             data: { estado: "Ocupada" }
-        }),
-        prisma.reserva.updateMany({
+        });
+
+        await tx.reserva.updateMany({
             where: {
                 idMesa: datos.mesaId,
                 estadoReserva: "Activa",
                 fechaHoraReservada: { gte: desde, lte: hasta }
             },
             data: { estadoReserva: "En curso" }
-        })
-    ]);
+        });
 
-    return pedido;
+        return pedido;
+    });
 };
 
 const modificar = async (id, datos) => {

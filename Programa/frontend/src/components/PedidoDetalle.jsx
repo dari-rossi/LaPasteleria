@@ -4,7 +4,7 @@ import { obtenerPedidoPorId, modificarPedido } from "../services/pedidoService";
 import { obtenerProductos } from "../services/productoService";
 import { agregarItem, modificarCantidad, quitarItem } from "../services/itemProductoService";
 import { crearPago } from "../services/pagoService";
-import MercadoPago from "./mercadoPago/MercadoPago";
+import MercadoPago from "./mercadoPago/mercadoPago";
 import { useAuth } from "../context/AuthContext";
 import {
     ESTADOS_EDITABLES,

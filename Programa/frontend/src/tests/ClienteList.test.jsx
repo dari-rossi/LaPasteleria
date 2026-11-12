@@ -8,6 +8,10 @@ vi.mock("../services/clienteService", () => ({
     eliminarCliente: vi.fn()
 }));
 
+vi.mock("../context/AuthContext", () => ({
+    useAuth: () => ({ sesion: { rol: "DUENIO" } })
+}));
+
 vi.mock("../components/ClienteForm", () => ({
     default: () => <div>Formulario de cliente</div>
 }));
@@ -31,13 +35,13 @@ describe("ClienteList", () => {
         expect(screen.getByText("15%")).toBeInTheDocument();
     });
 
-    test("debe mostrar un mensaje cuando no hay clientes", async () => {
+    test("debe mostrar un mensaje cuando no hay categorías de clientes", async () => {
         obtenerClientes.mockResolvedValue([]);
 
         render(<ClienteList />);
 
         expect(
-            await screen.findByText("No hay clientes registrados.")
+            await screen.findByText("No hay categorías registradas.")
         ).toBeInTheDocument();
     });
 
@@ -47,7 +51,7 @@ describe("ClienteList", () => {
         render(<ClienteList />);
 
         expect(
-            await screen.findByText("No se pudieron cargar los clientes.")
+            await screen.findByText("No se pudieron cargar las categorías de clientes.")
         ).toBeInTheDocument();
     });
 });

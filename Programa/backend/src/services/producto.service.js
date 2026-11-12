@@ -1,7 +1,6 @@
 const productoRepository = require("../repositories/producto.repository");
 const { lanzarError } = require("../config/errores");
 
-// Busca un producto o lanza 404
 const buscarProducto = async (id) => {
     const producto = await productoRepository.obtenerPorId(id);
 
@@ -12,7 +11,6 @@ const buscarProducto = async (id) => {
     return producto;
 };
 
-// Obtener todos los productos
 const obtenerProductos = async (filtros) => {
     return await productoRepository.obtenerTodos(filtros);
 };

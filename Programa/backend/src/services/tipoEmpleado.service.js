@@ -2,7 +2,6 @@ const tipoEmpleadoRepository = require("../repositories/tipoEmpleado.repository"
 const { ROLES, esDuenio } = require("../config/tiposEmpleado");
 const { lanzarError } = require("../config/errores");
 
-// Busca un tipo de empleado o lanza 404. El Dueño no se gestiona desde acá
 const buscarTipo = async (id) => {
     const tipo = await tipoEmpleadoRepository.obtenerPorId(id);
 
@@ -60,7 +59,6 @@ const crearTipoEmpleado = async (datos) => {
 const modificarTipoEmpleado = async (id, datos) => {
     await buscarTipo(id);
 
-    // El rol no se modifica: solo el sueldo
     return await tipoEmpleadoRepository.modificar(id, { sueldo: datos.sueldo });
 };
 

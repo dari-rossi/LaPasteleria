@@ -20,7 +20,6 @@ const SECCIONES_POR_ROL = {
         { to: "/inventario", label: "Inventario" },
         { to: "/gastos", label: "Gastos" },
         { to: "/productos", label: "Productos" },
-        { to: "/tipos-empleado", label: "Tipos de empleado" },
         { to: "/clientes", label: "Clientes" }
     ],
     MOZO: [

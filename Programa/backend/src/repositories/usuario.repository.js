@@ -1,6 +1,5 @@
 const prisma = require("../prisma");
 
-// La contraseña nunca se selecciona: así no puede filtrarse por la API
 const seleccion = {
     idUsuario: true,
     nombreUsuario: true,
@@ -25,7 +24,6 @@ const obtenerPorId = async (id) => {
     });
 };
 
-// Devuelve la fila completa (con contraseña hasheada): solo para uso interno y login
 const obtenerPorNombre = async (nombreUsuario) => {
     return await prisma.usuario.findUnique({
         where: { nombreUsuario: nombreUsuario },
@@ -33,7 +31,6 @@ const obtenerPorNombre = async (nombreUsuario) => {
     });
 };
 
-// findFirst (y no findUnique) porque sucursalId puede ser null
 const obtenerPorTipoYSucursal = async (idTipoEmpleado, sucursalId) => {
     return await prisma.usuario.findFirst({
         where: { idTipoEmpleado: idTipoEmpleado, sucursalId: sucursalId },
