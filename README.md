@@ -1,174 +1,321 @@
-# TP DSW
-tags: #dsw #tp
+# La Pastelería
 
-Status: draft
+Aplicación web full stack para la gestión de **La Pastelería**, una cafetería de la ciudad de Rosario que funciona como cafetería de día y bar de noche en una de sus sucursales. El sistema permite administrar sucursales, empleados, productos con control de stock, mesas, reservas, pedidos, pagos (incluido pago con QR de Mercado Pago), gastos, clientes con descuento e informes de ventas.
 
-## 1. Objetivo
+Trabajo Práctico de la materia **Desarrollo de Software (DSW)**.
 
-Desarrollar en grupo una aplicación web full stack en base a un alcance propuesto por los integrantes.
+## Links importantes
 
-Durante dicho desarrollo se deberá aplicar todo lo aprendido en la materia Desarrollo de Software.
+| Qué | Link |
+|:-|:-|
+| 🎥 Video explicando el funcionamiento del sistema | [Ver video](PEGAR_LINK_AL_VIDEO) |
+| 📁 Repositorio | https://github.com/dari-rossi/LaPasteleria |
+| 📝 Propuesta del TP | [proposal.md](proposal.md) |
 
-## 2. Tema y Alcance
-El grupo debe deberá proponer a los docentes un tema para el trabajo práctico de su preferencia utilizando la [plantilla de propuesta](proposal.md)
+## Integrantes
 
-## 3. Requisitos
-El desarrollo de la aplicación debe:
-1. Desarrollarse en 2 partes: Frontend y Backend; agnósticas entre si, comunicadas mediante una API.
-2. Cumplir con los requisitos:  [técnicos](#3.1%20Requisitos%20técnicos) y [funcionales](#3.2%20Requisitos%20funcionales).
-3. Desarrollarse en grupo utilizando metodologías de gestión de proyecto y llevar evidencia de ello.
-4. Cumplir con las [entregas](#3.3%20Entregas) estipuladas.
-5. Utilizar github o gitlab para gestión del código fuente.
-6. Realizar una defensa oral del trabajo práctico para regularidad.
-7. Realizar otra defensa oral del trabajo práctico para la aprobación.
-8. Enviar la 
-9. Presentar la [documentación](#3.4%20Documentación) durante la defensa.
+| Legajo | Integrante |
+|:-|:-|
+| 54175 | Bucher, Guadalupe Aylen |
+| 54547 | Crispo, Ignacio Martín |
+| 53953 | Rossi Avonto, Dariana |
+| 55061 | Sacchetti, Camila Maylén |
 
-### 3.1 Requisitos técnicos
-La app cuenta con 2 partes: Backend y Frontend agnósticas entre si que se comunican mediante una API.
+## Tecnologías usadas
 
-#### 3.1.1 Backend
-El backend debe cumplir con las siguientes condiciones para regularidad y aprobación.
+### Backend (`Programa/backend`)
 
-##### Regularidad
-* Desarrollarse en JavaScript.
-* Utilizar un framework web que permita integrarse a las demás.
-* herramientas a través de middlewares, pluggins o modulos.
-* Exponer una API web (rest, tRPC o gRPC) para interactuar con el frontend.
-* Utilizar una base de datos persistente que acceda a través de un servicio externo (es decir que no sea una base de datos embebida).
-* La persistencia a la base de datos debe realizarse mediante un mapper (ORM/ODM/OXM). En caso que la base de datos utilizada no tenga un mapper disponible para JavaScript se deberá implementar la persistencai utilizando un patron Repository.
-* Realizarse mediante capas.
-* Validar entrada de datos, manejar e informar apropiadamente los errores a través de la API.
-* Las dependencias para ejecución, desarrollo y test deben estar correctamente registradas para ser instaladas automáticamente (e.j. package.json).
+| Tecnología | Uso |
+|:-|:-|
+| **Node.js** + **JavaScript** | Entorno de ejecución y lenguaje |
+| **Express 5** | Framework web y API REST |
+| **MySQL** | Base de datos relacional (servicio externo, con persistencia en disco) |
+| **Prisma 6** | ORM / mapper y migraciones |
+| **Zod 4** | Validación de los datos de entrada |
+| **JSON Web Token** (`jsonwebtoken`) | Autenticación mediante token |
+| **bcryptjs** | Hash de contraseñas |
+| **Swagger** (`swagger-jsdoc` + `swagger-ui-express`) | Documentación interactiva de la API |
+| **dotenv** | Variables de entorno (`.env`) |
+| **cors** | Comunicación con el frontend |
+| **Jest** + **Supertest** | Tests automatizados del backend |
+| **Mercado Pago API** | Pago con código QR |
 
-##### Aprobación Directa o en Examen
-* Cumplir con todas las condiciones de regularidad.
-* Implementar 1 test automatizado por integrante.
-* Implementar 1 test de integración.
-* Implementar un login con autenticación propia o de third-party y al menos 2 niveles de acceso diferentes.
-* Proteger las diferentes rutas en base al nivel de acceso requerido.
-* Definir ambientes, ya sea mediante environment del framework o .env
+### Frontend (`Programa/frontend`)
 
-#### 3.1.2 Frontend
-El frontend debe cumplir con las siguientes condiciones para regularidad y aprobación.
+| Tecnología | Uso |
+|:-|:-|
+| **React 19** | Biblioteca/framework de frontend |
+| **Vite 8** | Servidor de desarrollo y build |
+| **React Router 7** | Navegación y protección de rutas por rol |
+| **Bootstrap 5** | Estilos y diseño responsive |
+| **qrcode.react** | Generación del QR de pago |
+| **Vitest** + **Testing Library** | Tests unitarios de componentes |
+| **Cypress** | Tests end-to-end |
+| **ESLint** | Análisis estático del código |
 
-##### Regularidad
-* Desarrollarse utilizando un framework de Frontend.
-* Utilizar HTML5
-* Utilizar CSS según las directrices de alguna biblioteca de componentes, guía de estilo o framework de CSS y la metodología propuesta por el framework de frontend elegido. Se sugiere el uso de biblioteca de componentes;  preprocesadores: sass, scss, less, stylus, etc o frameworks de css: Pico.css, Bulma, Material, Tailwind, Bootstrap, etc.
-* Guía de estilos sugerida Airbnb Javascript https://github.com/airbnb/javascript
-* Aplicar la estrategia mobile-first para la escritura del código css de la aplicación
-* La app debe visualizarse correctamente en al menos 3 diferentes breakpoints: SM, MD, LG
-* Seguir buenas prácticas de UX/UI (Que no requiera manual de usuario o explicaciones específicas para utilizar la interfaz)
-* Las app debe mostrar las siguientes características entre sus componentes:
-	* Manejo de eventos del usuario: click, input, etc
-	* Ante una posibilidad de fallo, manejar el/los errores adecuadamente y de manera amigable al usuario
-	* Reactividad ante un estado
-	* Input property
-	* Output property
-* Implementar al menos un servicio.
-* Para el manejo de la información, por ej una respuesta de un endpoint o los datos a enviar en una request, representar en el código los modelos de objetos con clases, interfaces y tipos de datos custom.
-* De ser posible, implementar algún patrón de diseño orientado a objetos.
-* Las dependencias para ejecución, desarrollo y test deben estar correctamente registradas para ser instaladas automáticamente (e.j. package.json).
+## Arquitectura
 
-##### Aprobación Directa o en Examen
-* Cumplir con las condiciones de regularidad.
-* Realizar al menos 1 test unitario de un componente.
-* Realizar al menos 1 test de end-to-end.
-* Implementar el login y proteger el acceso a las distintas partes del frontend en base a los niveles de usuarios del backend.
-* Definir ambientes, ya sea mediante environment del framework o .env
+La aplicación está dividida en dos partes independientes que se comunican mediante una API REST:
 
-### 3.2 Requisitos funcionales
-La app debe cumplir con los siguientes requisitos.
+```text
+ Frontend (React + Vite)   ──── HTTP / JSON ────▶   Backend (Express)   ───▶   MySQL
+ http://localhost:5173           (token JWT)         http://localhost:3000       (vía Prisma)
+```
 
-#### Regularidad
-* 1 CRUD Simple por integrante
-* 1 CRUD Dependiente cada 2 integrantes o fracción.
-* 1 Listado con filtro (al menos un atributo) cada 2 integrantes o fracción.
-* Para cada listado, al seleccionar un elemento, se debe mostrar un detalle.
-* Debe implementar un caso de uso de usuario o epic, con valor para el negocio, cada 2 integrantes o fracción.
+El backend está organizado en capas:
 
-#### Aprobación Directa o en Examen
-* CRUDs de todas las clases de negocio necesarias para el funcionamiento de la app.
-* Implementar 1 caso de uso usuario o epic, con valor para el negocio, por cada integrante.
-  Se deben implementar un mínimo de 2 relacionados entre si. Es decir que la data registrada por uno CU o epic sirva de input para otro.
+```text
+routes → middlewares (autenticación, roles, validación con Zod) → controllers → services → repositories → Prisma → MySQL
+```
 
-#### Alcance Adicional Voluntario
-De forma **opcional** y **voluntaria** los grupos podrán realizar CUU o epics, listados más complejos de los solicitados u otros requisitos como notificaciones, logs, etc; adicionales para completar la funcionalidad del sistema propuesto.
+Además, el manejo de errores está centralizado: la API responde siempre con un código HTTP y un mensaje claro (`{ codigo, error, detalles }`).
 
-Esto será considerado en la nota final en función de la complejidad y esfuerzo relativos a lo ya realizado.
+## Funcionalidades principales
 
+- **Login** con usuario y contraseña, y **4 niveles de acceso** (roles): Dueño, Gerente, Mozo y Ayudante de cocina. Las rutas del backend y las pantallas del frontend están protegidas según el rol.
+- **Sucursales**, **tipos de empleado** y asignación de empleados por sucursal, y **usuarios** del sistema.
+- **Productos** e **inventario** por sucursal, con listado de advertencia de **stock bajo**.
+- **Mesas** en una grilla visual con su estado (libre, ocupada, reservada). Solo el dueño y el gerente pueden crearlas, modificarlas o eliminarlas.
+- **Reservas** de mesas. Las reservas vencidas se cancelan automáticamente (el servidor lo revisa cada minuto).
+- **Pedidos** con sus productos (items), estados (Pendiente, En preparación, Entregado, Pagado, Cancelado) y detalle.
+- **Pagos** en efectivo, tarjeta, transferencia o **Mercado Pago (QR)**, con el descuento correspondiente al tipo de cliente.
+- **Clientes (categorías con descuento)**: el dueño puede crear distintas categorías con su porcentaje (por ejemplo, *Docente 10%*).
+- **Gastos** por sucursal.
+- **Informes / planillas** de ventas: diaria, mensual y general.
 
-### 3.3 Entregas
-#### Propuesta del enunciado
-En la entrega se debe entregar a los profesores la [plantilla de propuesta](./proposal.md) actualizada con las condiciones de Regularidad y de Aprobación. Los profesores analizarán la propuesta y de ser necesario sugerirán ajustes hasta que esté correcta y sea aceptada.
+### Qué puede hacer cada rol
 
-#### Regularidad
-En la entrega se debe entregar:
-* El README.md (o con un link) las instrucciones para instalar y ejecutar el proyecto sin conocimientos de cómo está desarrollado. El proyecto debe poder ejecutarse con scripts y las herramientas según las convenciones del lenguaje y/o framework utilizado (scripts en package.json, o tools específicas del framework).
-* Entregar la [proposal](./proposal.md) actualizada con links al pull request de back y/o front mediante el form publicado para cada año.
+| Rol | Alcance |
+|:-|:-|
+| **Dueño** | Acceso a todas las sucursales. Administra sucursales, usuarios, tipos de empleado, productos, clientes y ve los informes. |
+| **Gerente** | Trabaja en su sucursal: mesas, inventario, gastos, productos y consulta de pedidos y clientes. |
+| **Mozo** | Toma pedidos y reservas. Ve las mesas y productos, pero no puede crearlos, modificarlos ni eliminarlos. |
+| **Ayudante de cocina** | Consulta productos y actualiza el stock del inventario. |
 
-Coordinar una defensa grupal con los profesores.
+## Requisitos previos
 
-#### Aprobación Directa o en Examen
-En la entrega se debe enviar:
-* Video explicando el funcionamiento del sistema
-* Documentación de la API de backend (según la tecnología y standard utilizados).
-* Evidencia del resultado de la ejecución de los tests automáticos.
-* Entregar la [proposal](./proposal.md) actualizada con links al pull request de back y/o front.
-* Incluir en el README.md (o con un link) las instrucciones para instalar y ejecutar el proyecto sin conocimientos de cómo está desarrollado. El proyecto debe poder ejecutarse con scripts y las herramientas según las convenciones del lenguaje y/o framework utilizado (scripts en package.json, o tools específicas del framework).
-* Links de Deploy
-* Credenciales para utilizar la aplicación deployada
-* Contacto para coordinar la defensa
+Antes de empezar tenés que tener instalado:
 
-El envío se debe realizar por el form https://kutt.to/DSWEntregaSistemaFinal o https://bit.ly/DSWEntregaSistemaFinal y coordinar con el docente una defensa grupal con los profesores.
+- [Node.js](https://nodejs.org) **22 LTS** (mínimo 20.19) — incluye `npm`.
+- [MySQL](https://dev.mysql.com/downloads/) **8** corriendo en tu computadora.
+- [Git](https://git-scm.com).
 
-Para la Aprobación Directa la defensa debe pactarse con los docentes dentro de los plazos indicados a continuación.
-Para la Aprobación en Examen la defensa debe pactarse con los docentes y realizarse antes de la fecha de la mesa de examen.
+## Instalación y ejecución (paso a paso)
 
-#### Fechas de entrega
-**Propuesta**: Durante Abril
+El proyecto tiene dos carpetas que se levantan por separado: `Programa/backend` y `Programa/frontend`. Necesitás **dos terminales**.
 
-**Muestra de avance**: Inicio del segundo cuatrimestre
+### 1. Clonar el repositorio
 
-**Primer Entrega de Regularidad/AD**: 12/10 al 16/10
+```bash
+git clone https://github.com/dari-rossi/LaPasteleria.git
+cd LaPasteleria/Programa
+```
 
-**Primer Recuperatorio/Globalizador de Regularidad/AD**: 26/10 al 30/10
+### 2. Crear la base de datos
 
-**Ultima instancia Recuperatorio/Globalizador de Regularidad/AD**: 9/11 al 13/11
+Entrá a MySQL y creá una base vacía:
 
-### 3.4 Documentación
-La documentación debe presentarse para la instancia de defensa.
+```sql
+CREATE DATABASE la_pasteleria;
+```
 
-Para conocer el detalle de la documentación referirse a [docs](docs.md).
+### 3. Levantar el backend
 
-## 4. Gestión del proyecto
-**TODO: En revisión**
+```bash
+cd backend
+npm install
+```
 
-El desarrollo de la app debe realizarse utilizando metodologías ágiles para la gestión del proyecto (Scrum, XP, etc).
+Creá el archivo de variables de entorno a partir del ejemplo:
 
-El grupo deberá llevar un registro de lo realizado, el mismo debe incluir como mínimo:
-* Tipo de metodología a utilizar para el seguimiento. ( Scrum, XP, etc.)
-* Minutas de avances o reuniones de coordinación del equipo.
-* Documentación de trackeo como desarrollo de features y bugfix, asignación de tareas, etc.
+```bash
+# Linux / macOS
+cp .env.example .env
 
-Es de libre elección del alumno la herramienta a utilizar para el trackeo. Se recomienda el uso de github/gitlab proyects para integrar con el desarrollo de la misma pero en caso de utilizar otra en la documentación deberán incluirse los links a la tool para ello.
+# Windows (PowerShell)
+copy .env.example .env
+```
 
+Abrí el archivo `.env` y completá los valores:
 
-## 5. Evaluación
+| Variable | Qué poner | ¿Obligatoria? |
+|:-|:-|:-:|
+| `DATABASE_URL` | Conexión a MySQL. Ejemplo: `mysql://root:TU_CONTRASENA@localhost:3306/la_pasteleria` | Sí |
+| `JWT_SECRET` | Una clave larga y secreta cualquiera para firmar los tokens | Sí |
+| `MERCADOPAGO_ACCESS_TOKEN` | Access token de Mercado Pago | Solo para pago con QR |
+| `MERCADOPAGO_POS_EXTERNAL_ID` | Identificador de la caja (por defecto `CAJADSW001`) | Solo para pago con QR |
+| `MERCADOPAGO_USER_ID` | Id de usuario de Mercado Pago | Solo para el script de configuración |
 
-Durante la evaluación de cada entrega se considerarán:
-* Requisitos técnicos y funcionales de la etapa.
-* Adhesión a las directrices de UX/UI y buenas prácticas de programación.
-* Uso apropiado de la tecnología: librerías, frameworks, patrones, etc.
-* Documentación requerida.
-* Participación de los miembros del grupo.
-* Uso de git para el desarrollo.
-* Defensa oral del trabajo práctico.
-* Gestión y seguimiento del desarrollo de la app.
-* Innovación, investigación y desafíos asumidos.
-* Documentación solicitada.
+Creá las tablas y cargá los datos iniciales (sucursales, productos, mesas, tipos de cliente, roles y usuarios de prueba):
 
-## 6. FAQ
+```bash
+npm run db:migrate
+npm run db:seed
+```
 
-En la sección de [FAQ](FAQ.md) podrán encontrar respuestas a las consultas más frecuentes que se van realizando.
+Levantá el servidor:
+
+```bash
+npm run dev
+```
+
+Si todo salió bien vas a ver `Servidor funcionando en http://localhost:3000`.
+La documentación Swagger queda en http://localhost:3000/api-docs.
+
+> Para ejecutar sin recarga automática usá `npm start`.
+
+### 4. Levantar el frontend
+
+En **otra terminal**:
+
+```bash
+cd LaPasteleria/Programa/frontend
+npm install
+npm run dev
+```
+
+Abrí en el navegador la dirección que muestra la terminal, normalmente http://localhost:5173.
+
+> El frontend se conecta al backend en `http://localhost:3000`, así que el backend tiene que estar corriendo en ese puerto.
+
+### 5. Iniciar sesión
+
+Con el seed se crean estos usuarios de prueba:
+
+| Rol | Usuario | Contraseña | Sucursal |
+|:-|:-|:-|:-:|
+| Dueño | `duenio` | `duenioDSW` | todas |
+| Gerente | `gerente1` | `gerenteDSW1` | 1 |
+| Mozo | `mozo1` | `mozoDSW1` | 1 |
+| Ayudante de cocina | `cocina1` | `cocinaDSW1` | 1 |
+| Gerente | `gerente2` | `gerenteDSW2` | 2 |
+| Mozo | `mozo2` | `mozoDSW2` | 2 |
+| Ayudante de cocina | `cocina2` | `cocinaDSW2` | 2 |
+
+Los tipos de cliente iniciales son **General (0%)**, **Estudiante (15%)** y **Jubilado (20%)**. El dueño puede agregar más desde la sección *Clientes*.
+
+### Pago con Mercado Pago (opcional)
+
+El pago con QR necesita una cuenta de pruebas de Mercado Pago. Completá `MERCADOPAGO_ACCESS_TOKEN`, `MERCADOPAGO_USER_ID` y `MERCADOPAGO_POS_EXTERNAL_ID` en el `.env` y, una sola vez, ejecutá desde `Programa/backend`:
+
+```bash
+node scripts/configurarMercadoPago.js
+```
+
+Los demás métodos de pago funcionan sin esta configuración.
+
+## Scripts disponibles
+
+### Backend (`Programa/backend`)
+
+| Comando | Qué hace |
+|:-|:-|
+| `npm run dev` | Levanta el servidor con recarga automática |
+| `npm start` | Levanta el servidor |
+| `npm run db:migrate` | Aplica las migraciones a la base de datos |
+| `npm run db:seed` | Carga los datos iniciales y los usuarios de prueba |
+| `npm run db:reset` | Reinicia la base de datos (borra todo y vuelve a cargar) |
+| `npm test` | Ejecuta los tests con Jest |
+
+### Frontend (`Programa/frontend`)
+
+| Comando | Qué hace |
+|:-|:-|
+| `npm run dev` | Levanta el servidor de desarrollo (Vite) |
+| `npm run build` | Genera la versión para producción en `dist/` |
+| `npm run preview` | Sirve localmente la versión de producción |
+| `npm run lint` | Revisa el código con ESLint |
+| `npm test` | Ejecuta los tests unitarios con Vitest (modo watch) |
+| `npm run cy:open` | Abre Cypress de forma interactiva |
+| `npm run cy:run` | Ejecuta los tests end-to-end en consola |
+
+## Tests automáticos
+
+### Tests del backend (Jest)
+
+```bash
+cd Programa/backend
+npm test
+```
+
+### Tests unitarios del frontend (Vitest)
+
+```bash
+cd Programa/frontend
+npx vitest run
+```
+
+### Tests end-to-end (Cypress)
+
+Con el **backend y el frontend corriendo**, creá el archivo `Programa/frontend/cypress.env.json` con un usuario válido (por ejemplo el dueño):
+
+```json
+{
+    "usuario": "duenio",
+    "contrasenia": "duenioDSW"
+}
+```
+
+Y ejecutá:
+
+```bash
+cd Programa/frontend
+npm run cy:run
+```
+
+## Documentación de la API
+
+La API está documentada con **Swagger (OpenAPI)** y se puede probar desde el navegador en `/api-docs`. Para probar los endpoints protegidos, primero hacé `POST /auth/login` y usá el token devuelto en el botón **Authorize**.
+
+Recursos principales de la API:
+
+| Recurso | Ruta base |
+|:-|:-|
+| Autenticación | `/auth` |
+| Sucursales | `/sucursales` |
+| Tipos de empleado | `/tipos-empleado` |
+| Empleados por sucursal | `/sucursales/:sucursalId/tipos-empleado` |
+| Usuarios | `/usuarios` |
+| Productos | `/productos` |
+| Inventario | `/inventario` |
+| Mesas | `/mesas` |
+| Reservas | `/reservas` |
+| Clientes | `/clientes` |
+| Pedidos | `/pedidos` |
+| Items de pedido | `/itemProducto` |
+| Pagos | `/pagos` |
+| Gastos | `/gastos` |
+| Planillas (informes) | `/planillas` |
+
+## Estructura del proyecto
+
+```text
+LaPasteleria/
+├── README.md
+├── proposal.md
+├── docs/                     # Documentación del proyecto
+└── Programa/
+    ├── backend/
+    │   ├── prisma/           # schema.prisma, migraciones y seeds
+    │   ├── scripts/          # configuración de Mercado Pago
+    │   ├── src/
+    │   │   ├── config/       # errores, swagger, horarios, estados
+    │   │   ├── controllers/
+    │   │   ├── middlewares/  # autenticación, roles y validación
+    │   │   ├── repositories/ # acceso a la base de datos (Prisma)
+    │   │   ├── routes/
+    │   │   ├── schemas/      # validaciones con Zod
+    │   │   ├── services/     # lógica de negocio
+    │   │   └── tests/
+    │   ├── app.js
+    │   └── server.js
+    └── frontend/
+        ├── cypress/          # tests end-to-end
+        └── src/
+            ├── components/
+            ├── context/      # sesión y sucursal seleccionada
+            ├── models/       # clases de los modelos
+            ├── pages/
+            ├── services/     # llamadas a la API
+            └── tests/
+```
