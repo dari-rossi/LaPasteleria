@@ -8,7 +8,7 @@ Trabajo Práctico de la materia **Desarrollo de Software (DSW)**.
 
 | Qué | Link |
 |:-|:-|
-| 🎥 Video explicando el funcionamiento del sistema | [Ver video](PEGAR_LINK_AL_VIDEO) |
+| 🎥 Video explicando el funcionamiento del sistema | [Ver video](docs/video.mp4) |
 | 📁 Repositorio | https://github.com/dari-rossi/LaPasteleria |
 | 📝 Propuesta del TP | [proposal.md](proposal.md) |
 
